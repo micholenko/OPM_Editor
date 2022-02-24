@@ -1,0 +1,32 @@
+.app {
+  text-align: center;
+  margin-left: 100px;
+  margin-right: 100px;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.flex-wrapper{
+  display: flex;
+  height: 100%;
+}
+
+.top-toolbar{
+  border: 3px blue solid;
+  height: 50px;
+}
+
+.left-sidebar{
+  border: 3px blue solid;
+  width: 200px
+}
+
+.diagram-canvas {
+  border: 3px blue solid;
+  height: 100%;
+  position: relative;
+  width: 100%;
+  text-align: left;
+  
+}
