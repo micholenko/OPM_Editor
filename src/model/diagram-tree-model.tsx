@@ -1,7 +1,7 @@
-class diagramTreeNode {
+class DiagramTreeNode {
     id: number;
-    parent: diagramTreeNode | null;
-    children: Array<diagramTreeNode>;
+    parent: DiagramTreeNode | null;
+    children: Array<DiagramTreeNode>;
     diagramJson: any;
 
     constructor(id: number, parent = null) {
@@ -11,11 +11,12 @@ class diagramTreeNode {
         this.diagramJson = null;
     }
 
-    addChild(child: diagramTreeNode): number {
+    addChild(child: DiagramTreeNode): number {
         this.children.push(child);
-        return 0
+        child.parent = this; //necesarry?
+        return 0;
     }
-    removeChild(child: diagramTreeNode): number {
+    removeChild(child: DiagramTreeNode): number {
         let index = this.children.indexOf(child);
         if (index !== -1) {
             this.children.splice(index, 1);
@@ -24,28 +25,15 @@ class diagramTreeNode {
         return 1;
     }
 
-    /* get isLeaf() {
+    get isLeaf() {
         return this.children.length === 0;
     }
 
     get hasChildren() {
         return !this.isLeaf;
-    } */
+    }
 }
 
-class Tree {
-    root: diagramTreeNode;
+let diagramTreeRoot = new DiagramTreeNode(0);
 
-    constructor() {
-        this.root = new diagramTreeNode(0);
-    }
-
-    addChild(child: diagramTreeNode): number {
-        this.root.addChild(child);
-        return 0
-    }
-    
-}
-let diagramTree = new Tree()
-
-export { diagramTree, diagramTreeNode };
+export { diagramTreeRoot, DiagramTreeNode };

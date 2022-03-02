@@ -5,19 +5,19 @@ import './../css/general.css';
 import TopToolbar from './TopToolbar';
 import LeftSidebar from './LeftSidebar';
 import DiagramCanvas from './DiagramCanvas';
-import { diagramTree } from '../model/diagramTreeModel';
+import { diagramTreeRoot } from '../model/diagram-tree-model';
 
 export const TreeContext = createContext();
 
 function App() {
-  const [updateTree, setUpdateTree] = useState({})
-  const [currentDiagram, setCurrentDiagram] = useState(diagramTree.root)
+  const [updateTree, setUpdateTree] = useState({});
+  const [currentDiagram, setCurrentDiagram] = useState(diagramTreeRoot);
   return (
     <div className="app">
-      <TreeContext.Provider value={{updateTree, setUpdateTree, currentDiagram, setCurrentDiagram}}>
+      <TreeContext.Provider value={{ updateTree, setUpdateTree, currentDiagram, setCurrentDiagram }}>
         <TopToolbar />
         <div className='flex-wrapper'>
-          <LeftSidebar currentDiagram={currentDiagram}/>
+          <LeftSidebar currentDiagram={currentDiagram} />
           <DiagramCanvas />
         </div>
       </TreeContext.Provider>

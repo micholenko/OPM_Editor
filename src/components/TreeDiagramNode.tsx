@@ -1,9 +1,9 @@
 // @ts-nocheck
-import React, { useContext, useState } from 'react'
-import { cyto } from './DiagramCanvas'
+import React, { useContext, useState } from 'react';
+import { cyto } from './DiagramCanvas';
 import PropTypes from 'prop-types';
-import { diagramTree, diagramTreeNode } from '../model/diagramTreeModel'
-import {TreeContext} from './App'
+import { diagramTree, diagramTreeNode } from '../model/diagram-tree-model';
+import { TreeContext } from './App';
 
 
 import TreeItem, { useTreeItem } from '@mui/lab/TreeItem';
@@ -12,7 +12,7 @@ import clsx from 'clsx';
 
 type Props = {
   modelReferece: diagramTreeNode,
-  counter: number
+  counter: number;
 };
 
 const CustomContent = React.forwardRef(function CustomContent(props, ref) {
@@ -67,7 +67,7 @@ const CustomContent = React.forwardRef(function CustomContent(props, ref) {
       <div onClick={handleExpansionClick} className={classes.iconContainer}>
         {icon}
       </div>
-      
+
       <Button onClick={onClick}>{label}</Button>
     </div>
   );
@@ -78,19 +78,20 @@ const CustomTreeItem = (props) => (
   <TreeItem ContentComponent={CustomContent} {...props} />
 );
 
-const TreeDiagramNode: React.FC<Props> = ({ modelReferece, counter}) => {
-  const { updateTree, setUpdateTree, currentDiagram, setCurrentDiagram} = useContext(TreeContext);
+const TreeDiagramNode: React.FC<Props> = ({ modelReferece, counter }) => {
+  const { currentDiagram, setCurrentDiagram } = useContext(TreeContext);
   return (
-    <CustomTreeItem nodeId={counter} label={'diagram' + counter} onClick={() => { 
-        currentDiagram.diagramJson = cyto.json()
-        cyto.elements().remove();
-        cyto.json(modelReferece.diagramJson)
-        setCurrentDiagram(modelReferece) }}
-        >
-      {modelReferece.children?.map((child) => <TreeDiagramNode modelReferece={child} counter={(parseInt(counter)+1).toString()}></TreeDiagramNode>)}
+    <CustomTreeItem nodeId={counter} label={'diagram' + counter} onClick={() => {
+      currentDiagram.diagramJson = cyto.json();
+      cyto.elements().remove();
+      cyto.json(modelReferece.diagramJson);
+      setCurrentDiagram(modelReferece);
+    }}
+    >
+      {modelReferece.children?.map((child) => <TreeDiagramNode modelReferece={child} counter={(parseInt(counter) + 1).toString()}></TreeDiagramNode>)}
     </CustomTreeItem>
 
-  )
-}
+  );
+};
 
-export default TreeDiagramNode
+export default TreeDiagramNode;
