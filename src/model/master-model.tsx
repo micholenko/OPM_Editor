@@ -2,11 +2,11 @@ class MasterModelNode {
   id: number;
   parent: MasterModelNode | MasterModelRoot | null;
   children: Array<MasterModelNode>;
-  perseverance: 'object' | 'process';
+  type: 'object' | 'process';
 
-  constructor(id: number, parent = null, perseverance: 'object' | 'process') {
+  constructor(id: number, type: 'object' | 'process') {
     this.id = id;
-    this.perseverance = perseverance;
+    this.type = type;
     this.parent = null;
     this.children = [];
 

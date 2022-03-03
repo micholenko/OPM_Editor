@@ -1,19 +1,68 @@
 export const cyStylesheet = [
   // cytoscape elements
   {
-    selector: 'node[label]',
+    selector: 'node',
     style: {
-      'label': 'data(label)',
+      'content': 'data(label)',
+      'border-width': 2,
+      'background-color': 'white',
+      'width': '70px',
+      'height': '50px',
+      'text-valign': 'center',
+    }
+  },
+  {
+    selector: '$node > node',
+    style: {
+      'text-valign': 'top',
+    }
+  },
+
+  {
+    selector: 'node[type = "object"]',
+    style: {
+      'shape': 'rectangle',
+      'border-color': 'green'
+    }
+  },
+  {
+    selector: 'node[type = "process"]',
+    style: {
+      'shape': 'ellipse',
+      'border-color': 'DeepSkyBlue'
     }
   },
 
   {
     selector: 'edge',
     style: {
-      'curve-style': 'taxi',
+      'curve-style': 'straight',
       'target-arrow-shape': 'triangle'
     }
   },
+
+  {
+    selector: 'edge[type = "aggregation"]',
+    style: {
+      'curve-style': 'taxi',
+    }
+  },
+
+  {
+    selector: 'edge[type = "consumption"]',
+    style: {
+      'target-arrow-shape': 'triangle'
+    }
+  },
+
+  {
+    selector: 'edge[type = "effect"]',
+    style: {
+      'source-arrow-shape': 'triangle',
+      'target-arrow-shape': 'triangle'
+    }
+  },
+  
 
   // cytoscape-edge-handles extention
 
@@ -69,4 +118,6 @@ export const cyStylesheet = [
       'opacity': 0
     }
   }
+
+
 ]
