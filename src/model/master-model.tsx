@@ -3,9 +3,11 @@ class MasterModelNode {
   parent: MasterModelNode | MasterModelRoot | null;
   children: Array<MasterModelNode>;
   type: 'object' | 'process';
+  label: string;
 
-  constructor(id: number, type: 'object' | 'process') {
+  constructor(id: number, type: 'object' | 'process', label: string) {
     this.id = id;
+    this.label = label;
     this.type = type;
     this.parent = null;
     this.children = [];

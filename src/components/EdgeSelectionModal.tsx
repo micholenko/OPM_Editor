@@ -6,8 +6,8 @@ import Modal from '@mui/material/Modal';
 
 import { EdgeSingular } from 'cytoscape';
 
+import { edgeArray, Edge } from '../model/edge-model';
 import edgeTypes from '../options/edge-types.json';
-console.log(edgeTypes);
 
 const style = {
   position: 'absolute',
@@ -37,6 +37,7 @@ const EdgeSelectionOption: React.FC<OptionProps> = ({ option, createdEdge, handl
   return (
     <Button onClick={() => {
       createdEdge.data({ 'type': option });
+      createdEdge.data('MasterModelReference').type = option;
       handleClose();
     }}>{option}</Button>
   );

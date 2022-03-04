@@ -9,6 +9,7 @@ import { TreeContext } from './App';
 import EdgeSelectionModal from './EdgeSelectionModal';
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
 import { masterModelRoot, MasterModelNode } from '../model/master-model';
+import { edgeArray, Edge } from '../model/edge-model';
 
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
 
@@ -41,15 +42,17 @@ let defaults = {
 };
 
 const addNode = (event: Event, type: 'object' | 'process') => {
-  let modelNode = new MasterModelNode(nodeCounter);
+  const defaultLabel = type + " " + nodeCounter.toString();
+  let modelNode = new MasterModelNode(nodeCounter, type, defaultLabel);
   masterModelRoot.addChild(modelNode);
   console.log('added node' + nodeCounter);
 
 
   var data = {
     id: nodeCounter,
-    group: 'nodes',
-    'MasterModelReference': modelNode, label: 'node ' + nodeCounter,
+    group: 'nodes', //not needed in master model
+    'MasterModelReference': modelNode,
+    label: defaultLabel,
     'type': type,
   };
 
@@ -101,6 +104,15 @@ const DiagramCanvas = () => {
     cyto.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       console.log('edge completed');
       createdEdge = addedEdge;
+
+      let modelEdge = new Edge(
+        sourceNode.data('MasterModelReference'),
+        targetNode.data('MasterModelReference'),
+        'consumption'//default
+      );
+      edgeArray.addEdge(modelEdge);
+
+      addedEdge.data({ 'MasterModelReference': modelEdge });
 
       setEdgeSelectionOpen(true);
     });
@@ -193,6 +205,66 @@ const DiagramCanvas = () => {
               position: { x: 300, y: 300 },
             });
             nodeCounter++;
+
+            //add extra
+
+            const ingoingEdges = edgeArray.findIngoingEdges(target.data('MasterModelReference'));
+            const outgoingEdges = edgeArray.findOutgoingEdges(target.data('MasterModelReference'));
+            ingoingEdges.map((edge) => {
+              const node = edge.source;
+              cyto.add(
+                {
+                  group: 'nodes',
+                  data: {
+                    'id': node.id,
+                    'MasterModelReference': node,
+                    'label': node.label,
+                    'type': node.type
+                  },
+                }
+              );
+              cyto.add(
+                {
+                  group: 'edges',
+                  data: {
+                    'source': edge.source.id,
+                    'target': edge.target.id,
+                    'id': edge.id,
+                    'MasterModelReference': edge,
+                    'type': edge.type
+                  },
+                }
+              );
+            });
+
+            outgoingEdges.map((edge) => {
+              const node = edge.target;
+              cyto.add(
+                {
+                  group: 'nodes',
+                  data: {
+                    'id': node.id,
+                    'MasterModelReference': node,
+                    'label': node.label,
+                    'type': node.type
+                  },
+                }
+              );
+              cyto.add(
+                {
+                  group: 'edges',
+                  data: {
+                    'source': edge.source.id,
+                    'target': edge.target.id,
+                    'id': edge.id,
+                    'MasterModelReference': edge,
+                    'type': edge.type
+                  }
+                }
+              );
+            });
+
+
             setCurrentDiagram(nextDiagram);
 
           },
@@ -234,7 +306,7 @@ const DiagramCanvas = () => {
           cyto = cy;
           eh = cy.edgehandles(defaults);
           cyto.on('add', 'node', (evt: Event) => {
-            console.log('hello')
+            console.log('hello');
           });
         }}
 

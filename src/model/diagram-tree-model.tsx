@@ -25,6 +25,10 @@ class DiagramTreeNode {
         return 1;
     }
 
+    update(): void{
+        
+    }
+
     get isLeaf() {
         return this.children.length === 0;
     }

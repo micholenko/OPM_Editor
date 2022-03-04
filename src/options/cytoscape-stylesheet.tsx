@@ -117,7 +117,6 @@ export const cyStylesheet = [
     style: {
       'opacity': 0
     }
-  }
-
-
+  },
+  
 ]
