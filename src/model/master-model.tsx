@@ -49,4 +49,4 @@ class MasterModelRoot {
   }
 }
 let masterModelRoot = new MasterModelRoot();
-export { masterModelRoot, MasterModelNode };
+export { masterModelRoot, MasterModelNode, MasterModelRoot};

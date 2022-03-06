@@ -10,7 +10,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 
 const TreeDiagram = () => {
-  const [update, setUpdate] = useState({});
   return (
     <>
       <div>TreeDiagram</div>

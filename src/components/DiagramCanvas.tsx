@@ -21,7 +21,6 @@ cytoscape.use(edgehandles);
 let cyto: CoreGraphManipulation;
 let eh;
 let nodeCounter = 0;
-let createdEdge;
 
 let defaults = {
   canConnect: function (sourceNode, targetNode) {
@@ -71,10 +70,8 @@ const addNode = (event: Event, type: 'object' | 'process') => {
 
 
 
-const DiagramCanvas = () => {
+const DiagramCanvas = React.memo(({currentDiagram, setCurrentDiagram, setCreatedEdge, setEdgeSelectionOpen}) => {
 
-  const [edgeSelectionOpen, setEdgeSelectionOpen] = useState(false);
-  const { currentDiagram, setCurrentDiagram } = useContext(TreeContext);
   useEffect(() => {
     console.log('cytoscape rendered');
 
@@ -103,7 +100,7 @@ const DiagramCanvas = () => {
 
     cyto.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       console.log('edge completed');
-      createdEdge = addedEdge;
+      setCreatedEdge(addedEdge);
 
       let modelEdge = new Edge(
         sourceNode.data('MasterModelReference'),
@@ -171,7 +168,7 @@ const DiagramCanvas = () => {
             let parentId = target.id();
             currentDiagram.diagramJson = cyto.json();
             cyto.elements().remove();
-            let nextDiagram = new DiagramTreeNode();
+            let nextDiagram = new DiagramTreeNode(nodeCounter, target.data('MasterModelReference')); //change counter, remove?
             currentDiagram.addChild(nextDiagram);
 
             cyto.add({
@@ -185,7 +182,8 @@ const DiagramCanvas = () => {
               data: {
                 id: nodeCounter,
                 group: 'nodes',
-                'MasterModelReference': modelNode, label: 'node ' + nodeCounter,
+                'MasterModelReference': modelNode,
+                'label': type + ' ' + nodeCounter,
                 'parent': parentId,
                 'type': type,
               },
@@ -198,7 +196,8 @@ const DiagramCanvas = () => {
               data: {
                 id: nodeCounter,
                 group: 'nodes',
-                'MasterModelReference': modelNode, label: 'node ' + nodeCounter,
+                'MasterModelReference': modelNode,
+                'label': type + ' ' + nodeCounter,
                 'parent': parentId,
                 'type': type,
               },
@@ -298,6 +297,11 @@ const DiagramCanvas = () => {
 
   }, []);
 
+  useEffect(() => {
+    console.log('cytoscape rerender REEEEE');
+  });
+
+
   return (
     <div className='diagram-canvas'>
       <CytoscapeComponent
@@ -312,10 +316,9 @@ const DiagramCanvas = () => {
 
         elements={[]}
         style={{ width: '100%', height: '100%', position: 'absolute' }} />
-      <EdgeSelectionModal open={edgeSelectionOpen} setOpen={setEdgeSelectionOpen} createdEdge={createdEdge} />
     </div>);
 
-};
+}, () => true); //never re-render
 
 export default DiagramCanvas;
 export { cyto, eh };

@@ -1,14 +1,18 @@
+import { MasterModelNode, masterModelRoot, MasterModelRoot} from "./master-model";
+
 class DiagramTreeNode {
     id: number;
     parent: DiagramTreeNode | null;
     children: Array<DiagramTreeNode>;
+    mainNode: MasterModelNode | MasterModelRoot;
     diagramJson: any;
 
-    constructor(id: number, parent = null) {
+    constructor(id: number, mainNode: MasterModelNode | MasterModelRoot, parent = null, ) {
         this.id = id;
         this.parent = parent;
         this.children = [];
         this.diagramJson = null;
+        this.mainNode = mainNode;
     }
 
     addChild(child: DiagramTreeNode): number {
@@ -38,6 +42,7 @@ class DiagramTreeNode {
     }
 }
 
-let diagramTreeRoot = new DiagramTreeNode(0);
+
+let diagramTreeRoot = new DiagramTreeNode(0, masterModelRoot);
 
 export { diagramTreeRoot, DiagramTreeNode };
