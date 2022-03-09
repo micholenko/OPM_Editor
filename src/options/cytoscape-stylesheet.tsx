@@ -67,56 +67,28 @@ export const cyStylesheet = [
   // cytoscape-edge-handles extention
 
   {
-    selector: '.eh-handle',
+    selector: '.eh-source',
     style: {
-      'background-color': 'red',
-      'width': 12,
-      'height': 12,
-      'shape': 'ellipse',
-      'overlay-opacity': 0,
-      'border-width': 12, // makes the handle easier to hit
-      'border-opacity': 0
+      'border-width': 2,
     }
   },
 
   {
     selector: '.eh-hover',
     style: {
-      'background-color': 'red'
-    }
-  },
-
-  {
-    selector: '.eh-source',
-    style: {
-      'border-width': 2,
-      'border-color': 'red'
-    }
-  },
-
-  {
-    selector: '.eh-target',
-    style: {
-      'border-width': 2,
-      'border-color': 'red'
+      'border-width': 3,
+      'background-color': 'lightgrey'
     }
   },
 
   {
     selector: '.eh-preview, .eh-ghost-edge',
     style: {
-      'background-color': 'red',
-      'line-color': 'red',
-      'target-arrow-color': 'red',
-      'source-arrow-color': 'red'
+      'background-color': 'grey',
+      'line-color': 'grey',
+      'target-arrow-color': 'grey',
+      'source-arrow-color': 'grey'
     }
   },
 
-  {
-    selector: '.eh-ghost-edge.eh-preview-active',
-    style: {
-      'opacity': 0
-    }
-  },
-  
 ]

@@ -14,6 +14,7 @@ import { edgeArray, Edge } from '../model/edge-model';
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
 
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
+import { emit } from 'process';
 
 cytoscape.use(contextMenus);
 cytoscape.use(edgehandles);
@@ -71,76 +72,66 @@ const addNode = (event: Event, type: 'object' | 'process') => {
 
 
 const DiagramCanvas = React.memo(({ currentDiagram, createdEdge, setEdgeSelectionOpen, setRerender }) => {
-
+  let sourceNode = null;
+  let targetNode = null;
   useEffect(() => {
-
-    /* cyto.on('cxtdrag', 'node', (evt: Event) => {
-      const sourceNode = evt.target;
+    console.log('useeffect called');
+    cyto.on('cxttapstart', 'node', (evt: Event) => {
+      sourceNode = evt.target;
+      sourceNode.addClass('eh-source');
       eh.start(sourceNode);
     });
 
     cyto.on('cxttapend', 'node', (evt: Event) => {
-      const targetNode = evt.target;
       eh.stop();
-      // console.log('ended on ' + targetNode.data('label'));
     });
 
-    cyto.on('ehstop', (evt: Event, sourceNode) => {
-      const targetNode = evt.target;
-      console.log('ended on ' + targetNode.data('label'));
-      console.log('started on ' + sourceNode.data('label'));
+    cyto.on('ehstop', (evt: Event) => {
+      if (sourceNode != null && targetNode != null) {
+        let modelEdge = new Edge(
+          sourceNode.data('MasterModelReference'),
+          targetNode.data('MasterModelReference'),
+          'consumption'//default
+        );
+        const addedEdge = cyto.add({
+          group: 'edges',
+          data: {
+            'source': sourceNode.data('id'),
+            'target': targetNode.data('id'),
+            'MasterModelReference': modelEdge
+          },
+        });
+
+        edgeArray.addEdge(modelEdge);
+        targetNode.removeClass('eh-hover');
+
+        createdEdge.current = addedEdge;
+        setEdgeSelectionOpen(true);
+        
+      }
+      sourceNode = null;
+      targetNode = null;
     });
 
     cyto.on('cxtdragover', 'node', (evt: Event) => {
-      const targetNode = evt.target;
-      console.log('over ' + targetNode.data('label'));
+      if (sourceNode != null) {
+        targetNode = evt.target;
+        targetNode.addClass('eh-hover');
+        console.log('over ' + targetNode.data('label'));
+      }
     });
-    */
+
+    cyto.on('cxtdragout ', 'node', (evt: Event) => {
+      evt.target.removeClass('eh-hover');
+      targetNode = null;
+    });
+
 
     cyto.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       console.log('edge completed');
       createdEdge.current = addedEdge;
       console.log('here ' + createdEdge.current);
-
-      let modelEdge = new Edge(
-        sourceNode.data('MasterModelReference'),
-        targetNode.data('MasterModelReference'),
-        'consumption'//default
-      );
-      edgeArray.addEdge(modelEdge);
-
-      addedEdge.data({ 'MasterModelReference': modelEdge });
-
-      setEdgeSelectionOpen(true);
     });
-
-    cyto.on('add', 'node', function (evt: Event) {
-      var node = evt.target;
-      if (!node.hasClass('eh-ghost')) {
-        console.log('added  node ');
-      }
-    });
-    cyto.on('add', 'edge', function (evt) {
-      var node = evt.target;
-
-      if (!node.hasClass('eh-ghost')) {
-        console.log('added  edge ');
-
-      }
-    });
-    cyto.on('remove', 'node', function (evt) {
-      var node = evt.target;
-      if (!node.hasClass('eh-ghost')) {
-        console.log('removed node');
-
-      }
-    });
-    cyto.on('remove', 'edge', function (evt: Event) {
-      var node = evt.target;
-      if (!node.hasClass('eh-ghost'))
-        console.log('removed  edge ');
-    });
-
 
     cyto.contextMenus({
       menuItems: [
@@ -278,8 +269,8 @@ const DiagramCanvas = React.memo(({ currentDiagram, createdEdge, setEdgeSelectio
 
 
             currentDiagram.current = nextDiagram;
-            setRerender(true)
-            setRerender(false)
+            setRerender(true);
+            setRerender(false);
 
           },
           hasTrailingDivider: true

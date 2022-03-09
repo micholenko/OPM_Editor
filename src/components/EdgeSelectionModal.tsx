@@ -55,6 +55,7 @@ const EdgeSelectionModal: React.FC<ModalProps> = ({ open, setOpen, createdEdge }
   return (
     { open } &&
     <Modal
+      onContextMenu={(e)=> e.preventDefault()}
       open={open}
       onClose={handleClose}
       aria-labelledby="modal-modal-title"
