@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import cytoscape, { CoreGraphManipulation } from 'cytoscape';
+import cytoscape, { CoreGraphManipulation, CoreGraphManipulationExt } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import CytoscapeComponent from 'react-cytoscapejs';
 import contextMenus from 'cytoscape-context-menus';
@@ -18,7 +18,7 @@ import 'cytoscape-context-menus/cytoscape-context-menus.css';
 cytoscape.use(contextMenus);
 cytoscape.use(edgehandles);
 
-let cyto: CoreGraphManipulation;
+let cyto: Core;
 let eh;
 let nodeCounter = 0;
 
@@ -70,10 +70,9 @@ const addNode = (event: Event, type: 'object' | 'process') => {
 
 
 
-const DiagramCanvas = React.memo(({currentDiagram, setCurrentDiagram, setCreatedEdge, setEdgeSelectionOpen}) => {
+const DiagramCanvas = React.memo(({ currentDiagram, createdEdge, setEdgeSelectionOpen, setRerender }) => {
 
   useEffect(() => {
-    console.log('cytoscape rendered');
 
     /* cyto.on('cxtdrag', 'node', (evt: Event) => {
       const sourceNode = evt.target;
@@ -100,7 +99,8 @@ const DiagramCanvas = React.memo(({currentDiagram, setCurrentDiagram, setCreated
 
     cyto.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       console.log('edge completed');
-      setCreatedEdge(addedEdge);
+      createdEdge.current = addedEdge;
+      console.log('here ' + createdEdge.current);
 
       let modelEdge = new Edge(
         sourceNode.data('MasterModelReference'),
@@ -163,13 +163,26 @@ const DiagramCanvas = React.memo(({currentDiagram, setCurrentDiagram, setCreated
           selector: 'node',
           onClickFunction: function (event) {
             var target = event.target || event.cyTarget;
+            let nextDiagram;
+            const MMReference = target.data('MasterModelReference');
+            if (nextDiagram = MMReference.diagram) {
+              currentDiagram.current.diagramJson = cyto.json();
+              cyto.elements().remove();
+              cyto.json(nextDiagram.diagramJson);
+              currentDiagram.current = nextDiagram;
+              return;
+            }
+
+
             let reference = target.data();
+
             let type = target.data('type');
             let parentId = target.id();
-            currentDiagram.diagramJson = cyto.json();
+            currentDiagram.current.diagramJson = cyto.json();
             cyto.elements().remove();
-            let nextDiagram = new DiagramTreeNode(nodeCounter, target.data('MasterModelReference')); //change counter, remove?
-            currentDiagram.addChild(nextDiagram);
+            nextDiagram = new DiagramTreeNode(nodeCounter, MMReference); //change counter, remove?
+            MMReference.diagram = nextDiagram;
+            currentDiagram.current.addChild(nextDiagram);
 
             cyto.add({
               group: 'nodes',
@@ -264,7 +277,9 @@ const DiagramCanvas = React.memo(({currentDiagram, setCurrentDiagram, setCreated
             });
 
 
-            setCurrentDiagram(nextDiagram);
+            currentDiagram.current = nextDiagram;
+            setRerender(true)
+            setRerender(false)
 
           },
           hasTrailingDivider: true

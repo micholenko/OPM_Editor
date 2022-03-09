@@ -1,9 +1,12 @@
+import { DiagramTreeNode } from "./diagram-tree-model";
+
 class MasterModelNode {
   id: number;
   parent: MasterModelNode | MasterModelRoot | null;
   children: Array<MasterModelNode>;
   type: 'object' | 'process';
   label: string;
+  diagram: DiagramTreeNode | null;
 
   constructor(id: number, type: 'object' | 'process', label: string) {
     this.id = id;
@@ -11,6 +14,7 @@ class MasterModelNode {
     this.type = type;
     this.parent = null;
     this.children = [];
+    this.diagram = null;
 
   }
 

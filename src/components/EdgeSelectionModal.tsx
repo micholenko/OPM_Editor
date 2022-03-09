@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -24,20 +26,20 @@ const style = {
 interface ModalProps {
   open: boolean,
   setOpen: Function;
-  createdEdge: EdgeSingular;
+  // createdEdge: EdgeSingular;
 };
 
 interface OptionProps {
   option: string;
-  createdEdge: EdgeSingular;
+  // createdEdge: EdgeSingular;
   handleClose: Function;
 };
 
 const EdgeSelectionOption: React.FC<OptionProps> = ({ option, createdEdge, handleClose }) => {
   return (
     <Button onClick={() => {
-      createdEdge.data({ 'type': option });
-      createdEdge.data('MasterModelReference').type = option;
+      createdEdge.current.data({ 'type': option });
+      createdEdge.current.data('MasterModelReference').type = option;
       handleClose();
     }}>{option}</Button>
   );
