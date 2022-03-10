@@ -6,11 +6,13 @@ class Edge {
   source: MasterModelNode;
   target: MasterModelNode;
   type: edgeType;
+  label: string;
 
   constructor(source: MasterModelNode, target: MasterModelNode, type: edgeType) {
     this.source = source;
     this.target = target;
     this.type = type;
+    this.label = '';
   }
 }
 
@@ -20,8 +22,8 @@ class EdgeArray {
     this.edges = [];
   }
 
-  addEdge(newEdge: Edge){
-    this.edges.push(newEdge)
+  addEdge(newEdge: Edge) {
+    this.edges.push(newEdge);
   }
 
   findOutgoingEdges(node: MasterModelNode): Array<Edge> {
@@ -42,7 +44,7 @@ class EdgeArray {
     return returnArray;
   };
 
-  findRelatedEdges(node: MasterModelNode): Array<Edge>{
+  findRelatedEdges(node: MasterModelNode): Array<Edge> {
     let returnArray: Array<Edge> = [];
     returnArray.concat(this.findIngoingEdges(node));
     returnArray.concat(this.findOutgoingEdges(node));

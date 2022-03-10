@@ -3,7 +3,7 @@ import 'antd/dist/antd.css';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
 import { TreeContext } from './App';
-import { cyto } from './DiagramCanvas';
+import { cy } from './DiagramCanvas';
 import { edgeArray } from '../model/edge-model';
 
 
@@ -51,34 +51,33 @@ const DiagramTree = () => {
     if (info.node.selected == true)
       return;
     const modelReference = info.node.modelReference;
-    console.log('selected', selectedKeys, info);
-    currentDiagram.current.diagramJson = cyto.json();
-    cyto.elements().remove();
-    cyto.json(modelReference.diagramJson);
+    currentDiagram.current.diagramJson = cy.json();
+    cy.elements().remove();
+    cy.json(modelReference.diagramJson);
     //add extra
 
     const ingoingEdges = edgeArray.findIngoingEdges(modelReference.mainNode);
     const outgoingEdges = edgeArray.findOutgoingEdges(modelReference.mainNode);
     ingoingEdges.map((edge) => {
       const node = edge.source;
-      cyto.add(
+      cy.add(
         {
           group: 'nodes',
           data: {
             'id': node.id,
-            'MasterModelReference': node,
+            'MasterModelRef': node,
             'label': node.label,
             'type': node.type
           },
         }
       );
-      cyto.add(
+      cy.add(
         {
           group: 'edges',
           data: {
             'source': edge.source.id,
             'target': edge.target.id,
-            'MasterModelReference': edge,
+            'MasterModelRef': edge,
             'type': edge.type
           },
         }
@@ -87,24 +86,24 @@ const DiagramTree = () => {
 
     outgoingEdges.map((edge) => {
       const node = edge.target;
-      cyto.add(
+      cy.add(
         {
           group: 'nodes',
           data: {
             'id': node.id,
-            'MasterModelReference': node,
+            'MasterModelRef': node,
             'label': node.label,
             'type': node.type
           },
         }
       );
-      cyto.add(
+      cy.add(
         {
           group: 'edges',
           data: {
             'source': edge.source.id,
             'target': edge.target.id,
-            'MasterModelReference': edge,
+            'MasterModelRef': edge,
             'type': edge.type
           }
         }
@@ -115,7 +114,6 @@ const DiagramTree = () => {
     currentDiagram.current = modelReference;
   };
 
-  console.log('rerendered');
   return (
     <Tree
       height={500} //set to scroll

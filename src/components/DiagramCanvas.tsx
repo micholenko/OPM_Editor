@@ -2,103 +2,59 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import cytoscape, { CoreGraphManipulation, CoreGraphManipulationExt } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
-import CytoscapeComponent from 'react-cytoscapejs';
+import popper from 'cytoscape-popper';
 import contextMenus from 'cytoscape-context-menus';
+import tippy from 'tippy.js';
 
-import { TreeContext } from './App';
-import EdgeSelectionModal from './EdgeSelectionModal';
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
-import { masterModelRoot, MasterModelNode } from '../model/master-model';
 import { edgeArray, Edge } from '../model/edge-model';
 
+import { defaults } from '../options/cytoscape-edge-handles-defaults';
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
+import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
+import { nodeLabelEditingPopup, edgeLabelEditingPopup} from '../helper-functions/tippy-elements';
 
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
-import { emit } from 'process';
+import '../css/general.css';
 
 cytoscape.use(contextMenus);
 cytoscape.use(edgehandles);
+cytoscape.use(popper);
 
-let cyto: Core;
-let eh;
+let cy: Core;
 let nodeCounter = 0;
 
-let defaults = {
-  canConnect: function (sourceNode, targetNode) {
-    // whether an edge can be created between source and target
-    return !sourceNode.same(targetNode); // e.g. disallow loops
-  },
-  edgeParams: function (sourceNode, targetNode) {
-    // for edges between the specified source and target
-    // return element object to be passed to cy.add() for edge
-    return {};
-  },
-  hoverDelay: 150, // time spent hovering over a target node before it is considered selected
-  snap: false, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
-  snapThreshold: 20, // the target node must be less than or equal to this many pixels away from the cursor/finger
-  snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
-  noEdgeEventsInDraw: false, // set events:no to edges during draws, prevents mouseouts on compounds
-  disableBrowserGestures: true // during an edge drawing gesture, disable browser gestures such as two-finger trackpad swipe and pinch-to-zoom
-};
+const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setRerender }) => {
 
-const addNode = (event: Event, type: 'object' | 'process') => {
-  const defaultLabel = type + " " + nodeCounter.toString();
-  let modelNode = new MasterModelNode(nodeCounter, type, defaultLabel);
-  masterModelRoot.addChild(modelNode);
-  console.log('added node' + nodeCounter);
+  const registerEdgeEventHandlers = (cy: Core) => {
+    let sourceNode = null;
+    let targetNode = null;
 
+    let eh = cy.edgehandles(defaults);
 
-  var data = {
-    id: nodeCounter,
-    group: 'nodes', //not needed in master model
-    'MasterModelReference': modelNode,
-    label: defaultLabel,
-    'type': type,
-  };
-
-  var pos = event.position || event.cyPosition;
-
-  cyto.add({
-    data: data,
-    position: {
-      x: pos.x,
-      y: pos.y
-    }
-  });
-
-  nodeCounter++;
-};
-
-
-
-const DiagramCanvas = React.memo(({ currentDiagram, createdEdge, setEdgeSelectionOpen, setRerender }) => {
-  let sourceNode = null;
-  let targetNode = null;
-  useEffect(() => {
-    console.log('useeffect called');
-    cyto.on('cxttapstart', 'node', (evt: Event) => {
+    cy.on('cxttapstart', 'node', (evt: Event) => {
       sourceNode = evt.target;
       sourceNode.addClass('eh-source');
       eh.start(sourceNode);
     });
 
-    cyto.on('cxttapend', 'node', (evt: Event) => {
+    cy.on('cxttapend', 'node', (evt: Event) => {
       eh.stop();
     });
 
-    cyto.on('ehstop', (evt: Event) => {
+    cy.on('ehstop', (evt: Event) => {
       if (sourceNode != null && targetNode != null) {
         let modelEdge = new Edge(
-          sourceNode.data('MasterModelReference'),
-          targetNode.data('MasterModelReference'),
+          sourceNode.data('MasterModelRef'),
+          targetNode.data('MasterModelRef'),
           'consumption'//default
         );
-        const addedEdge = cyto.add({
+        const addedEdge = cy.add({
           group: 'edges',
           data: {
             'source': sourceNode.data('id'),
             'target': targetNode.data('id'),
-            'MasterModelReference': modelEdge
+            'MasterModelRef': modelEdge
           },
         });
 
@@ -107,33 +63,33 @@ const DiagramCanvas = React.memo(({ currentDiagram, createdEdge, setEdgeSelectio
 
         createdEdge.current = addedEdge;
         setEdgeSelectionOpen(true);
-        
+
       }
       sourceNode = null;
       targetNode = null;
     });
 
-    cyto.on('cxtdragover', 'node', (evt: Event) => {
+    cy.on('cxtdragover', 'node', (evt: Event) => {
       if (sourceNode != null) {
         targetNode = evt.target;
         targetNode.addClass('eh-hover');
-        console.log('over ' + targetNode.data('label'));
       }
     });
 
-    cyto.on('cxtdragout ', 'node', (evt: Event) => {
+    cy.on('cxtdragout', 'node', (evt: Event) => {
       evt.target.removeClass('eh-hover');
       targetNode = null;
     });
 
+  };
 
-    cyto.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
-      console.log('edge completed');
-      createdEdge.current = addedEdge;
-      console.log('here ' + createdEdge.current);
-    });
+  const registerPopperHandlers = (cy: Core) => {
+    nodeLabelEditingPopup(cy)
+    edgeLabelEditingPopup(cy)
+  };
 
-    cyto.contextMenus({
+  const registerContextMenu = (cy: Core) => {
+    cy.contextMenus({
       menuItems: [
         {
           id: 'remove',
@@ -155,118 +111,24 @@ const DiagramCanvas = React.memo(({ currentDiagram, createdEdge, setEdgeSelectio
           onClickFunction: function (event) {
             var target = event.target || event.cyTarget;
             let nextDiagram;
-            const MMReference = target.data('MasterModelReference');
-            if (nextDiagram = MMReference.diagram) {
-              currentDiagram.current.diagramJson = cyto.json();
-              cyto.elements().remove();
-              cyto.json(nextDiagram.diagramJson);
+            const MMReference = target.data('MasterModelRef');
+            if (nextDiagram = MMReference.diagram) { //already inzoomed
+              currentDiagram.current.diagramJson = cy.json();
+              cy.elements().remove();
+              cy.json(nextDiagram.diagramJson);
               currentDiagram.current = nextDiagram;
               return;
             }
 
-
-            let reference = target.data();
-
-            let type = target.data('type');
-            let parentId = target.id();
-            currentDiagram.current.diagramJson = cyto.json();
-            cyto.elements().remove();
+            currentDiagram.current.diagramJson = cy.json();
+            cy.elements().remove();
             nextDiagram = new DiagramTreeNode(nodeCounter, MMReference); //change counter, remove?
             MMReference.diagram = nextDiagram;
             currentDiagram.current.addChild(nextDiagram);
 
-            cyto.add({
-              group: 'nodes',
-              data: reference,
-            });
-
-            let modelNode = new MasterModelNode(nodeCounter);
-            cyto.add({
-              group: 'nodes',
-              data: {
-                id: nodeCounter,
-                group: 'nodes',
-                'MasterModelReference': modelNode,
-                'label': type + ' ' + nodeCounter,
-                'parent': parentId,
-                'type': type,
-              },
-              position: { x: 200, y: 200 },
-            });
-            nodeCounter++;
-            modelNode = new MasterModelNode(nodeCounter);
-            cyto.add({
-              group: 'nodes',
-              data: {
-                id: nodeCounter,
-                group: 'nodes',
-                'MasterModelReference': modelNode,
-                'label': type + ' ' + nodeCounter,
-                'parent': parentId,
-                'type': type,
-              },
-              position: { x: 300, y: 300 },
-            });
-            nodeCounter++;
-
+            cyAddInzoomedNodes(cy, event);
             //add extra
-
-            const ingoingEdges = edgeArray.findIngoingEdges(target.data('MasterModelReference'));
-            const outgoingEdges = edgeArray.findOutgoingEdges(target.data('MasterModelReference'));
-            ingoingEdges.map((edge) => {
-              const node = edge.source;
-              cyto.add(
-                {
-                  group: 'nodes',
-                  data: {
-                    'id': node.id,
-                    'MasterModelReference': node,
-                    'label': node.label,
-                    'type': node.type
-                  },
-                }
-              );
-              cyto.add(
-                {
-                  group: 'edges',
-                  data: {
-                    'source': edge.source.id,
-                    'target': edge.target.id,
-                    'id': edge.id,
-                    'MasterModelReference': edge,
-                    'type': edge.type
-                  },
-                }
-              );
-            });
-
-            outgoingEdges.map((edge) => {
-              const node = edge.target;
-              cyto.add(
-                {
-                  group: 'nodes',
-                  data: {
-                    'id': node.id,
-                    'MasterModelReference': node,
-                    'label': node.label,
-                    'type': node.type
-                  },
-                }
-              );
-              cyto.add(
-                {
-                  group: 'edges',
-                  data: {
-                    'source': edge.source.id,
-                    'target': edge.target.id,
-                    'id': edge.id,
-                    'MasterModelReference': edge,
-                    'type': edge.type
-                  }
-                }
-              );
-            });
-
+            cyAddConnectedNodes(cy, event.target);
 
             currentDiagram.current = nextDiagram;
             setRerender(true);
@@ -284,7 +146,7 @@ const DiagramCanvas = React.memo(({ currentDiagram, createdEdge, setEdgeSelectio
           coreAsWell: true,
           selector: 'node',
           onClickFunction: function (event) {
-            addNode(event, 'object');
+            cyAddNodeFromContextMenu(cy, event, 'object');
           }
         },
         {
@@ -294,37 +156,30 @@ const DiagramCanvas = React.memo(({ currentDiagram, createdEdge, setEdgeSelectio
           coreAsWell: true,
           selector: 'node',
           onClickFunction: function (event) {
-            addNode(event, 'process');
+            cyAddNodeFromContextMenu(cy, event, 'process');
           }
         },
 
       ]
     });
+  };
+
+  useEffect(() => {
+    cy = cytoscape({
+      container: document.getElementById('cy'), // container to render in
+      style: cyStylesheet,
+      wheelSensitivity: 0.1,
+    });
+
+    registerEdgeEventHandlers(cy);
+    registerPopperHandlers(cy);
+    registerContextMenu(cy);
 
   }, []);
 
-  useEffect(() => {
-    console.log('cytoscape rerender REEEEE');
-  });
-
-
   return (
-    <div className='diagram-canvas'>
-      <CytoscapeComponent
-        stylesheet={cyStylesheet}
-        cy={(cy: CoreGraphManipulation) => {
-          cyto = cy;
-          eh = cy.edgehandles(defaults);
-          cyto.on('add', 'node', (evt: Event) => {
-            console.log('hello');
-          });
-        }}
-
-        elements={[]}
-        style={{ width: '100%', height: '100%', position: 'absolute' }} />
-    </div>);
-
-}, () => true); //never re-render
+    <div className='diagram-canvas' id='cy' />);
+};
 
 export default DiagramCanvas;
-export { cyto, eh };
+export { cy };

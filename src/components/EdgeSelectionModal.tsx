@@ -38,8 +38,9 @@ interface OptionProps {
 const EdgeSelectionOption: React.FC<OptionProps> = ({ option, createdEdge, handleClose }) => {
   return (
     <Button onClick={() => {
-      createdEdge.current.data({ 'type': option });
-      createdEdge.current.data('MasterModelReference').type = option;
+      createdEdge.current.data({ type: option });
+      createdEdge.current.data({ label: '' });
+      createdEdge.current.data('MasterModelRef').type = option;
       handleClose();
     }}>{option}</Button>
   );
@@ -51,7 +52,6 @@ const EdgeSelectionModal: React.FC<ModalProps> = ({ open, setOpen, createdEdge }
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  console.log(open);
   return (
     { open } &&
     <Modal

@@ -18,9 +18,6 @@ function App() {
   const [rerender, setRerender] = useState(false);
   const [edgeSelectionOpen, setEdgeSelectionOpen] = useState(false);
 
-  useEffect(() => {
-    console.log('app rendered ' + rerender);
-  });
   return (
     <div className="app">
       <TreeContext.Provider value={{ currentDiagram }}>
