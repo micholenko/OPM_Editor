@@ -1,6 +1,6 @@
 import { Core, NodeSingular } from "cytoscape";
 import { masterModelRoot, MasterModelNode } from "../model/master-model";
-import { edgeArray } from '../model/edge-model';
+import { edgeArray, derivedEdgeArray } from '../model/edge-model';
 
 let nodeCounter = 0;
 let currentMasterModelNode = masterModelRoot;
@@ -53,6 +53,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
 
   // add inzoomed node to new diagram
   cyAddNode(cy, inzoomedNode.data(), { x: 0, y: 0 }, false);
+  
   currentMasterModelNode = inzoomedNode.data('MasterModelRef');
   // add 2 default subnodes
   let data = {
@@ -61,7 +62,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     parent: inzoomedNode.id(),
     type: type,
   };
-  cyAddNode(cy, data, { x: 200, y: 200 });
+  cyAddNode(cy, data, { x: 50, y: 50 });
 
   data = {
     id: nodeCounter,
@@ -69,12 +70,11 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     parent: parentId,
     type: type,
   };
-  cyAddNode(cy, data, { x: 300, y: 300 });
+  cyAddNode(cy, data, { x: 150, y: 150 });
+  
 };
 
-
-const cyAddConnectedNodes = (cy: Core, node: NodeSingular) => {
-  const MMNode = node.data('MasterModelRef');
+const cyAddConnectedNodes = (cy: Core, MMNode: MasterModelNode) => {
   let connectedEdges = edgeArray.findIngoingEdges(MMNode);
   connectedEdges = connectedEdges.concat(edgeArray.findOutgoingEdges(MMNode));
   connectedEdges.map((edge) => {
@@ -83,6 +83,38 @@ const cyAddConnectedNodes = (cy: Core, node: NodeSingular) => {
       connectedNode = edge.target;
     else
       connectedNode = edge.source;
+
+    const nodeData = {
+      id: connectedNode.id,
+      MasterModelRef: connectedNode,
+      label: connectedNode.label,
+      type: connectedNode.type
+    };
+    cyAddNode(cy, nodeData, { x: 0, y: 0 }, false);
+
+    const edgeData = {
+      source: edge.source.id,
+      target: edge.target.id,
+      MasterModelRef: edge,
+      label: edge.label,
+      type: edge.type
+    };
+    cyAddEdge(cy, edgeData, false)
+  });
+
+
+
+  connectedEdges = derivedEdgeArray.findIngoingEdges(MMNode);
+  connectedEdges = connectedEdges.concat(derivedEdgeArray.findOutgoingEdges(MMNode));
+  
+  connectedEdges.map((edge) => {
+    
+    let connectedNode;
+    if (MMNode === edge.source)
+      connectedNode = edge.target;
+    else
+      connectedNode = edge.source;
+    
 
     const nodeData = {
       id: connectedNode.id,

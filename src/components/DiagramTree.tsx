@@ -1,10 +1,15 @@
 import { Tree } from 'antd';
+import { NodeSingular } from 'cytoscape';
 import 'antd/dist/antd.css';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
 import { TreeContext } from './App';
 import { cy } from './DiagramCanvas';
 import { edgeArray } from '../model/edge-model';
+
+import { cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
+import { OptionUnstyled } from '@mui/base';
+import { MasterModelNode } from '../model/master-model';
 
 
 interface DataNode {
@@ -56,59 +61,18 @@ const DiagramTree = () => {
     cy.json(modelReference.diagramJson);
     //add extra
 
-    const ingoingEdges = edgeArray.findIngoingEdges(modelReference.mainNode);
-    const outgoingEdges = edgeArray.findOutgoingEdges(modelReference.mainNode);
-    ingoingEdges.map((edge) => {
-      const node = edge.source;
-      cy.add(
-        {
-          group: 'nodes',
-          data: {
-            'id': node.id,
-            'MasterModelRef': node,
-            'label': node.label,
-            'type': node.type
-          },
-        }
-      );
-      cy.add(
-        {
-          group: 'edges',
-          data: {
-            'source': edge.source.id,
-            'target': edge.target.id,
-            'MasterModelRef': edge,
-            'type': edge.type
-          },
-        }
-      );
-    });
-
-    outgoingEdges.map((edge) => {
-      const node = edge.target;
-      cy.add(
-        {
-          group: 'nodes',
-          data: {
-            'id': node.id,
-            'MasterModelRef': node,
-            'label': node.label,
-            'type': node.type
-          },
-        }
-      );
-      cy.add(
-        {
-          group: 'edges',
-          data: {
-            'source': edge.source.id,
-            'target': edge.target.id,
-            'MasterModelRef': edge,
-            'type': edge.type
-          }
-        }
-      );
-    });
+    if (modelReference === diagramTreeRoot) {
+      console.log('root');
+      const nodes = modelReference.mainNode.children
+      nodes.forEach((node: MasterModelNode) => {
+        cyAddConnectedNodes(cy, node);  
+      });
+    }
+    else {
+      console.log('not root');
+      cyAddConnectedNodes(cy, modelReference.mainNode);
+    }
+    cy.center();
 
 
     currentDiagram.current = modelReference;

@@ -7,12 +7,14 @@ class Edge {
   target: MasterModelNode;
   type: edgeType;
   label: string;
+  originalEdge: Edge;
 
-  constructor(source: MasterModelNode, target: MasterModelNode, type: edgeType) {
+  constructor(source: MasterModelNode, target: MasterModelNode, type: edgeType, originalEdge: Edge) {
     this.source = source;
     this.target = target;
     this.type = type;
     this.label = '';
+    this.originalEdge = originalEdge;
   }
 }
 
@@ -51,8 +53,16 @@ class EdgeArray {
     return returnArray;
   }
 
+  contains(edge:Edge): boolean{
+    this.edges.forEach(element => {
+      if (element === edge)
+        return true;
+    });
+    return false;
+  }
 };
 
 
 let edgeArray = new EdgeArray();
-export { edgeArray, Edge };
+let derivedEdgeArray = new EdgeArray();
+export { edgeArray, derivedEdgeArray, Edge };

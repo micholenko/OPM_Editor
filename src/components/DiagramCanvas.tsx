@@ -4,15 +4,16 @@ import cytoscape, { CoreGraphManipulation, CoreGraphManipulationExt } from 'cyto
 import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
 import contextMenus from 'cytoscape-context-menus';
+import coseBilkent from 'cytoscape-cose-bilkent';
 import tippy from 'tippy.js';
 
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
-import { edgeArray, Edge } from '../model/edge-model';
+import { edgeArray, Edge, derivedEdgeArray } from '../model/edge-model';
 
 import { defaults } from '../options/cytoscape-edge-handles-defaults';
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
 import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
-import { nodeLabelEditingPopup, edgeLabelEditingPopup} from '../helper-functions/tippy-elements';
+import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-functions/tippy-elements';
 
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import '../css/general.css';
@@ -20,9 +21,21 @@ import '../css/general.css';
 cytoscape.use(contextMenus);
 cytoscape.use(edgehandles);
 cytoscape.use(popper);
+cytoscape.use(coseBilkent);
 
 let cy: Core;
 let nodeCounter = 0;
+
+var defaultOptions = {
+  name: "cose-bilkent",
+  // other options
+  fit: false,
+  padding: 250,
+  nodeDimensionsIncludeLabels: true,
+  idealEdgeLength: 150,
+  edgeElasticity: 0.1,
+  nodeRepulsion: 8500
+};
 
 const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setRerender }) => {
 
@@ -44,7 +57,9 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
 
     cy.on('ehstop', (evt: Event) => {
       if (sourceNode != null && targetNode != null) {
-        let modelEdge = new Edge(
+        let modelEdge, derivedEdge
+
+        modelEdge = new Edge(
           sourceNode.data('MasterModelRef'),
           targetNode.data('MasterModelRef'),
           'consumption'//default
@@ -59,6 +74,23 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
         });
 
         edgeArray.addEdge(modelEdge);
+        if (sourceNode.isChild()) {
+          derivedEdge = new Edge(
+            sourceNode.parent().data('MasterModelRef'),
+            targetNode.data('MasterModelRef'),
+            'consumption',//default
+          );
+          derivedEdgeArray.addEdge(derivedEdge);
+        }
+        else if (targetNode.isChild()) {
+          derivedEdge = new Edge(
+            sourceNode.data('MasterModelRef'),
+            targetNode.parent().data('MasterModelRef'),
+            'consumption',//default
+          );
+          derivedEdgeArray.addEdge(derivedEdge);
+        }
+
         targetNode.removeClass('eh-hover');
 
         createdEdge.current = addedEdge;
@@ -84,8 +116,8 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
   };
 
   const registerPopperHandlers = (cy: Core) => {
-    nodeLabelEditingPopup(cy)
-    edgeLabelEditingPopup(cy)
+    nodeLabelEditingPopup(cy);
+    edgeLabelEditingPopup(cy);
   };
 
   const registerContextMenu = (cy: Core) => {
@@ -125,10 +157,16 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
             nextDiagram = new DiagramTreeNode(nodeCounter, MMReference); //change counter, remove?
             MMReference.diagram = nextDiagram;
             currentDiagram.current.addChild(nextDiagram);
-
+            console.log(cy.zoom())
             cyAddInzoomedNodes(cy, event);
-            //add extra
-            cyAddConnectedNodes(cy, event.target);
+
+            cyAddConnectedNodes(cy, MMReference);
+
+            let layout = cy.layout(defaultOptions);
+            layout.run();
+            cy.center();
+            console.log(cy.zoom())
+            cy.zoom(1);
 
             currentDiagram.current = nextDiagram;
             setRerender(true);

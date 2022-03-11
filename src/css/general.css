@@ -1,3 +1,7 @@
+*{
+  box-sizing: border-box;
+}
+
 .app {
   text-align: center;
   margin-left: 100px;
@@ -14,23 +18,22 @@
 
 .top-toolbar{
   border: 3px blue solid;
-  height: 50px;
+  height: 5%;
 }
 
 .left-sidebar{
   border: 3px blue solid;
-  width: 200px;
+  width: 20%;
   display: flex;
   flex-direction: column;
 }
 
 .diagram-canvas {
   border: 3px blue solid;
-  height: 100%;
   position: relative;
-  width: 100%;
+  height: 95%;
+  width: 80%;
   text-align: left;
-  
 }
 
 

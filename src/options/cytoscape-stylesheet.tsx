@@ -11,9 +11,25 @@ export const cyStylesheet = [
       'border-width': '2px',
       'background-color': 'white',
       'width': '70px',
-      'height': '45px',
+      'height': '45 px',
       'text-valign': 'center',
-      'padding': '3px'
+      'taxi-direction': 'vertical'
+    }
+  },
+  {
+    selector: 'node[type = "object"]',
+    style: {
+      'shape': 'rectangle',
+      'border-color': 'green',
+      'padding': '5 px',
+    }
+  },
+  {
+    selector: 'node[type = "process"]',
+    style: {
+      'shape': 'ellipse',
+      'border-color': 'DeepSkyBlue',
+      'padding': '8 px',
     }
   },
   {
@@ -29,21 +45,8 @@ export const cyStylesheet = [
     }
   },
 
-  {
-    selector: 'node[type = "object"]',
-    style: {
-      'shape': 'rectangle',
-      'border-color': 'green'
-    }
-  },
-  {
-    selector: 'node[type = "process"]',
-    style: {
-      'shape': 'ellipse',
-      'border-color': 'DeepSkyBlue',
-      'width': '80px',
-    }
-  },
+  
+  
   {
     selector: 'edge',
     style: {
@@ -56,7 +59,9 @@ export const cyStylesheet = [
   {
     selector: 'edge[type = "aggregation"]',
     style: {
-      'curve-style': 'taxi',
+      "curve-style": "taxi",
+      "taxi-direction": "downward",
+      "taxi-turn": 100,
     }
   },
 
