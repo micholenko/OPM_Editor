@@ -11,6 +11,8 @@ import { cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
 import { OptionUnstyled } from '@mui/base';
 import { MasterModelNode } from '../model/master-model';
 
+import '../css/general.css'
+
 
 interface DataNode {
   title: string;
@@ -20,6 +22,7 @@ interface DataNode {
 }
 
 const DiagramTree = () => {
+  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>(['SD'])
 
   const { currentDiagram } = useContext(TreeContext);
   let initTreeData: DataNode =
@@ -68,7 +71,11 @@ const DiagramTree = () => {
 
 
   const onSelect = (selectedKeys: React.Key[], info: any) => {
-    if (info.node.selected == true)
+    
+    if (info.node.selected !== true) {
+      setSelectedKeys(selectedKeys)
+    }
+    else
       return;
 
     currentDiagram.current.diagramJson = cy.json();
@@ -90,6 +97,7 @@ const DiagramTree = () => {
       console.log('not root');
       cyAddConnectedNodes(cy, modelReference.mainNode);
     }
+
     updateNodesFromMM(cy);
     cy.center();
 
@@ -99,12 +107,15 @@ const DiagramTree = () => {
 
   return (
     <Tree
+      className='diagram-tree'
+      style={{marginTop: '5px', height: '100%'}}
       height={500} //set to scroll
       defaultExpandAll
       defaultExpandParent
       draggable={{ icon: false }}
       showLine={{ showLeafIcon: false }}
       defaultSelectedKeys={['SD']}
+      selectedKeys={selectedKeys  }
       onSelect={onSelect}
       treeData={treeData} />
   );

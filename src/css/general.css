@@ -1,11 +1,16 @@
 * {
 	box-sizing: border-box;
+	
+}
+
+#root{
+	background-color: #dee2e6;
 }
 
 .app {
 	text-align: center;
-	margin-left: 100px;
-	margin-right: 100px;
+	/* margin-left: 50px; */
+	/* margin-right: 50px; */
 	height: 100vh;
 	position: relative;
 	overflow: hidden;
@@ -23,7 +28,7 @@
 
 .top-toolbar {
   height: 100%;
-	border: 3px blue solid;
+	border-bottom: 2.5px #adb5bd solid;
 }
 
 .flex-horizontal-wrapper {
@@ -45,20 +50,25 @@
 
 
 .left-sidebar {
-	border: 3px blue solid;
 	display: flex;
 	flex-direction: column;
   height: 100%;
+	border: 2.5px #adb5bd solid;
+	border-top: 0px;
+	border-left: 0px;
+	background-color: #ffffff;
   /* spatne */
 }
 
 .diagram-canvas {
-	border: 3px blue solid;
 	position: relative;
 	text-align: left;
   height: 100%;
   width: 100%;
+	background-color: #ffffff;
 }
+
+
 
 .display-block {
 	display: block;

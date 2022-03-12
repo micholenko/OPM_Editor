@@ -3,7 +3,7 @@ import './../css/general.css';
 
 const TopToolbar = () => {
   return (
-    <div className='top-toolbar'>TopToolbar</div>
+    <div className='top-toolbar'></div>
   );
 };
 
