@@ -1,14 +1,12 @@
 // @ts-nocheck
-import React, {useEffect} from 'react';
 import '../css/general.css';
-import { cyto, eh } from './DiagramCanvas';
 import DiagramTree from './DiagramTree';
 
-const LeftSidebar = () => {
+const LeftSidebar = ({ state, dispatch }) => {
 
   return (
     <div className='left-sidebar'>
-      <DiagramTree></DiagramTree>
+      <DiagramTree state={state} dispatch={dispatch}/>
     </div>
   );
 };

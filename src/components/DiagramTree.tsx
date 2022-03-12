@@ -1,14 +1,12 @@
 import { Tree } from 'antd';
-import { Core, NodeSingular } from 'cytoscape';
+import { Core  } from 'cytoscape';
 import 'antd/dist/antd.css';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
-import { TreeContext } from './App';
+import { ACTIONS, StateInterface } from './App';
 import { cy } from './DiagramCanvas';
-import { edgeArray } from '../model/edge-model';
 
 import { cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
-import { OptionUnstyled } from '@mui/base';
 import { MasterModelNode } from '../model/master-model';
 
 import '../css/general.css'
@@ -21,10 +19,14 @@ interface DataNode {
   children?: DataNode[];
 }
 
-const DiagramTree = () => {
+interface Props {
+  state: StateInterface;
+  dispatch: Function;
+};
+
+const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>(['SD'])
 
-  const { currentDiagram } = useContext(TreeContext);
   let initTreeData: DataNode =
   {
     title: 'SD',
@@ -72,13 +74,14 @@ const DiagramTree = () => {
 
   const onSelect = (selectedKeys: React.Key[], info: any) => {
     
+    const currentDiagram = state.currentDiagram
     if (info.node.selected !== true) {
       setSelectedKeys(selectedKeys)
     }
     else
       return;
 
-    currentDiagram.current.diagramJson = cy.json();
+    currentDiagram.diagramJson = cy.json();
     cy.elements().remove();
 
     const modelReference = info.node.modelReference;
@@ -101,8 +104,7 @@ const DiagramTree = () => {
     updateNodesFromMM(cy);
     cy.center();
 
-
-    currentDiagram.current = modelReference;
+    dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: modelReference });
   };
 
   return (

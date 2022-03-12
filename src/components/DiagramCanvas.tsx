@@ -1,11 +1,10 @@
 // @ts-nocheck
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import cytoscape, { CoreGraphManipulation, CoreGraphManipulationExt } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
 import contextMenus from 'cytoscape-context-menus';
 import coseBilkent from 'cytoscape-cose-bilkent';
-import tippy from 'tippy.js';
 
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
 import { edgeArray, Edge, derivedEdgeArray } from '../model/edge-model';
@@ -18,6 +17,8 @@ import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-function
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import '../css/general.css';
 import { MasterModelNode } from '../model/master-model';
+
+import { ACTIONS } from './App';
 
 cytoscape.use(contextMenus);
 cytoscape.use(edgehandles);
@@ -38,7 +39,10 @@ var defaultOptions = {
   nodeRepulsion: 8500
 };
 
-const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setRerender }) => {
+const DiagramCanvas = ({ state, dispatch }) => {
+
+  const currentDiagram = useRef()
+  currentDiagram.current = state.currentDiagram
 
   const registerEdgeEventHandlers = (cy: Core) => {
     let sourceNode = null;
@@ -94,9 +98,7 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
 
         targetNode.removeClass('eh-hover');
 
-        createdEdge.current = addedEdge;
-        setEdgeSelectionOpen(true);
-
+        dispatch({type: ACTIONS.CHANGE_CREATED_EDGE, payload:addedEdge})
       }
       sourceNode = null;
       targetNode = null;
@@ -133,13 +135,13 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
             const target = event.target;
             const nodeMMRef = target.data('MasterModelRef'); //to function set deleted and null reference
             nodeMMRef.deleted = true;
-            target.data({'MasterModelRef': null})
+            target.data({ 'MasterModelRef': null });
 
-            for( const connectedEdge of target.connectedEdges()){
-              const edgeMMRef = connectedEdge.data('MasterModelRef')
-              edgeArray.removeEdge(edgeMMRef)
-              connectedEdge.data({'MasterModelRef': null})
-            } 
+            for (const connectedEdge of target.connectedEdges()) {
+              const edgeMMRef = connectedEdge.data('MasterModelRef');
+              edgeArray.removeEdge(edgeMMRef);
+              connectedEdge.data({ 'MasterModelRef': null });
+            }
             target.remove();
           },
           hasTrailingDivider: true
@@ -157,7 +159,7 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
               currentDiagram.current.diagramJson = cy.json();
               cy.elements().remove();
               cy.json(nextDiagram.diagramJson);
-              currentDiagram.current = nextDiagram;
+              dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: nextDiagram });
               return;
             }
 
@@ -177,10 +179,7 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
             console.log(cy.zoom());
             cy.zoom(1);
 
-            currentDiagram.current = nextDiagram;
-            setRerender(true);
-            setRerender(false);
-
+            dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: nextDiagram });
           },
           hasTrailingDivider: true
         },
@@ -222,7 +221,7 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
     registerPopperHandlers(cy);
     registerContextMenu(cy);
 
-   /* ffff */
+    /* ffff */
 
   }, []);
 
