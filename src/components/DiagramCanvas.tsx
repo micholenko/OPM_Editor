@@ -17,6 +17,7 @@ import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-function
 
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import '../css/general.css';
+import { MasterModelNode } from '../model/master-model';
 
 cytoscape.use(contextMenus);
 cytoscape.use(edgehandles);
@@ -57,7 +58,7 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
 
     cy.on('ehstop', (evt: Event) => {
       if (sourceNode != null && targetNode != null) {
-        let modelEdge, derivedEdge
+        let modelEdge, derivedEdge;
 
         modelEdge = new Edge(
           sourceNode.data('MasterModelRef'),
@@ -129,9 +130,17 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
           tooltipText: 'remove',
           selector: 'node, edge',
           onClickFunction: function (event) {
-            var target = event.target || event.cyTarget;
-            target.remove();
+            const target = event.target;
+            const nodeMMRef = target.data('MasterModelRef'); //to function set deleted and null reference
+            nodeMMRef.deleted = true;
+            target.data({'MasterModelRef': null})
 
+            for( const connectedEdge of target.connectedEdges()){
+              const edgeMMRef = connectedEdge.data('MasterModelRef')
+              edgeArray.removeEdge(edgeMMRef)
+              connectedEdge.data({'MasterModelRef': null})
+            } 
+            target.remove();
           },
           hasTrailingDivider: true
         },
@@ -141,7 +150,7 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
           tooltipText: 'in-zoom',
           selector: 'node',
           onClickFunction: function (event) {
-            var target = event.target || event.cyTarget;
+            var target = event.target;
             let nextDiagram;
             const MMReference = target.data('MasterModelRef');
             if (nextDiagram = MMReference.diagram) { //already inzoomed
@@ -157,7 +166,7 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
             nextDiagram = new DiagramTreeNode(nodeCounter, MMReference); //change counter, remove?
             MMReference.diagram = nextDiagram;
             currentDiagram.current.addChild(nextDiagram);
-            console.log(cy.zoom())
+            console.log(cy.zoom());
             cyAddInzoomedNodes(cy, event);
 
             cyAddConnectedNodes(cy, MMReference);
@@ -165,7 +174,7 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
             let layout = cy.layout(defaultOptions);
             layout.run();
             cy.center();
-            console.log(cy.zoom())
+            console.log(cy.zoom());
             cy.zoom(1);
 
             currentDiagram.current = nextDiagram;
@@ -212,6 +221,8 @@ const DiagramCanvas = ({ currentDiagram, createdEdge, setEdgeSelectionOpen, setR
     registerEdgeEventHandlers(cy);
     registerPopperHandlers(cy);
     registerContextMenu(cy);
+
+   /* ffff */
 
   }, []);
 

@@ -7,6 +7,7 @@ class MasterModelNode {
   type: 'object' | 'process';
   label: string;
   diagram: DiagramTreeNode | null;
+  deleted: boolean;
 
   constructor(id: number, type: 'object' | 'process', label: string) {
     this.id = id;
@@ -15,6 +16,7 @@ class MasterModelNode {
     this.parent = null;
     this.children = [];
     this.diagram = null;
+    this.deleted = false;
 
   }
 
@@ -53,4 +55,4 @@ class MasterModelRoot {
   }
 }
 let masterModelRoot = new MasterModelRoot();
-export { masterModelRoot, MasterModelNode, MasterModelRoot};
+export { masterModelRoot, MasterModelNode, MasterModelRoot };

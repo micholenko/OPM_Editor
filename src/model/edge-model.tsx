@@ -8,6 +8,7 @@ class Edge {
   type: edgeType;
   label: string;
   originalEdge: Edge;
+  deleted: boolean;
 
   constructor(source: MasterModelNode, target: MasterModelNode, type: edgeType, originalEdge: Edge) {
     this.source = source;
@@ -15,6 +16,7 @@ class Edge {
     this.type = type;
     this.label = '';
     this.originalEdge = originalEdge;
+    this.deleted = false;
   }
 }
 
@@ -26,6 +28,13 @@ class EdgeArray {
 
   addEdge(newEdge: Edge) {
     this.edges.push(newEdge);
+  }
+
+  removeEdge(edge: Edge) {
+    var index = this.edges.indexOf(edge);
+    if (index !== -1) {
+      this.edges.splice(index, 1);
+    }
   }
 
   findOutgoingEdges(node: MasterModelNode): Array<Edge> {
@@ -53,7 +62,7 @@ class EdgeArray {
     return returnArray;
   }
 
-  contains(edge:Edge): boolean{
+  contains(edge: Edge): boolean {
     this.edges.forEach(element => {
       if (element === edge)
         return true;

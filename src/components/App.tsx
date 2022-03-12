@@ -21,10 +21,18 @@ function App() {
   return (
     <div className="app">
       <TreeContext.Provider value={{ currentDiagram }}>
-        <TopToolbar />
-        <div className='flex-wrapper'>
-          <LeftSidebar />
-          <DiagramCanvas currentDiagram={currentDiagram} createdEdge={createdEdge} setEdgeSelectionOpen={setEdgeSelectionOpen} setRerender={setRerender} />
+        <div className='flex-vertical-wrapper'>
+          <div className='top-toolbar-wrapper'>
+            <TopToolbar />
+          </div>
+          <div className='flex-horizontal-wrapper'>
+            <div className='left-sidebar-wrapper'>
+              <LeftSidebar />
+            </div>
+            <div className='diagram-canvas-wrapper'>
+              <DiagramCanvas currentDiagram={currentDiagram} createdEdge={createdEdge} setEdgeSelectionOpen={setEdgeSelectionOpen} setRerender={setRerender} />
+            </div>
+          </div>
         </div>
         <EdgeSelectionModal open={edgeSelectionOpen} setOpen={setEdgeSelectionOpen} createdEdge={createdEdge} />
       </TreeContext.Provider>
