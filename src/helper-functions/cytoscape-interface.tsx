@@ -30,12 +30,17 @@ const cyAddEdge = (cy: Core, data: any,  createModelEdge = true) => {
 };
 
 const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'process') => {
+  
   const defaultLabel = type + " " + nodeCounter.toString();
   let data = {
     id: nodeCounter,
     label: defaultLabel,
     type: type,
+    parent: null,
   };
+
+  if (event.target !== cy) //on element
+    data['parent'] = event.target.id()
 
   let pos = event.position;
   let nodePosition = {
