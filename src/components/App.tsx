@@ -10,6 +10,7 @@ import { EdgeSingular, NodeSingular } from 'cytoscape';
 
 export interface StateInterface {
   currentDiagram: DiagramTreeNode,
+  lastCreatedDiagram: DiagramTreeNode,
   showEdgeSelectonModal: boolean,
   currentNode: NodeSingular | null,
   currentEdge: EdgeSingular | null,
@@ -17,6 +18,7 @@ export interface StateInterface {
 
 export const ACTIONS = {
   CHANGE_DIAGRAM: 'change-diagram',
+  INZOOM_DIAGRAM: 'inzoom-diagram',
   EDGE_SELECTION: 'edge-selection',
   CHANGE_CURRENT_NODE: 'change-current-node',
   CHANGE_CURRENT_EDGE: 'change-current-edge',
@@ -27,6 +29,8 @@ function reducer(state, action) {
   switch (action.type) {
     case ACTIONS.CHANGE_DIAGRAM:
       return { ...state, currentDiagram: action.payload };
+    case ACTIONS.INZOOM_DIAGRAM:
+      return { ...state, currentDiagram: action.payload, lastCreatedDiagram: action.payload };
     case ACTIONS.EDGE_SELECTION:
       return { ...state, showEdgeSelectonModal: action.payload };
   }

@@ -133,7 +133,7 @@ const DiagramCanvas = ({ state, dispatch }) => {
             console.log(cy.zoom());
             cy.zoom(1);
 
-            dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: nextDiagram });
+            dispatch({ type: ACTIONS.INZOOM_DIAGRAM, payload: nextDiagram });
           },
           hasTrailingDivider: true
         },

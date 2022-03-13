@@ -68,15 +68,16 @@ const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
 
   useEffect(() => {
     setTreedata([constructTreeJson(initTreeData, diagramTreeRoot)]);
-    setExpandedKeys((prevState) => {
-      const newKey = state.currentDiagram.label;
-      if (!expandedKeys.includes(newKey))
-        return [...prevState, state.currentDiagram.label];
-      else
-        return [...prevState];
-    });
-    console.log(expandedKeys);
-  }, [state.currentDiagram]);
+    if (state.lastCreatedDiagram) {
+      setExpandedKeys((prevState) => {
+        const newKey = state.lastCreatedDiagram.label;
+        if (!expandedKeys.includes(newKey))
+          return [...prevState, newKey];
+        else
+          return [...prevState];
+      });
+    }
+  }, [state.lastCreatedDiagram]);
 
   const onExpand = (expandedKeysValue: React.Key[]) => {
     setExpandedKeys(expandedKeysValue);
