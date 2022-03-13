@@ -1,14 +1,14 @@
 import { MasterModelNode, masterModelRoot, MasterModelRoot} from "./master-model";
 
 class DiagramTreeNode {
-    id: number;
+    label: React.Key;
     parent: DiagramTreeNode | null;
     children: Array<DiagramTreeNode>;
     mainNode: MasterModelNode | MasterModelRoot;
     diagramJson: any;
 
-    constructor(id: number, mainNode: MasterModelNode | MasterModelRoot, parent = null, ) {
-        this.id = id;
+    constructor(label: React.Key = '', mainNode: MasterModelNode | MasterModelRoot, parent = null, ) {
+        this.label = label;
         this.parent = parent;
         this.children = [];
         this.diagramJson = null;
@@ -17,7 +17,13 @@ class DiagramTreeNode {
 
     addChild(child: DiagramTreeNode): number {
         this.children.push(child);
-        child.parent = this; //necesarry?
+        child.parent = this;
+        const index = this.children.length.toString()
+
+        child.label = this.label
+        if (this !== diagramTreeRoot)
+            child.label += '.'
+        child.label += index;
         return 0;
     }
     removeChild(child: DiagramTreeNode): number {
@@ -43,6 +49,6 @@ class DiagramTreeNode {
 }
 
 
-let diagramTreeRoot = new DiagramTreeNode(0, masterModelRoot);
+let diagramTreeRoot = new DiagramTreeNode('SD', masterModelRoot);
 
 export { diagramTreeRoot, DiagramTreeNode };

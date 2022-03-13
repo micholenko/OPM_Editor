@@ -42,7 +42,7 @@ export const edgeCreate = (cy: Core, edgeType: edgeType ) => {
       targetNode.data('MasterModelRef'),
       edgeType,
     );
-    const addedEdge = cy.add({
+    cy.add({
       group: 'edges',
       data: {
         source: sourceNode.data('id'),

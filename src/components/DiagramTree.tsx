@@ -1,7 +1,7 @@
 import { Tree } from 'antd';
-import { Core  } from 'cytoscape';
+import { Core } from 'cytoscape';
 import 'antd/dist/antd.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
 import { ACTIONS, StateInterface } from './App';
 import { cy } from './DiagramCanvas';
@@ -9,7 +9,7 @@ import { cy } from './DiagramCanvas';
 import { cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
 import { MasterModelNode } from '../model/master-model';
 
-import '../css/general.css'
+import '../css/general.css';
 
 
 interface DataNode {
@@ -24,9 +24,38 @@ interface Props {
   dispatch: Function;
 };
 
-const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
-  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>(['SD'])
 
+
+const constructTreeJson = (data: any, parentNode: DiagramTreeNode): DataNode => {
+
+  parentNode.children.forEach((modelNode) => {
+    const newNode: any = {
+      title: modelNode.label,
+      key: modelNode.label,
+      modelReference: modelNode,
+      children: []
+    };
+    const treeNode = constructTreeJson(newNode, modelNode);
+    data.children.push(treeNode);
+  });
+  return data;
+};
+
+const updateNodesFromMM = (cy: Core) => {
+  for (const node of cy.nodes() as any) {
+    const MMRef = node.data('MasterModelRef') as MasterModelNode;
+    if (MMRef.deleted) {
+      node.remove();
+      continue;
+    }
+    node.data({
+      label: MMRef.label,
+      labelWidth: MMRef.label.length * 8.5
+    });
+  }
+};
+
+const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
   let initTreeData: DataNode =
   {
     title: 'SD',
@@ -34,51 +63,28 @@ const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
     modelReference: diagramTreeRoot,
     children: [],
   };
+  const [expandedKeys, setExpandedKeys] = useState<React.Key[]>(['SD']);
+  const [treeData, setTreedata] = useState([initTreeData]);
 
-  const constructTreeJson = (data: any, parentNode: DiagramTreeNode, parentIndex: string): DataNode => {
-    parentNode.children.forEach((modelNode, index) => {
-      index++;
-      let currentIndex;
-      if (parentIndex === '')
-        currentIndex = parentIndex + index;
+  useEffect(() => {
+    setTreedata([constructTreeJson(initTreeData, diagramTreeRoot)]);
+    setExpandedKeys((prevState) => {
+      const newKey = state.currentDiagram.label;
+      if (!expandedKeys.includes(newKey))
+        return [...prevState, state.currentDiagram.label];
       else
-        currentIndex = parentIndex + '.' + index;
-      const title = 'SD' + currentIndex;
-      const newNode: any = {
-        title: title,
-        key: title,
-        modelReference: modelNode,
-        children: []
-      };
-      const treeNode = constructTreeJson(newNode, modelNode, currentIndex);
-      data.children.push(treeNode);
+        return [...prevState];
     });
-    return data;
-  };
-  let treeData = [constructTreeJson(initTreeData, diagramTreeRoot, '')];
+    console.log(expandedKeys);
+  }, [state.currentDiagram]);
 
-  const updateNodesFromMM = (cy: Core) => {
-    for (const node of cy.nodes() as any) {
-      const MMRef = node.data('MasterModelRef') as MasterModelNode;
-      if (MMRef.deleted) {
-        node.remove();
-        continue;
-      }
-      node.data({
-        label: MMRef.label,
-        labelWidth: MMRef.label.length * 8.5
-      });
-    }
+  const onExpand = (expandedKeysValue: React.Key[]) => {
+    setExpandedKeys(expandedKeysValue);
   };
-
 
   const onSelect = (selectedKeys: React.Key[], info: any) => {
-    
-    const currentDiagram = state.currentDiagram
-    if (info.node.selected !== true) {
-      setSelectedKeys(selectedKeys)
-    }
-    else
+    const currentDiagram = state.currentDiagram;
+    if (info.node.selected === true)
       return;
 
     currentDiagram.diagramJson = cy.json();
@@ -90,14 +96,12 @@ const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
     //add extra
 
     if (modelReference === diagramTreeRoot) {
-      console.log('root');
       const nodes = modelReference.mainNode.children;
       nodes.forEach((node: MasterModelNode) => {
         cyAddConnectedNodes(cy, node);
       });
     }
     else {
-      console.log('not root');
       cyAddConnectedNodes(cy, modelReference.mainNode);
     }
 
@@ -110,15 +114,14 @@ const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
   return (
     <Tree
       className='diagram-tree'
-      style={{marginTop: '5px', height: '100%'}}
+      style={{ marginTop: '5px', height: '100%' }}
       height={500} //set to scroll
-      defaultExpandAll
-      defaultExpandParent
       draggable={{ icon: false }}
       showLine={{ showLeafIcon: false }}
-      defaultSelectedKeys={['SD']}
-      selectedKeys={selectedKeys  }
+      selectedKeys={[state.currentDiagram.label]}
       onSelect={onSelect}
+      expandedKeys={expandedKeys}
+      onExpand={onExpand}
       treeData={treeData} />
   );
 };
