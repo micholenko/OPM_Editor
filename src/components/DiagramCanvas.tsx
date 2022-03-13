@@ -13,10 +13,11 @@ import { defaults } from '../options/cytoscape-edge-handles-defaults';
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
 import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
 import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-functions/tippy-elements';
+import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../helper-functions/edge-interface';
+
 
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import '../css/general.css';
-import { MasterModelNode } from '../model/master-model';
 
 import { ACTIONS } from './App';
 
@@ -41,79 +42,32 @@ var defaultOptions = {
 
 const DiagramCanvas = ({ state, dispatch }) => {
 
-  const currentDiagram = useRef()
-  currentDiagram.current = state.currentDiagram
+  const currentDiagram = useRef();
+  currentDiagram.current = state.currentDiagram;
 
   const registerEdgeEventHandlers = (cy: Core) => {
-    let sourceNode = null;
-    let targetNode = null;
 
     let eh = cy.edgehandles(defaults);
 
     cy.on('cxttapstart', 'node', (evt: Event) => {
-      sourceNode = evt.target;
-      sourceNode.addClass('eh-source');
-      eh.start(sourceNode);
+      edgeStartDrawing(eh, evt);
     });
 
     cy.on('cxttapend', 'node', (evt: Event) => {
-      eh.stop();
-    });
-
-    cy.on('ehstop', (evt: Event) => {
-      if (sourceNode != null && targetNode != null) {
-        let modelEdge, derivedEdge;
-
-        modelEdge = new Edge(
-          sourceNode.data('MasterModelRef'),
-          targetNode.data('MasterModelRef'),
-          'consumption'//default
-        );
-        const addedEdge = cy.add({
-          group: 'edges',
-          data: {
-            'source': sourceNode.data('id'),
-            'target': targetNode.data('id'),
-            'MasterModelRef': modelEdge
-          },
-        });
-
-        edgeArray.addEdge(modelEdge);
-        if (sourceNode.isChild()) {
-          derivedEdge = new Edge(
-            sourceNode.parent().data('MasterModelRef'),
-            targetNode.data('MasterModelRef'),
-            'consumption',//default
-          );
-          derivedEdgeArray.addEdge(derivedEdge);
-        }
-        else if (targetNode.isChild()) {
-          derivedEdge = new Edge(
-            sourceNode.data('MasterModelRef'),
-            targetNode.parent().data('MasterModelRef'),
-            'consumption',//default
-          );
-          derivedEdgeArray.addEdge(derivedEdge);
-        }
-
-        targetNode.removeClass('eh-hover');
-
-        dispatch({type: ACTIONS.CHANGE_CREATED_EDGE, payload:addedEdge})
-      }
-      sourceNode = null;
-      targetNode = null;
+      edgeStopDrawing(eh);
     });
 
     cy.on('cxtdragover', 'node', (evt: Event) => {
-      if (sourceNode != null) {
-        targetNode = evt.target;
-        targetNode.addClass('eh-hover');
-      }
+      edgeDragOver(evt);
+
+    });
+    cy.on('cxtdragout', 'node', (evt: Event) => {
+      edgeDragOut(evt);
     });
 
-    cy.on('cxtdragout', 'node', (evt: Event) => {
-      evt.target.removeClass('eh-hover');
-      targetNode = null;
+    cy.on('ehstop', (evt: Event,) => {
+      const callback = () => dispatch({ type: ACTIONS.EDGE_SELECTION, payload: true });
+      edgeCheckValidTargets(callback)
     });
 
   };

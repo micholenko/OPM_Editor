@@ -1,4 +1,3 @@
-// @ts-nocheck
 
 import React from 'react';
 
@@ -6,7 +5,12 @@ import { Modal, List, Card } from "antd";
 import 'antd/dist/antd.css';
 
 import edgeTypes from '../options/edge-types.json';
+import { edgeType } from '../model/edge-model';
 import { ACTIONS, StateInterface } from './App';
+
+import { edgeCreate } from '../helper-functions/edge-interface';
+
+import {cy} from './DiagramCanvas'
 
   interface ModalProps {
   state: StateInterface;
@@ -15,9 +19,7 @@ import { ACTIONS, StateInterface } from './App';
 
 const EdgeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
   const cancelModal = () => {
-    state.createdEdge.remove();
-    state.createdEdge.data({ 'MasterModelRef': null });
-    dispatch({ type: ACTIONS.CHANGE_CREATED_EDGE, payload: null });
+    dispatch({ type: ACTIONS.EDGE_SELECTION, payload: false });
   };
   return (
     <div onContextMenu={(e) => {
@@ -25,8 +27,8 @@ const EdgeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
     }}>
 
       <Modal
-        visible={state.createdEdge}
-        title="Choose edge type"/*  */
+        visible={state.showEdgeSelectonModal}
+        title="Choose edge type"
         onCancel={cancelModal}
         footer={null}
       >
@@ -35,17 +37,15 @@ const EdgeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
             gutter: 12,
             column: 3
           }}
-          dataSource={edgeTypes}
-          renderItem={item => (
+          dataSource={edgeTypes as edgeType[]}
+          renderItem={(edgeType: edgeType)=> (
             <List.Item>
               <Card
                 hoverable
-                title={item}
+                title={edgeType}
                 onClick={() => {
-                  state.createdEdge.data({ type: item });
-                  state.createdEdge.data({ label: '' });
-                  state.createdEdge.data('MasterModelRef').type = item;
-                  dispatch({ type: ACTIONS.CHANGE_CREATED_EDGE, payload: null });
+                  edgeCreate(cy, edgeType);
+                  dispatch({ type: ACTIONS.EDGE_SELECTION, payload: false });
                 }}>
                   picture
               </Card>
