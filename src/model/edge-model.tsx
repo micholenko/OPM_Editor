@@ -3,6 +3,7 @@ import { MasterModelNode } from "./master-model";
 export type edgeType = 'consumption' | 'effect';
 
 class Edge {
+  id: string;
   source: MasterModelNode;
   target: MasterModelNode;
   type: edgeType;
@@ -10,7 +11,8 @@ class Edge {
   originalEdge: Edge | null;
   deleted: boolean;
 
-  constructor(source: MasterModelNode, target: MasterModelNode, type: edgeType, originalEdge: Edge | null = null) {
+  constructor(id: string, source: MasterModelNode, target: MasterModelNode, type: edgeType, originalEdge: Edge | null = null) {
+    this.id = id;
     this.source = source;
     this.target = target;
     this.type = type;

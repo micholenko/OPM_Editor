@@ -1,9 +1,10 @@
 // @ts-nocheck
+import { cy } from "../components/DiagramCanvas";
+
 
 export const eeDefaults = {
   // A function parameter to get bend point positions, should return positions of bend points
   bendPositionsFunction: function (ele) {
-    console.log('bendPosition');
     return ele.data('bendPointPositions ' + ele);
   },
   // A function parameter to get control point positions, should return positions of control points
@@ -12,7 +13,6 @@ export const eeDefaults = {
   },
   // A function parameter to set bend point positions
   bendPointPositionsSetterFunction: function (ele, bendPointPositions) {
-    console.log('bendPositionSetter');
     ele.data('bendPointPositions', bendPointPositions);
   },
   // A function parameter to set bend point positions
@@ -20,7 +20,7 @@ export const eeDefaults = {
     ele.data('controlPointPositions', controlPointPositions);
   },
   // whether to initilize bend and control points on creation of this extension automatically
-  initAnchorsAutomatically: true,
+  initAnchorsAutomatically: false,
   // the classes of those edges that should be ignored
   ignoredClasses: [],
   // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
@@ -33,7 +33,7 @@ export const eeDefaults = {
     its two neighbors and will be automatically removed
     min value = 0 , max value = 20 , values less than 0 are set to 0 and values greater than 20 are set to 20
   */
-  bendRemovalSensitivity: 8,
+  bendRemovalSensitivity: 16,
   // to not show a menu item, pass `false` for corresponding menu item title. Below are 6 menu item titles.
   // title of add bend point menu item (User may need to adjust width of menu items according to length of this option)
   addBendMenuItemTitle: "Add Bend Point",
@@ -51,15 +51,22 @@ export const eeDefaults = {
   },
   // Can be a function or boolean. If `false`, edge reconnection won't be active. If `true`, connects edge to its new source/target as usual. 
   // If a function is given, the function will be called with parameters: newSource.id(), newTarget.id(), edge.data(), location
-  handleReconnectEdge: function (sid, tid, data, location) {
-    console.log(sid);
-    console.log(tid);
+  handleReconnectEdge: function (sourceID, targetID, data, location) {
+    const edgeId = data['id'];
+    const MMRef = data['MasterModelRef'];
+    const edge = cy.getElementById(edgeId);
+
+    edge.remove()
+
+    MMRef.source = cy.getElementById(sourceID).data('MasterModelRef')
+    MMRef.target = cy.getElementById(targetID).data('MasterModelRef')
+
     cy.add(
       {
-        group: 'edges',
         data: {
-          source: sid,
-          target: tid,
+          ...data,
+          source: sourceID,
+          target: targetID,
         },
       }
     );

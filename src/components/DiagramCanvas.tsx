@@ -96,14 +96,20 @@ const DiagramCanvas = ({ state, dispatch }) => {
           selector: 'node, edge',
           onClickFunction: function (event) {
             const target = event.target;
-            const nodeMMRef = target.data('MasterModelRef'); //to function set deleted and null reference
-            nodeMMRef.deleted = true;
-            target.data({ 'MasterModelRef': null });
-
-            for (const connectedEdge of target.connectedEdges()) {
-              const edgeMMRef = connectedEdge.data('MasterModelRef');
-              edgeArray.removeEdge(edgeMMRef);
-              connectedEdge.data({ 'MasterModelRef': null });
+            const elemMMRef = target.data('MasterModelRef'); //to function set deleted and null reference
+            if (target.isNode()) {
+              elemMMRef.deleted = true;
+              target.data({ 'MasterModelRef': null });
+              for (const connectedEdge of target.connectedEdges()) {
+                const edgeMMRef = connectedEdge.data('MasterModelRef');
+                edgeArray.removeEdge(edgeMMRef);
+                connectedEdge.data({ 'MasterModelRef': null });
+              }
+            }
+            else if (target.isEdge()) {
+              elemMMRef.deleted = true;
+              edgeArray.removeEdge(elemMMRef);
+              target.data({ 'MasterModelRef': null });
             }
             target.remove();
           },
@@ -138,10 +144,10 @@ const DiagramCanvas = ({ state, dispatch }) => {
 
             let layout = cy.layout(defaultOptions);
             layout.run();
-            
-            cy.pan({x:500, y: 250});
+
+            cy.pan({ x: 500, y: 250 });
             cy.zoom(1);
-            
+
             dispatch({ type: ACTIONS.INZOOM_DIAGRAM, payload: nextDiagram });
           },
           hasTrailingDivider: true
@@ -183,7 +189,7 @@ const DiagramCanvas = ({ state, dispatch }) => {
     registerContextMenu(cy);
     registerEdgeEventHandlers(cy);
     registerPopperHandlers(cy);
-
+    console.log('reregistered');
     cy.edgeEditing(eeDefaults);
 
   }, []);

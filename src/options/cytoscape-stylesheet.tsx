@@ -52,6 +52,13 @@ export const cyStylesheet = [
     style: {
       'curve-style': 'straight',
       'content': 'data(label)'
+      
+    }
+  },
+  {
+    selector: 'edge[label]',
+    style: {
+      'content': 'data(label)'
     }
   },
 

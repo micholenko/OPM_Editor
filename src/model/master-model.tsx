@@ -1,7 +1,7 @@
 import { DiagramTreeNode } from "./diagram-tree-model";
 
 class MasterModelNode {
-  id: number;
+  id: string;
   parent: MasterModelNode | MasterModelRoot | null;
   children: Array<MasterModelNode>;
   type: 'object' | 'process';
@@ -9,7 +9,7 @@ class MasterModelNode {
   diagram: DiagramTreeNode | null;
   deleted: boolean;
 
-  constructor(id: number, type: 'object' | 'process', label: string) {
+  constructor(id: string, type: 'object' | 'process', label: string) {
     this.id = id;
     this.label = label;
     this.type = type;

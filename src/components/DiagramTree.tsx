@@ -53,6 +53,26 @@ const updateNodesFromMM = (cy: Core) => {
       labelWidth: MMRef.label.length * 8.5
     });
   }
+  
+  //remove unlinked
+  // @ts-ignore
+  for (const edge of cy.edges())
+  {
+    const MMRef = edge.data('MasterModelRef')
+    if (MMRef.deleted || 
+        edge.data('source') != MMRef.source.id  ||
+        edge.data('target') != MMRef.target.id)
+    {
+      edge.remove()
+    }
+    else
+    {
+      edge.data({
+        label: MMRef.label,
+      })
+    }
+  }
+
 };
 
 const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {

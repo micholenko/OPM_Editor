@@ -1,9 +1,23 @@
 import { Core, NodeSingular } from "cytoscape";
 import { edgeArray, Edge, derivedEdgeArray } from '../model/edge-model';
-import {edgeType} from '../model/edge-model'
+import { edgeType } from '../model/edge-model';
+import { eleCounter } from './elementCounter'
 
 let sourceNode: NodeSingular | null = null;
 let targetNode: NodeSingular | null = null;
+
+
+export const cyAddEdge = (cy: Core, data: any) => {
+  if (!('MasterModelRef' in data)) {
+    // @ts-ignore
+    let modelEdge = new Edge(data['id'], sourceNode.data('MasterModelRef'), targetNode.data('MasterModelRef'), data['type']);
+    edgeArray.addEdge(modelEdge);
+    data['MasterModelRef'] = modelEdge;
+  }
+  cy.add({
+    data: data,
+  });
+};
 
 export const edgeStartDrawing = (eh: any, evt: Event) => {
   sourceNode = evt.target as unknown as NodeSingular;
@@ -28,34 +42,27 @@ export const edgeDragOut = (evt: any) => {
 };
 
 export const edgeCheckValidTargets = (callback: Function) => {
-  if (sourceNode != null && targetNode != null){
-    callback()
+  if (sourceNode != null && targetNode != null) {
+    callback();
   }
-}
+};
 
-export const edgeCreate = (cy: Core, edgeType: edgeType ) => {
+export const edgeCreate = (cy: Core, edgeType: edgeType) => {
   if (sourceNode != null && targetNode != null) {
     let modelEdge, derivedEdge;
 
-    modelEdge = new Edge(
-      sourceNode.data('MasterModelRef'),
-      targetNode.data('MasterModelRef'),
-      edgeType,
-    );
-    cy.add({
-      group: 'edges',
-      data: {
+    const data =  {
+        id: eleCounter.value,
         source: sourceNode.data('id'),
         target: targetNode.data('id'),
-        MasterModelRef: modelEdge,
         type: edgeType,
         label: ''
-      },
-    });
+    };
+    cyAddEdge(cy, data);
 
-    edgeArray.addEdge(modelEdge);
     if (sourceNode.isChild()) {
       derivedEdge = new Edge(
+        eleCounter.value,
         sourceNode.parent()[0].data('MasterModelRef'),
         targetNode.data('MasterModelRef'),
         'consumption',//default
@@ -64,6 +71,7 @@ export const edgeCreate = (cy: Core, edgeType: edgeType ) => {
     }
     else if (targetNode.isChild()) {
       derivedEdge = new Edge(
+        eleCounter.value,
         sourceNode.data('MasterModelRef'),
         targetNode.parent()[0].data('MasterModelRef'),
         'consumption',//default
