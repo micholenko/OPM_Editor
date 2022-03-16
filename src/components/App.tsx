@@ -8,6 +8,8 @@ import { DiagramTreeNode, diagramTreeRoot } from '../model/diagram-tree-model';
 import EdgeSelectionModal from './EdgeSelectionModal';
 import { EdgeSingular, NodeSingular } from 'cytoscape';
 
+
+
 export interface StateInterface {
   currentDiagram: DiagramTreeNode,
   lastCreatedDiagram: DiagramTreeNode,

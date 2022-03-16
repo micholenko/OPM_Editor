@@ -3,25 +3,35 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import cytoscape, { CoreGraphManipulation, CoreGraphManipulationExt } from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
-import contextMenus from 'cytoscape-context-menus';
 import coseBilkent from 'cytoscape-cose-bilkent';
 
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
 import { edgeArray, Edge, derivedEdgeArray } from '../model/edge-model';
 
-import { defaults } from '../options/cytoscape-edge-handles-defaults';
+import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
+import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
+
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
 import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
 import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-functions/tippy-elements';
 import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../helper-functions/edge-interface';
-
 
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import '../css/general.css';
 
 import { ACTIONS } from './App';
 
-cytoscape.use(contextMenus);
+var $ = require('jquery');
+var konva = require('konva');
+const contextMenus = require('cytoscape-context-menus');
+var edgeEditing = require('cytoscape-edge-editing');
+const nodeEditing = require('cytoscape-node-editing');
+
+window.$ = $;
+contextMenus(cytoscape, $);
+edgeEditing(cytoscape, $, konva);
+nodeEditing(cytoscape, $, konva);
+
 cytoscape.use(edgehandles);
 cytoscape.use(popper);
 cytoscape.use(coseBilkent);
@@ -47,7 +57,7 @@ const DiagramCanvas = ({ state, dispatch }) => {
 
   const registerEdgeEventHandlers = (cy: Core) => {
 
-    let eh = cy.edgehandles(defaults);
+    let eh = cy.edgehandles(ehDefaults);
 
     cy.on('cxttapstart', 'node', (evt: Event) => {
       edgeStartDrawing(eh, evt);
@@ -67,9 +77,8 @@ const DiagramCanvas = ({ state, dispatch }) => {
 
     cy.on('ehstop', (evt: Event,) => {
       const callback = () => dispatch({ type: ACTIONS.EDGE_SELECTION, payload: true });
-      edgeCheckValidTargets(callback)
+      edgeCheckValidTargets(callback);
     });
-
   };
 
   const registerPopperHandlers = (cy: Core) => {
@@ -129,10 +138,10 @@ const DiagramCanvas = ({ state, dispatch }) => {
 
             let layout = cy.layout(defaultOptions);
             layout.run();
-            cy.center();
-            console.log(cy.zoom());
+            
+            cy.pan({x:500, y: 250});
             cy.zoom(1);
-
+            
             dispatch({ type: ACTIONS.INZOOM_DIAGRAM, payload: nextDiagram });
           },
           hasTrailingDivider: true
@@ -169,13 +178,13 @@ const DiagramCanvas = ({ state, dispatch }) => {
       container: document.getElementById('cy'), // container to render in
       style: cyStylesheet,
       wheelSensitivity: 0.1,
-    });
 
+    });
+    registerContextMenu(cy);
     registerEdgeEventHandlers(cy);
     registerPopperHandlers(cy);
-    registerContextMenu(cy);
 
-    /* ffff */
+    cy.edgeEditing(eeDefaults);
 
   }, []);
 

@@ -107,7 +107,7 @@ const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
     }
 
     updateNodesFromMM(cy);
-    cy.center();
+    //cy.center();
 
     dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: modelReference });
   };
@@ -117,7 +117,7 @@ const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
       className='diagram-tree'
       style={{ marginTop: '5px', height: '100%' }}
       height={500} //set to scroll
-      draggable={{ icon: false }}
+      /* draggable={{ icon: false }} */
       showLine={{ showLeafIcon: false }}
       selectedKeys={[state.currentDiagram.label]}
       onSelect={onSelect}

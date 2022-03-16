@@ -45,13 +45,12 @@ export const cyStylesheet = [
     }
   },
 
-  
-  
+
+
   {
     selector: 'edge',
     style: {
       'curve-style': 'straight',
-      'target-arrow-shape': 'triangle',
       'content': 'data(label)'
     }
   },
@@ -61,7 +60,16 @@ export const cyStylesheet = [
     style: {
       "curve-style": "taxi",
       "taxi-direction": "downward",
-      "taxi-turn": 100,
+      "taxi-turn": '1000px',
+      'source-arrow-shape': 'triangle',
+      'arrow-scale': 3,
+      'source-distance-from-node': '20px',
+      
+      'edge-distances': 'node-position',
+      'taxi-turn-min-distance': '0px',
+
+      'target-endpoint': 'outside-to-node',
+      'source-endpoint': 'outside-to-node'
     }
   },
 

@@ -1,5 +1,5 @@
 import { NodeSingular } from "cytoscape";
-export let defaults = {
+export let ehDefaults = {
   canConnect: function (sourceNode: NodeSingular, targetNode: NodeSingular) {
     // whether an edge can be created between source and target
     return !sourceNode.same(targetNode); // e.g. disallow loops

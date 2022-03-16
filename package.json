@@ -18,11 +18,14 @@
     "@types/react-dom": "^17.0.11",
     "antd": "^4.19.1",
     "cytoscape": "^3.21.0",
-    "cytoscape-context-menus": "^4.1.0",
+    "cytoscape-context-menus": "github:iVis-at-Bilkent/cytoscape.js-context-menus#unstable",
     "cytoscape-cose-bilkent": "^4.1.0",
-    "cytoscape-edge-editing": "^4.0.0",
+    "cytoscape-edge-editing": "github:iVis-at-Bilkent/cytoscape.js-edge-editing#unstable",
     "cytoscape-edgehandles": "^4.0.1",
+    "cytoscape-node-editing": "^4.1.0",
+    "cytoscape-noderesize": "^1.0.0",
     "cytoscape-popper": "^2.0.0",
+    "jquery": "^3.6.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-cytoscapejs": "^1.2.1",
@@ -56,5 +59,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.14"
   }
 }
