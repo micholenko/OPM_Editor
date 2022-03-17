@@ -39,9 +39,12 @@ export const cyStylesheet = [
     }
   },
   {
-    selector: '$node > node',
+    selector: 'node:parent',
     style: {
       'text-valign': 'top',
+      'padding': 8,
+      'min-width': 180,
+      'min-height': 300
     }
   },
   {
