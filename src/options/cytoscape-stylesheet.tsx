@@ -54,7 +54,11 @@ export const cyStylesheet = [
   {
     selector: 'edge[label]',
     style: {
-      'content': 'data(label)'
+      'content': 'data(label)',
+      'text-background-opacity': 0.8,
+      'text-background-color': 'white',
+      'text-background-shape': 'round-rectangle',
+      'text-background-padding': 5
     }
   },
   {
@@ -83,7 +87,7 @@ export const cyStylesheet = [
       'source-distance-from-node': '30px',
       'target-endpoint': 'outside-to-node'
 
-      
+
     }
   },
 
