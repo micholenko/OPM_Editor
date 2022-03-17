@@ -44,15 +44,11 @@ export const cyStylesheet = [
       'text-valign': 'top',
     }
   },
-
-
-
   {
     selector: 'edge',
     style: {
       'curve-style': 'straight',
-      'content': 'data(label)'
-      
+      'arrow-scale': 1.5,
     }
   },
   {
@@ -61,25 +57,6 @@ export const cyStylesheet = [
       'content': 'data(label)'
     }
   },
-
-  {
-    selector: 'edge[type = "aggregation"]',
-    style: {
-      "curve-style": "taxi",
-      "taxi-direction": "downward",
-      "taxi-turn": '1000px',
-      'source-arrow-shape': 'triangle',
-      'arrow-scale': 3,
-      'source-distance-from-node': '20px',
-      
-      'edge-distances': 'node-position',
-      'taxi-turn-min-distance': '0px',
-
-      'target-endpoint': 'outside-to-node',
-      'source-endpoint': 'outside-to-node'
-    }
-  },
-
   {
     selector: 'edge[type = "consumption"]',
     style: {
@@ -92,6 +69,36 @@ export const cyStylesheet = [
     style: {
       'source-arrow-shape': 'triangle',
       'target-arrow-shape': 'triangle'
+    }
+  },
+
+  {
+    selector: 'edge[type = "aggregation"]',
+    style: {
+      "curve-style": "taxi",
+      "taxi-direction": "downward",
+      "taxi-turn": '100px',
+      'source-arrow-shape': 'triangle',
+      'arrow-scale': 3,
+      'source-distance-from-node': '30px',
+      'target-endpoint': 'outside-to-node'
+
+      
+    }
+  },
+
+  {
+    selector: 'edge[type = "instrument"]',
+    style: {
+      'target-arrow-shape': 'circle',
+      'target-arrow-fill': 'hollow',
+    }
+  },
+
+  {
+    selector: 'edge[type = "tagged"]',
+    style: {
+      'target-arrow-shape': 'vee'
     }
   },
 
