@@ -1,0 +1,3 @@
+[submodule "dependencies/cytoscape.js"]
+	path = dependencies/cytoscape.js
+	url = https://github.com/cytoscape/cytoscape.js

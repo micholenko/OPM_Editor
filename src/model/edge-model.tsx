@@ -1,6 +1,6 @@
 import { MasterModelNode } from "./master-model";
 
-export type edgeType = 'consumption' | 'effect';
+export type edgeType = 'consumption' | 'effect' | 'aggregation' | 'instrument' | 'tagged';
 
 class Edge {
   id: string;

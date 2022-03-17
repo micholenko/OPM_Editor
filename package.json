@@ -17,7 +17,7 @@
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
     "antd": "^4.19.1",
-    "cytoscape": "^3.21.0",
+    "cytoscape": "file:dependencies/cytoscape.js",
     "cytoscape-context-menus": "github:iVis-at-Bilkent/cytoscape.js-context-menus#unstable",
     "cytoscape-cose-bilkent": "^4.1.0",
     "cytoscape-edge-editing": "github:iVis-at-Bilkent/cytoscape.js-edge-editing#unstable",

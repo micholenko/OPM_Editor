@@ -80,6 +80,15 @@ export const edgeCreate = (cy: Core, edgeType: edgeType) => {
     }
 
     targetNode.removeClass('eh-hover');
+
+
+
+    if (edgeType === 'aggregation')
+    {
+      targetNode.on('drag', (event) => {
+        // console.log(event.target.position()) 
+      })
+    }
   }
   sourceNode = null;
   targetNode = null;
