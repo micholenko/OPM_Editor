@@ -122,7 +122,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           id: 'in-zoom',
           content: 'in-zoom',
           tooltipText: 'in-zoom',
-          selector: 'node',
+          selector: 'node[type != "state"]',
           onClickFunction: function (event) {
             var target = event.target;
             let nextDiagram;
@@ -163,7 +163,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           content: 'add object',
           tooltipText: 'add object',
           coreAsWell: true,
-          selector: 'node',
+          selector: 'node[type != "state"]',
           onClickFunction: function (event) {
             cyAddNodeFromContextMenu(cy, event, 'object');
           }
@@ -173,9 +173,20 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           content: 'add process',
           tooltipText: 'add process',
           coreAsWell: true,
-          selector: 'node',
+          selector: 'node[type != "state"]',
           onClickFunction: function (event) {
             cyAddNodeFromContextMenu(cy, event, 'process');
+          }
+        },
+
+        {
+          id: 'add-state',
+          content: 'add state',
+          tooltipText: 'add state',
+          coreAsWell: false,
+          selector: 'node[type = "object"]',
+          onClickFunction: function (event) {
+            cyAddNodeFromContextMenu(cy, event, 'state');
           }
         },
 

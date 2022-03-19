@@ -20,7 +20,7 @@ const cyAddNode = (cy: Core, data: any, position = { x: 0, y: 0 }, createModelNo
 };
 
 
-const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'process') => {
+const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'process' | 'state') => {
 
   const counter = eleCounter.value;
   const defaultLabel = type + " " + counter;
@@ -31,9 +31,13 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'proces
     parent: null,
   };
 
-  if (event.target !== cy) //on element
+  if (event.target !== cy) { //on element
     data['parent'] = event.target.id();
-
+    if (type === 'state')
+      event.target.data({hasState: 'true'})
+    else 
+      event.target.data({hasState: 'false'})
+  }
   let pos = event.position;
   let nodePosition = {
     x: pos.x,

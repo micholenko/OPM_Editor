@@ -33,13 +33,33 @@ export const cyStylesheet = [
     }
   },
   {
+    selector: 'node[type = "state"]',
+    style: {
+      'shape': 'round-rectangle',
+      'border-color': 'orange',
+    }
+  },
+  {
     selector: 'node[labelWidth]',
     style: {
       'width': 'data(labelWidth)',
     }
   },
+  
+  
+
   {
-    selector: 'node:parent',
+    selector: '$node > node[type = "state"]',
+    style: {
+      'text-valign': 'top',
+      'padding': 8,
+      'min-width': 100,
+      'min-height': 100
+    }
+  },
+
+  {
+    selector: '$node > node[type = "object"], $node > node[type = "process"]',
     style: {
       'text-valign': 'top',
       'padding': 8,
