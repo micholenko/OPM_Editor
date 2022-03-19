@@ -50,9 +50,10 @@ export const edgeCheckValidTargets = (callback: Function) => {
 export const edgeCreate = (cy: Core, edgeType: edgeType) => {
   if (sourceNode != null && targetNode != null) {
     let modelEdge, derivedEdge;
+    const counter = eleCounter.value;
 
     const data =  {
-        id: eleCounter.value,
+        id: counter,
         source: sourceNode.data('id'),
         target: targetNode.data('id'),
         type: edgeType,
@@ -62,7 +63,7 @@ export const edgeCreate = (cy: Core, edgeType: edgeType) => {
 
     if (sourceNode.isChild()) {
       derivedEdge = new Edge(
-        eleCounter.value,
+        counter,
         sourceNode.parent()[0].data('MasterModelRef'),
         targetNode.data('MasterModelRef'),
         'consumption',//default
@@ -71,7 +72,7 @@ export const edgeCreate = (cy: Core, edgeType: edgeType) => {
     }
     else if (targetNode.isChild()) {
       derivedEdge = new Edge(
-        eleCounter.value,
+        counter,
         sourceNode.data('MasterModelRef'),
         targetNode.parent()[0].data('MasterModelRef'),
         'consumption',//default
@@ -80,8 +81,6 @@ export const edgeCreate = (cy: Core, edgeType: edgeType) => {
     }
 
     targetNode.removeClass('eh-hover');
-
-
 
     if (edgeType === 'aggregation')
     {

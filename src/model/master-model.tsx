@@ -4,12 +4,12 @@ class MasterModelNode {
   id: string;
   parent: MasterModelNode | MasterModelRoot | null;
   children: Array<MasterModelNode>;
-  type: 'object' | 'process';
+  type: 'object' | 'process' | 'state';
   label: string;
   diagram: DiagramTreeNode | null;
   deleted: boolean;
 
-  constructor(id: string, type: 'object' | 'process', label: string) {
+  constructor(id: string, type: 'object' | 'process' | 'state', label: string) {
     this.id = id;
     this.label = label;
     this.type = type;
@@ -17,7 +17,6 @@ class MasterModelNode {
     this.children = [];
     this.diagram = null;
     this.deleted = false;
-
   }
 
   addChild(child: MasterModelNode): number {
