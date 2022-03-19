@@ -22,6 +22,8 @@ import '../css/general.css';
 import { ACTIONS, useReducerProps, PropagationEnum } from './App';
 import { json } from 'stream/consumers';
 
+import { Essence, Affiliation } from '../enums/node-property-enums';
+
 var $ = require('jquery');
 var konva = require('konva');
 const contextMenus = require('cytoscape-context-menus');
@@ -156,8 +158,16 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           },
           hasTrailingDivider: true
         },
-
-
+        {
+          id: 'add-state',
+          content: 'add state',
+          tooltipText: 'add state',
+          coreAsWell: false,
+          selector: 'node[type = "object"]',
+          onClickFunction: function (event) {
+            cyAddNodeFromContextMenu(cy, event, 'state');
+          },
+        },
         {
           id: 'add-object',
           content: 'add object',
@@ -176,18 +186,41 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           selector: 'node[type != "state"]',
           onClickFunction: function (event) {
             cyAddNodeFromContextMenu(cy, event, 'process');
-          }
+          },
+          hasTrailingDivider: true,
         },
-
         {
-          id: 'add-state',
-          content: 'add state',
-          tooltipText: 'add state',
+          id: 'change-essence',
+          content: 'change essence',
           coreAsWell: false,
-          selector: 'node[type = "object"]',
+          selector: 'node[type != "state"]',
           onClickFunction: function (event) {
-            cyAddNodeFromContextMenu(cy, event, 'state');
-          }
+            const node = event.target;
+            const MMRef = node.data('MasterModelRef');
+            if (MMRef.essence === Essence.Informatical)
+              MMRef.essence = Essence.Physical;
+            else
+              MMRef.essence = Essence.Informatical;
+
+            node.data({labelWidth: node.width() + 1})
+          },
+        },
+        {
+          id: 'change-affiliation',
+          content: 'change affiliation',
+          coreAsWell: false,
+          selector: 'node[type != "state"]',
+          onClickFunction: function (event) {
+            const node = event.target;
+            const MMRef = node.data('MasterModelRef');
+            if (MMRef.affiliation === Affiliation.Systemic)
+              MMRef.affiliation = Affiliation.Environmental;
+            else
+              MMRef.affiliation = Affiliation.Systemic;
+
+            node.data({labelWidth: node.width() + 1}) // workaround: width has to be changed or ghost node does not appear
+          },
+          hasTrailingDivider: true,
         },
 
       ]

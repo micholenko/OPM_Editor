@@ -1,19 +1,20 @@
-import { NodeSingular } from "cytoscape";
-
-
-
 export const cyStylesheet = [
   // cytoscape elements
   {
     selector: 'node[label]',
     style: {
-      'content': 'data(label)',
+      'content': 'data(MasterModelRef.label)',
+      'ghost': 'data(MasterModelRef.essence)',
+      'border-style': 'data(MasterModelRef.affiliation)',
       'border-width': '2px',
       'background-color': 'white',
       'width': '70px',
       'height': '45 px',
       'text-valign': 'center',
-      'taxi-direction': 'vertical'
+      'taxi-direction': 'vertical',
+      'ghost-offset-x': 3,
+      'ghost-offset-y': 3,
+      'ghost-opacity': 0.4,
     }
   },
   {
@@ -22,6 +23,8 @@ export const cyStylesheet = [
       'shape': 'rectangle',
       'border-color': 'green',
       'padding': '5 px',
+      
+      
     }
   },
   {
@@ -113,7 +116,6 @@ export const cyStylesheet = [
 
     }
   },
-
   {
     selector: 'edge[type = "instrument"]',
     style: {
@@ -121,15 +123,12 @@ export const cyStylesheet = [
       'target-arrow-fill': 'hollow',
     }
   },
-
   {
     selector: 'edge[type = "tagged"]',
     style: {
       'target-arrow-shape': 'vee'
     }
   },
-
-
   // cytoscape-edge-handles extention
 
   {

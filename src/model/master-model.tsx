@@ -1,5 +1,8 @@
 import { DiagramTreeNode } from "./diagram-tree-model";
 
+import {Essence, Affiliation} from '../enums/node-property-enums'
+
+
 class MasterModelNode {
   id: string;
   parent: MasterModelNode | MasterModelRoot | null;
@@ -8,6 +11,8 @@ class MasterModelNode {
   label: string;
   diagram: DiagramTreeNode | null;
   deleted: boolean;
+  essence: Essence;
+  affiliation: Affiliation;
 
   constructor(id: string, type: 'object' | 'process' | 'state', label: string) {
     this.id = id;
@@ -17,6 +22,8 @@ class MasterModelNode {
     this.children = [];
     this.diagram = null;
     this.deleted = false;
+    this.essence = Essence.Informatical;
+    this.affiliation = Affiliation.Systemic;
   }
 
   addChild(child: MasterModelNode): number {

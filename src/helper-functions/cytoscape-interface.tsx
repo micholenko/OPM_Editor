@@ -9,7 +9,7 @@ let currentMasterModelNode = masterModelRoot;
 
 const cyAddNode = (cy: Core, data: any, position = { x: 0, y: 0 }, parentMMNode: MasterModelNode | MasterModelRoot, createModelNode = true) => {
   if (createModelNode) {
-    let modelNode = new MasterModelNode(data['id'], data['type'], 'label');
+    let modelNode = new MasterModelNode(data['id'], data['type'], data['label']);
     parentMMNode.addChild(modelNode);
     data['MasterModelRef'] = modelNode;
   }
@@ -29,7 +29,6 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'proces
     type: type,
     parent: null,
   };
-  defaultLabel[0] = 'reeee'
 
   let pos = event.position;
   let nodePosition = {
