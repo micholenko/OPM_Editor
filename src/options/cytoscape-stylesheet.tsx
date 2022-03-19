@@ -67,9 +67,21 @@ export const cyStylesheet = [
       'text-valign': 'top',
       'padding': 8,
       'min-width': 180,
-      'min-height': 300
+      'min-height': 300 
     }
   },
+
+  {
+    selector: 'node:parent[type = "process"]',
+    style: {
+      'text-valign': 'top',
+      'padding': 0,
+      'min-width': 0,
+      'min-height': 0
+    }
+  },
+
+
   {
     selector: 'edge',
     style: {
