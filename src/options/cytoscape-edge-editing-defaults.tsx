@@ -56,27 +56,16 @@ export const eeDefaults = {
     const MMRef = data['MasterModelRef'];
     const edge = cy.getElementById(edgeId);
 
-    edge.remove()
 
-    MMRef.source = cy.getElementById(sourceID).data('MasterModelRef')
-    MMRef.target = cy.getElementById(targetID).data('MasterModelRef')
+    MMRef.source = cy.getElementById(sourceID).data('MasterModelRef');
+    MMRef.target = cy.getElementById(targetID).data('MasterModelRef');
 
-    const createdEdge = cy.add(
-      {
-        data: {
-          ...data,
-          source: sourceID,
-          target: targetID,
-        },
-      }
-    );
-
-    if (createdEdge.source().isParent() || createdEdge.target().isParent())
-    {
-      
-    }
+    edge.move({
+      source: sourceID,
+      target: targetID
+    });
   },
-  
+
   // Can be `false` or `true`. If `false`, it won't interact with anchors (control and bend points). If `false`, it won't show any context menu items as well.
   handleAnchors: true,
   // this function checks validation of the edge and its new source/target
