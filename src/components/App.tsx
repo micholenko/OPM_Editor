@@ -8,7 +8,10 @@ import { DiagramTreeNode, diagramTreeRoot } from '../model/diagram-tree-model';
 import EdgeSelectionModal from './EdgeSelectionModal';
 import { EdgeSingular, NodeSingular } from 'cytoscape';
 
-
+export interface useReducerProps {
+  state: StateInterface;
+  dispatch: Function;
+};
 
 export interface StateInterface {
   currentDiagram: DiagramTreeNode,
@@ -16,6 +19,13 @@ export interface StateInterface {
   showEdgeSelectonModal: boolean,
   currentNode: NodeSingular | null,
   currentEdge: EdgeSingular | null,
+  propagation: Propagation
+}
+
+export enum PropagationEnum {
+  None,
+  OneLevel,
+  Complete
 }
 
 export const ACTIONS = {
@@ -24,7 +34,7 @@ export const ACTIONS = {
   EDGE_SELECTION: 'edge-selection',
   CHANGE_CURRENT_NODE: 'change-current-node',
   CHANGE_CURRENT_EDGE: 'change-current-edge',
-
+  CHANGE_PROPAGATION: 'change-propagation'
 };
 
 function reducer(state, action) {
@@ -35,14 +45,20 @@ function reducer(state, action) {
       return { ...state, currentDiagram: action.payload, lastCreatedDiagram: action.payload };
     case ACTIONS.EDGE_SELECTION:
       return { ...state, showEdgeSelectonModal: action.payload };
+    case ACTIONS.CHANGE_PROPAGATION:
+      return {...state, propagation: action.payload}
+    default:
+      console.log('invalid dispatch type')
   }
 }
 
 const reducerInitState = {
   currentDiagram: diagramTreeRoot,
+  lastCreatedDiagram: null,
   createdEdge: null,
   currentNode: null,
   currentEdge: null,
+  propagation: PropagationEnum.OneLevel
 };
 
 function App() {
@@ -51,7 +67,7 @@ function App() {
     <div className="app">
       <div className='flex-vertical-wrapper'>
         <div className='top-toolbar-wrapper'>
-          <TopToolbar />
+          <TopToolbar state={state} dispatch={dispatch}/>
         </div>
         <div className='flex-horizontal-wrapper'>
           <div className='left-sidebar-wrapper'>

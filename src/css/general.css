@@ -1,9 +1,8 @@
 * {
 	box-sizing: border-box;
-	
 }
 
-#root{
+#root {
 	background-color: #dee2e6;
 }
 
@@ -17,24 +16,39 @@
 }
 
 .flex-vertical-wrapper {
-  display: flex;
-  flex-flow: column;
-  height: 100%;
+	display: flex;
+	flex-flow: column;
+	height: 100%;
 }
 
 .top-toolbar-wrapper {
-  flex: 0 0 50px
+	flex: 0 0 50px;
 }
 
 .top-toolbar {
-  height: 100%;
+	height: 100%;
 	border-bottom: 2.5px #adb5bd solid;
+	display: flex;
+	flex-flow: row;
+	justify-content: space-between;
 }
 
+.top-toolbar .app-title {
+	margin-bottom: 0px;
+	margin: 5px;
+	margin-left: 15px;
+}
+
+.propagation-wrapper {
+	display: flex;
+	flex-direction: column;
+	margin: 3px;
+	margin-right: 20px;
+}
 .flex-horizontal-wrapper {
 	flex: 1 1 auto;
 
-  display: flex;
+	display: flex;
 	flex-flow: row;
 }
 
@@ -44,31 +58,28 @@
 }
 
 .diagram-canvas-wrapper {
-  flex: 1 1 auto;
-  overflow: hidden;
+	flex: 1 1 auto;
+	overflow: hidden;
 }
-
 
 .left-sidebar {
 	display: flex;
 	flex-direction: column;
-  height: 100%;
+	height: 100%;
 	border: 2.5px #adb5bd solid;
 	border-top: 0px;
 	border-left: 0px;
 	background-color: #ffffff;
-  /* spatne */
+	/* spatne */
 }
 
 .diagram-canvas {
 	position: relative;
 	text-align: left;
-  height: 100%;
-  width: 100%;
+	height: 100%;
+	width: 100%;
 	background-color: #ffffff;
 }
-
-
 
 .display-block {
 	display: block;

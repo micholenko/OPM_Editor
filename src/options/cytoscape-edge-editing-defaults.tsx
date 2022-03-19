@@ -61,7 +61,7 @@ export const eeDefaults = {
     MMRef.source = cy.getElementById(sourceID).data('MasterModelRef')
     MMRef.target = cy.getElementById(targetID).data('MasterModelRef')
 
-    cy.add(
+    const createdEdge = cy.add(
       {
         data: {
           ...data,
@@ -70,7 +70,13 @@ export const eeDefaults = {
         },
       }
     );
+
+    if (createdEdge.source().isParent() || createdEdge.target().isParent())
+    {
+      
+    }
   },
+  
   // Can be `false` or `true`. If `false`, it won't interact with anchors (control and bend points). If `false`, it won't show any context menu items as well.
   handleAnchors: true,
   // this function checks validation of the edge and its new source/target

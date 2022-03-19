@@ -50,7 +50,7 @@ export const cyStylesheet = [
   {
     selector: 'edge',
     style: {
-      'curve-style': 'straight',
+      'curve-style': 'bezier',
       'arrow-scale': 1.5,
     }
   },

@@ -19,7 +19,8 @@ import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edg
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import '../css/general.css';
 
-import { ACTIONS } from './App';
+import { ACTIONS, useReducerProps, PropagationEnum } from './App';
+import { json } from 'stream/consumers';
 
 var $ = require('jquery');
 var konva = require('konva');
@@ -50,10 +51,12 @@ var defaultOptions = {
   nodeRepulsion: 8500
 };
 
-const DiagramCanvas = ({ state, dispatch }) => {
-
+const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
   const currentDiagram = useRef();
   currentDiagram.current = state.currentDiagram;
+
+  const propagation = useRef();
+  propagation.current = state.propagation;
 
   const registerEdgeEventHandlers = (cy: Core) => {
 
@@ -137,10 +140,11 @@ const DiagramCanvas = ({ state, dispatch }) => {
             nextDiagram = new DiagramTreeNode(nodeCounter, MMReference); //change counter, remove?
             MMReference.diagram = nextDiagram;
             currentDiagram.current.addChild(nextDiagram);
-            console.log(cy.zoom());
+
             cyAddInzoomedNodes(cy, event);
 
-            cyAddConnectedNodes(cy, MMReference);
+            if (propagation.current !== PropagationEnum.None)
+              cyAddConnectedNodes(cy, MMReference);
 
             let layout = cy.layout(defaultOptions);
             layout.run();

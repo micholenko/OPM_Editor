@@ -3,7 +3,7 @@ import { Core } from 'cytoscape';
 import 'antd/dist/antd.css';
 import { useEffect, useState } from 'react';
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
-import { ACTIONS, StateInterface } from './App';
+import { ACTIONS, useReducerProps } from './App';
 import { cy } from './DiagramCanvas';
 
 import { cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
@@ -18,13 +18,6 @@ interface DataNode {
   modelReference: DiagramTreeNode,
   children?: DataNode[];
 }
-
-interface Props {
-  state: StateInterface;
-  dispatch: Function;
-};
-
-
 
 const constructTreeJson = (data: any, parentNode: DiagramTreeNode): DataNode => {
 
@@ -41,7 +34,8 @@ const constructTreeJson = (data: any, parentNode: DiagramTreeNode): DataNode => 
   return data;
 };
 
-const updateNodesFromMM = (cy: Core) => {
+const updateNodesFromMM = (cy: Core, mainNode: MasterModelNode) => {
+  
   for (const node of cy.nodes() as any) {
     const MMRef = node.data('MasterModelRef') as MasterModelNode;
     if (MMRef.deleted) {
@@ -61,9 +55,13 @@ const updateNodesFromMM = (cy: Core) => {
     const MMRef = edge.data('MasterModelRef')
     if (MMRef.deleted || 
         edge.data('source') != MMRef.source.id  ||
-        edge.data('target') != MMRef.target.id)
+        edge.data('target') != MMRef.target.id) //edge.source()
     {
       edge.remove()
+      if (edge.source().data('MasterModelRef') === mainNode)
+        edge.target().remove()
+      else
+        edge.source().remove()
     }
     else
     {
@@ -75,7 +73,7 @@ const updateNodesFromMM = (cy: Core) => {
 
 };
 
-const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
+const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
   let initTreeData: DataNode =
   {
     title: 'SD',
@@ -116,6 +114,7 @@ const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
     cy.json(modelReference.diagramJson);
     //add extra
 
+    updateNodesFromMM(cy, modelReference.mainNode);
     if (modelReference === diagramTreeRoot) {
       const nodes = modelReference.mainNode.children;
       nodes.forEach((node: MasterModelNode) => {
@@ -126,7 +125,6 @@ const DiagramTree: React.FC<Props> = ({ state, dispatch }) => {
       cyAddConnectedNodes(cy, modelReference.mainNode);
     }
 
-    updateNodesFromMM(cy);
     //cy.center();
 
     dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: modelReference });
