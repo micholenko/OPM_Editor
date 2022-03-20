@@ -76,4 +76,4 @@ class EdgeArray {
 
 let edgeArray = new EdgeArray();
 let derivedEdgeArray = new EdgeArray();
-export { edgeArray, derivedEdgeArray, Edge };
+export { edgeArray, derivedEdgeArray, Edge, EdgeArray };

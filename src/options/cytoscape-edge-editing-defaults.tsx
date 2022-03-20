@@ -1,6 +1,5 @@
 // @ts-nocheck
-import { cy } from "../components/DiagramCanvas";
-
+import { edgeReconnect } from "../helper-functions/edge-interface";
 
 export const eeDefaults = {
   // A function parameter to get bend point positions, should return positions of bend points
@@ -52,18 +51,7 @@ export const eeDefaults = {
   // Can be a function or boolean. If `false`, edge reconnection won't be active. If `true`, connects edge to its new source/target as usual. 
   // If a function is given, the function will be called with parameters: newSource.id(), newTarget.id(), edge.data(), location
   handleReconnectEdge: function (sourceID, targetID, data, location) {
-    const edgeId = data['id'];
-    const MMRef = data['MasterModelRef'];
-    const edge = cy.getElementById(edgeId);
-
-
-    MMRef.source = cy.getElementById(sourceID).data('MasterModelRef');
-    MMRef.target = cy.getElementById(targetID).data('MasterModelRef');
-
-    edge.move({
-      source: sourceID,
-      target: targetID
-    });
+    edgeReconnect(sourceID, targetID, data)
   },
 
   // Can be `false` or `true`. If `false`, it won't interact with anchors (control and bend points). If `false`, it won't show any context menu items as well.

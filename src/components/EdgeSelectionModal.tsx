@@ -8,7 +8,7 @@ import edgeTypes from '../options/edge-types.json';
 import { edgeType } from '../model/edge-model';
 import { ACTIONS, StateInterface } from './App';
 
-import { edgeCreate } from '../helper-functions/edge-interface';
+import { edgeCreate, edgeCancel } from '../helper-functions/edge-interface';
 
 import {cy} from './DiagramCanvas'
 
@@ -19,6 +19,7 @@ import {cy} from './DiagramCanvas'
 
 const EdgeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
   const cancelModal = () => {
+    edgeCancel();
     dispatch({ type: ACTIONS.EDGE_SELECTION, payload: false });
   };
   return (
@@ -44,7 +45,7 @@ const EdgeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
                 hoverable
                 title={edgeType}
                 onClick={() => {
-                  edgeCreate(cy, edgeType);
+                  edgeCreate(edgeType);
                   dispatch({ type: ACTIONS.EDGE_SELECTION, payload: false });
                 }}>
                   picture

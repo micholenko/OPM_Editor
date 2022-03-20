@@ -1,6 +1,6 @@
 import { Core, NodeSingular } from "cytoscape";
 import { masterModelRoot, MasterModelNode, MasterModelRoot } from "../model/master-model";
-import { edgeArray, derivedEdgeArray, Edge } from '../model/edge-model';
+import { edgeArray, derivedEdgeArray, Edge, EdgeArray } from '../model/edge-model';
 import { cyAddEdge } from './edge-interface';
 import { eleCounter } from './elementCounter';
 
@@ -46,9 +46,6 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'proces
   }
   else
     cyAddNode(cy, data, nodePosition, currentMasterModelNode);
-
-
-
 };
 
 const cyAddInzoomedNodes = (cy: Core, event: any) => {
@@ -81,12 +78,40 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
 
 };
 
-const cyAddConnectedNodes = (cy: Core, MMNode: MasterModelNode) => {
-  let connectedEdges = edgeArray.findIngoingEdges(MMNode);
-  connectedEdges = connectedEdges.concat(edgeArray.findOutgoingEdges(MMNode));
+const getConnectedEdges = (MMNode: MasterModelNode, array: EdgeArray): Array<Edge> => {
+  let connectedEdges = array.findIngoingEdges(MMNode);
+  connectedEdges = connectedEdges.concat(array.findOutgoingEdges(MMNode));
+  return connectedEdges;
+};
 
+const eleAlreadyIn = (cy: Core, id: string): boolean => {
+  return cy.getElementById(id).length > 0;
+};
+
+const createCyNodeData = (node: MasterModelNode): any => {
+  return {
+    id: node.id,
+    MasterModelRef: node,
+    label: node.label,
+    type: node.type,
+  };
+};
+
+const createCyEdgeData = (edge: Edge): any => {
+  return {
+    id: edge.id,
+    source: edge.source.id,
+    target: edge.target.id,
+    MasterModelRef: edge,
+    label: edge.label,
+    type: edge.type
+  };
+};
+
+const cyAddOriginalEdges = (cy: Core, MMNode: MasterModelNode) => {
+  let connectedEdges = getConnectedEdges(MMNode, edgeArray);
   for (const edge of connectedEdges) {
-    if (cy.getElementById(edge.id.toString()).length > 0) {
+    if (eleAlreadyIn(cy, edge.id)) {
       continue;
     }
     let connectedNode;
@@ -95,70 +120,47 @@ const cyAddConnectedNodes = (cy: Core, MMNode: MasterModelNode) => {
     else
       connectedNode = edge.source;
 
-    if (cy.getElementById(connectedNode.id).length === 0) {
+    if (!eleAlreadyIn(cy, connectedNode.id)) {
       let parent = connectedNode.parent as MasterModelNode;
-      if (connectedNode.type === 'state' && cy.getElementById(parent.id).length === 0) {
-        const nodeData = {
-          id: parent.id,
-          MasterModelRef: parent,
-          label: parent.label,
-          type: parent.type,
-        };
-        cyAddNode(cy, nodeData, { x: 0, y: 0 }, currentMasterModelNode, false);
+      const nodeData = createCyNodeData(connectedNode);
+
+      if (connectedNode.type === 'state' && !eleAlreadyIn(cy, parent.id)) {
+        const nodeParentData = createCyNodeData(parent);
+        cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMasterModelNode, false);
+        nodeData['parent'] = parent ? parent.id : null;
       }
-      const nodeData = {
-        id: connectedNode.id,
-        MasterModelRef: connectedNode,
-        label: connectedNode.label,
-        type: connectedNode.type,
-        parent: parent ? parent.id : null
-      };
       cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent, false);
     }
 
-    const edgeData = {
-      id: edge.id,
-      source: edge.source.id,
-      target: edge.target.id,
-      MasterModelRef: edge,
-      label: edge.label,
-      type: edge.type
-    };
-    cyAddEdge(cy, edgeData);
+    const edgeData = createCyEdgeData(edge);
+    cyAddEdge(edgeData);
   }
+};
 
-  /* connectedEdges = derivedEdgeArray.findIngoingEdges(MMNode);
-  connectedEdges = connectedEdges.concat(derivedEdgeArray.findOutgoingEdges(MMNode));
+const cyAddDerivedEdges = (cy: Core, MMNode: MasterModelNode) => {
+  let connectedEdges = getConnectedEdges(MMNode, derivedEdgeArray);
 
   for (const edge of connectedEdges) {
-    if (cy.getElementById(edge.id).length > 0) {
+    if (eleAlreadyIn(cy, edge.id)) {
       continue;
     }
-
     let connectedNode;
     if (MMNode === edge.source)
       connectedNode = edge.target;
     else
       connectedNode = edge.source;
 
-    if (cy.getElementById(connectedNode.id).length === 0) {
-      const nodeData = {
-        id: connectedNode.id,
-        MasterModelRef: connectedNode,
-        label: connectedNode.label,
-        type: connectedNode.type
-      };
+    if (!eleAlreadyIn(cy, connectedNode.id)) {
+      const nodeData = createCyNodeData(connectedNode);
       cyAddNode(cy, nodeData, { x: 0, y: 0 }, currentMasterModelNode, false);
     }
+    const edgeData = createCyEdgeData(edge);
+    cyAddEdge(edgeData);
+  };
+};
 
-    const edgeData = {
-      source: edge.source.id,
-      target: edge.target.id,
-      MasterModelRef: edge,
-      label: edge.label,
-      type: edge.type
-    };
-    cyAddEdge(cy, edgeData);
-  }; */
+const cyAddConnectedNodes = (cy: Core, MMNode: MasterModelNode) => {
+  cyAddOriginalEdges(cy, MMNode);
+  cyAddDerivedEdges(cy, MMNode);
 };
 export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes, cyAddEdge };

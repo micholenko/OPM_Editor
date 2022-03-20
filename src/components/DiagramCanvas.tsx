@@ -40,7 +40,6 @@ cytoscape.use(popper);
 cytoscape.use(coseBilkent);
 
 let cy: Core;
-let nodeCounter = 0;
 
 var defaultOptions = {
   name: "cose-bilkent",
@@ -139,7 +138,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
 
             currentDiagram.current.diagramJson = cy.json();
             cy.elements().remove();
-            nextDiagram = new DiagramTreeNode(nodeCounter, MMReference); //change counter, remove?
+            nextDiagram = new DiagramTreeNode('', MMReference); //change counter, remove?
             MMReference.diagram = nextDiagram;
             currentDiagram.current.addChild(nextDiagram);
 
