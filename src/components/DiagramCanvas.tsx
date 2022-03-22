@@ -6,7 +6,7 @@ import popper from 'cytoscape-popper';
 import coseBilkent from 'cytoscape-cose-bilkent';
 
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
-import { edgeArray, Edge, derivedEdgeArray } from '../model/edge-model';
+import { edgeArray, MMEdge, derivedEdgeArray } from '../model/edge-model';
 
 import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
 import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
@@ -100,20 +100,32 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           selector: 'node, edge',
           onClickFunction: function (event) {
             const target = event.target;
-            const elemMMRef = target.data('MasterModelRef'); //to function set deleted and null reference
+            const elemMMRef = target.data('MMRef'); //to function set deleted and null reference
             if (target.isNode()) {
               elemMMRef.deleted = true;
-              target.data({ 'MasterModelRef': null });
+              target.data({ 'MMRef': null });
               for (const connectedEdge of target.connectedEdges()) {
-                const edgeMMRef = connectedEdge.data('MasterModelRef');
+                const edgeMMRef = connectedEdge.data('MMRef');
+
+                elemMMRef.deleted = true;
                 edgeArray.removeEdge(edgeMMRef);
-                connectedEdge.data({ 'MasterModelRef': null });
+                if (edgeMMRef.originalEdge !== null) {
+                  edgeArray.removeEdge(elemMMRef.originalEdge);
+                  edgeMMRef.originalEdge.deleted = true;
+                }
+                derivedEdgeArray.removeEdgesById(edgeMMRef.id);
+                connectedEdge.data({ 'MMRef': null });
               }
             }
             else if (target.isEdge()) {
               elemMMRef.deleted = true;
               edgeArray.removeEdge(elemMMRef);
-              target.data({ 'MasterModelRef': null });
+              if (elemMMRef.originalEdge !== null) {
+                edgeArray.removeEdge(elemMMRef.originalEdge);
+                elemMMRef.originalEdge.deleted = true;
+              }
+              derivedEdgeArray.removeEdgesById(elemMMRef.id);
+              target.data({ 'MMRef': null });
             }
             target.remove();
           },
@@ -127,7 +139,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           onClickFunction: function (event) {
             var target = event.target;
             let nextDiagram;
-            const MMReference = target.data('MasterModelRef');
+            const MMReference = target.data('MMRef');
             if (nextDiagram = MMReference.diagram) { //already inzoomed
               currentDiagram.current.diagramJson = cy.json();
               cy.elements().remove();
@@ -195,13 +207,13 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           selector: 'node[type != "state"]',
           onClickFunction: function (event) {
             const node = event.target;
-            const MMRef = node.data('MasterModelRef');
+            const MMRef = node.data('MMRef');
             if (MMRef.essence === Essence.Informatical)
               MMRef.essence = Essence.Physical;
             else
               MMRef.essence = Essence.Informatical;
 
-            node.data({labelWidth: node.width() + 1})
+            node.data({ labelWidth: node.width() + 1 });
           },
         },
         {
@@ -211,13 +223,13 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           selector: 'node[type != "state"]',
           onClickFunction: function (event) {
             const node = event.target;
-            const MMRef = node.data('MasterModelRef');
+            const MMRef = node.data('MMRef');
             if (MMRef.affiliation === Affiliation.Systemic)
               MMRef.affiliation = Affiliation.Environmental;
             else
               MMRef.affiliation = Affiliation.Systemic;
 
-            node.data({labelWidth: node.width() + 1}) // workaround: width has to be changed or ghost node does not appear
+            node.data({ labelWidth: node.width() + 1 }); // workaround: width has to be changed or ghost node does not appear
           },
           hasTrailingDivider: true,
         },

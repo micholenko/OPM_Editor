@@ -7,9 +7,10 @@ import { ACTIONS, useReducerProps } from './App';
 import { cy } from './DiagramCanvas';
 
 import { cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
-import { MasterModelNode } from '../model/master-model';
+import { MMNode } from '../model/master-model';
 
 import '../css/general.css';
+import { MMEdge } from '../model/edge-model';
 
 
 interface DataNode {
@@ -34,40 +35,52 @@ const constructTreeJson = (data: any, parentNode: DiagramTreeNode): DataNode => 
   return data;
 };
 
-const updateNodesFromMM = (cy: Core, mainNode: MasterModelNode) => {
-  
+const getEdgeLabel = (MMRef: MMEdge): string => {
+  if (MMRef.originalEdge)
+    return MMRef.originalEdge.label;
+  else
+    return MMRef.label;
+};
+
+const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
+
   for (const node of cy.nodes() as any) {
-    const MMRef = node.data('MasterModelRef') as MasterModelNode;
+    const MMRef = node.data('MMRef') as MMNode;
     if (MMRef.deleted) {
       node.remove();
       continue;
     }
+
     node.data({
       label: MMRef.label,
       labelWidth: MMRef.label.length * 8.5
     });
   }
-  
+
   //remove unlinked
   // @ts-ignore
-  for (const edge of cy.edges())
-  {
-    const MMRef = edge.data('MasterModelRef')
-    if (MMRef.deleted || 
-        edge.data('source') != MMRef.source.id  ||
-        edge.data('target') != MMRef.target.id) //edge.source()
-    {
-      edge.remove()
-      if (edge.source().data('MasterModelRef') === mainNode)
-        edge.target().remove()
-      else
-        edge.source().remove()
+  for (const edge of cy.edges()) {
+    const MMRef = edge.data('MMRef');
+    if (MMRef.deleted ||
+      edge.data('source') != MMRef.source.id ||
+      edge.data('target') != MMRef.target.id || //edge.source()
+      MMRef.originalEdge?.deleted) {
+      edge.remove();
+
+      const prevSourceId = edge.source().data('MMRef').id;
+      const prevTargetId = edge.target().data('MMRef').id;
+      console.log(prevSourceId !== MMRef.source.id);
+      if (prevSourceId !== MMRef.source.id) {
+        edge.source().remove();
+      }
+      else if (prevTargetId !== MMRef.target.id) {
+        edge.target().remove();
+      }
     }
-    else
-    {
+    else {
       edge.data({
-        label: MMRef.label,
-      })
+        label: getEdgeLabel(MMRef),
+      });
     }
   }
 
@@ -117,7 +130,7 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
     updateNodesFromMM(cy, modelReference.mainNode);
     if (modelReference === diagramTreeRoot) {
       const nodes = modelReference.mainNode.children;
-      nodes.forEach((node: MasterModelNode) => {
+      nodes.forEach((node: MMNode) => {
         cyAddConnectedNodes(cy, node);
       });
     }

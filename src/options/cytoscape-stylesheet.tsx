@@ -3,9 +3,9 @@ export const cyStylesheet = [
   {
     selector: 'node[label]',
     style: {
-      'content': 'data(MasterModelRef.label)',
-      'ghost': 'data(MasterModelRef.essence)',
-      'border-style': 'data(MasterModelRef.affiliation)',
+      'content': 'data(MMRef.label)',
+      'ghost': 'data(MMRef.essence)',
+      'border-style': 'data(MMRef.affiliation)',
       'border-width': '2px',
       'background-color': 'white',
       'width': '70px',

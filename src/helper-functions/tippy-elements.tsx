@@ -39,7 +39,7 @@ const nodeLabelEditingPopup = (cy: Core) => {
           event.preventDefault();
           targetNode.data({ label: newLabel });
           targetNode.data({ labelWidth: newLabel.length * 8.5 });
-          targetNode.data('MasterModelRef').label = newLabel;
+          targetNode.data('MMRef').label = newLabel;
           tip.hide();
           console.log('hello')
           
@@ -64,8 +64,8 @@ const nodeLabelEditingPopup = (cy: Core) => {
 
 const edgeLabelEditingPopup = (cy: Core) => {
   cy.on('dbltap', 'edge', (evt: any) => {
-    const targetNode = evt.target;
-    let ref = targetNode.popperRef();
+    const targetEdge = evt.target;
+    let ref = targetEdge.popperRef();
     let dummyDomEle = document.createElement('div');
     document.body.appendChild(dummyDomEle);
     let tip = tippy(dummyDomEle, { // tippy props:
@@ -80,7 +80,7 @@ const edgeLabelEditingPopup = (cy: Core) => {
 
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
-        inputElement.value = targetNode.data('label');
+        inputElement.value = targetEdge.data('label');
         let newLabel = inputElement.value;
 
         inputElement.addEventListener("change", function (event) {
@@ -97,12 +97,12 @@ const edgeLabelEditingPopup = (cy: Core) => {
         buttonConfirm.innerHTML = "Ok";
         buttonConfirm.addEventListener("click", function (event) {
           event.preventDefault();
-          targetNode.data({ label: newLabel });
-          targetNode.data('MasterModelRef').label = newLabel;
-
+          targetEdge.data({ label: newLabel });
+          const MMRef = targetEdge.data('MMRef')
+          MMRef.label = newLabel;
+          if (MMRef.originalEdge)
+            MMRef.originalEdge.label = newLabel;
           tip.hide();
-
-
         });
         buttonConfirm.classList.add('tippyButton');
 

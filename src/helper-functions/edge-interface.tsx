@@ -1,25 +1,12 @@
 import { Core, NodeSingular } from "cytoscape";
-import { edgeArray, Edge, derivedEdgeArray } from '../model/edge-model';
+import { edgeArray, MMEdge, derivedEdgeArray } from '../model/edge-model';
 import { edgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { cy } from '../components/DiagramCanvas';
+import {cyAddEdge} from './cytoscape-interface'
 
 let sourceNode: NodeSingular | null = null;
 let targetNode: NodeSingular | null = null;
-
-
-export const cyAddEdge = (data: any) => {
-  if (!('MasterModelRef' in data)) {
-    // @ts-ignore
-    let modelEdge = new Edge(data['id'], sourceNode.data('MasterModelRef'), targetNode.data('MasterModelRef'), data['type']);
-    edgeArray.addEdge(modelEdge);
-    data['MasterModelRef'] = modelEdge;
-  }
-  const addedEdge = cy.add({
-    data: data,
-  });
-  return addedEdge
-};
 
 export const edgeStartDrawing = (eh: any, evt: Event) => {
   sourceNode = evt.target as unknown as NodeSingular;
@@ -49,44 +36,50 @@ export const edgeCheckValidTargets = (callback: Function) => {
   }
 };
 
-const addDerivedEdges = (counter: string, type: edgeType, originalEdge: Edge) => {
-  const derivedEdge = new Edge(
-      counter,
-      sourceNode?.data('MasterModelRef'),
-      targetNode?.data('MasterModelRef'),
-      type,
-      originalEdge
-    );
+const addDerivedEdges = (originalEdge: MMEdge) => {
+  const derivedEdge = new MMEdge(
+    originalEdge.id,
+    sourceNode?.data('MMRef'),
+    targetNode?.data('MMRef'),
+    originalEdge.type,
+    originalEdge,
+    originalEdge.label
+  );
+
   if (sourceNode?.isChild() && sourceNode?.data('type') !== 'state') {
-    derivedEdge.source = sourceNode.parent()[0].data('MasterModelRef');
+    derivedEdge.source = sourceNode.parent()[0].data('MMRef');
   }
   else if (targetNode?.isChild() && targetNode?.data('type') !== 'state') {
-    derivedEdge.target = targetNode.parent()[0].data('MasterModelRef');
+    derivedEdge.target = targetNode.parent()[0].data('MMRef');
   }
+
   derivedEdgeArray.addEdge(derivedEdge);
 };
 
-export const edgeCreate = (edgeType: edgeType) => {
-  if (sourceNode != null && targetNode != null) {
-    let modelEdge, derivedEdge;
-    const counter = eleCounter.value;
+export const edgeCreate = (type: edgeType) => {
+  if (sourceNode === null || targetNode === null)
+    return;
 
-    const data = {
-      id: counter,
-      source: sourceNode.data('id'),
-      target: targetNode.data('id'),
-      type: edgeType,
-      label: ''
-    };
-    const addedEdge = cyAddEdge(data);
-
-    if (sourceNode?.isChild() || targetNode?.isChild())
-      addDerivedEdges(counter, edgeType, addedEdge.data('MasterModelRef'));
-
-    targetNode.removeClass('eh-hover');
+  if (type === 'aggregation'){
+    
   }
-  sourceNode = null;
-  targetNode = null;
+  const counter = eleCounter.value;
+  const data = {
+    id: counter,
+    label: '',
+    type: type,
+    MMRef: null,
+    source: sourceNode.data('MMRef'),
+    target: targetNode.data('MMRef'),
+  };
+  const addedEdge = cyAddEdge(cy, data);
+
+  if (sourceNode?.isChild() || targetNode?.isChild())
+    addDerivedEdges(addedEdge.data('MMRef'));
+
+  targetNode.removeClass('eh-hover');
+sourceNode = null;
+targetNode = null;
 };
 
 export const edgeCancel = () => {
@@ -97,14 +90,14 @@ export const edgeCancel = () => {
 
 export const edgeReconnect = (sourceID: string, targetID: string, data: any) => {
   const edgeId = data['id'];
-  const MMRef = data['MasterModelRef'];
+  const MMRef = data['MMRef'];
   const edge = cy.getElementById(edgeId);
 
-  sourceNode = cy.getElementById(sourceID)
-  targetNode = cy.getElementById(targetID)
+  sourceNode = cy.getElementById(sourceID);
+  targetNode = cy.getElementById(targetID);
 
-  MMRef.source = sourceNode?.data('MasterModelRef')
-  MMRef.target = targetNode?.data('MasterModelRef')
+  MMRef.source = sourceNode?.data('MMRef');
+  MMRef.target = targetNode?.data('MMRef');
 
   edge.move({
     source: sourceID,
@@ -112,7 +105,10 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
   });
 
   if (sourceNode?.isChild() || targetNode?.isChild())
-      addDerivedEdges(edgeId, edge.data('type'), MMRef);
+    addDerivedEdges(MMRef);
+
+  console.log(edgeArray);
+  console.log(derivedEdgeArray);
 };
 
 

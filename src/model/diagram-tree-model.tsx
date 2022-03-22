@@ -1,13 +1,13 @@
-import { MasterModelNode, masterModelRoot, MasterModelRoot} from "./master-model";
+import { MMNode, masterModelRoot, MMRoot} from "./master-model";
 
 class DiagramTreeNode {
     label: React.Key;
     parent: DiagramTreeNode | null;
     children: Array<DiagramTreeNode>;
-    mainNode: MasterModelNode | MasterModelRoot;
+    mainNode: MMNode | MMRoot;
     diagramJson: any;
 
-    constructor(label: React.Key = '', mainNode: MasterModelNode | MasterModelRoot, parent = null, ) {
+    constructor(label: React.Key = '', mainNode: MMNode | MMRoot, parent = null, ) {
         this.label = label;
         this.parent = parent;
         this.children = [];

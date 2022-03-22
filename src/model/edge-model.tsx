@@ -1,46 +1,55 @@
-import { MasterModelNode } from "./master-model";
+import { MMNode } from "./master-model";
 
 export type edgeType = 'consumption' | 'effect' | 'aggregation' | 'instrument' | 'tagged';
 
-class Edge {
+class MMEdge {
   id: string;
-  source: MasterModelNode;
-  target: MasterModelNode;
+  source: MMNode;
+  target: MMNode;
   type: edgeType;
   label: string;
-  originalEdge: Edge | null;
+  originalEdge: MMEdge | null;
+  derivedEdges: Array<MMEdge>
   deleted: boolean;
 
-  constructor(id: string, source: MasterModelNode, target: MasterModelNode, type: edgeType, originalEdge: Edge | null = null) {
+  constructor(id: string, source: MMNode, target: MMNode, type: edgeType, originalEdge: MMEdge | null = null, label: string = '') {
     this.id = id;
     this.source = source;
     this.target = target;
     this.type = type;
-    this.label = '';
+    this.label = label;
     this.originalEdge = originalEdge;
+    this.derivedEdges = []
     this.deleted = false;
   }
 }
 
 class EdgeArray {
-  edges: Array<Edge>;
+  edges: Array<MMEdge>;
   constructor() {
     this.edges = [];
   }
 
-  addEdge(newEdge: Edge) {
+  addEdge(newEdge: MMEdge) {
     this.edges.push(newEdge);
   }
 
-  removeEdge(edge: Edge) {
+  removeEdge(edge: MMEdge) {
     var index = this.edges.indexOf(edge);
     if (index !== -1) {
       this.edges.splice(index, 1);
     }
   }
 
-  findOutgoingEdges(node: MasterModelNode): Array<Edge> {
-    let returnArray: Array<Edge> = [];
+  removeEdgesById(id: string) {
+    for (const edge of this.edges){
+      if (edge.id === id)
+        this.removeEdge(edge)
+    }
+  }
+
+  findOutgoingEdges(node: MMNode): Array<MMEdge> {
+    let returnArray: Array<MMEdge> = [];
     this.edges.forEach(edge => {
       if (edge.source == node)
         returnArray.push(edge);
@@ -48,8 +57,8 @@ class EdgeArray {
     return returnArray;
   };
 
-  findIngoingEdges(node: MasterModelNode): Array<Edge> {
-    let returnArray: Array<Edge> = [];
+  findIngoingEdges(node: MMNode): Array<MMEdge> {
+    let returnArray: Array<MMEdge> = [];
     this.edges.forEach(edge => {
       if (edge.target == node)
         returnArray.push(edge);
@@ -57,14 +66,14 @@ class EdgeArray {
     return returnArray;
   };
 
-  findRelatedEdges(node: MasterModelNode): Array<Edge> {
-    let returnArray: Array<Edge> = [];
+  findRelatedEdges(node: MMNode): Array<MMEdge> {
+    let returnArray: Array<MMEdge> = [];
     returnArray.concat(this.findIngoingEdges(node));
     returnArray.concat(this.findOutgoingEdges(node));
     return returnArray;
   }
 
-  contains(edge: Edge): boolean {
+  contains(edge: MMEdge): boolean {
     this.edges.forEach(element => {
       if (element === edge)
         return true;
@@ -76,4 +85,4 @@ class EdgeArray {
 
 let edgeArray = new EdgeArray();
 let derivedEdgeArray = new EdgeArray();
-export { edgeArray, derivedEdgeArray, Edge, EdgeArray };
+export { edgeArray, derivedEdgeArray, MMEdge, EdgeArray };

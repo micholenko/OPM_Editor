@@ -3,10 +3,10 @@ import { DiagramTreeNode } from "./diagram-tree-model";
 import {Essence, Affiliation} from '../enums/node-property-enums'
 
 
-class MasterModelNode {
+class MMNode {
   id: string;
-  parent: MasterModelNode | MasterModelRoot | null;
-  children: Array<MasterModelNode>;
+  parent: MMNode | MMRoot | null;
+  children: Array<MMNode>;
   type: 'object' | 'process' | 'state';
   label: string;
   diagram: DiagramTreeNode | null;
@@ -26,12 +26,12 @@ class MasterModelNode {
     this.affiliation = Affiliation.Systemic;
   }
 
-  addChild(child: MasterModelNode): number {
+  addChild(child: MMNode): number {
     this.children.push(child);
     child.parent = this;
     return 0;
   }
-  removeChild(child: MasterModelNode): number {
+  removeChild(child: MMNode): number {
     let index = this.children.indexOf(child);
     if (index !== -1) {
       this.children.splice(index, 1);
@@ -49,16 +49,16 @@ class MasterModelNode {
   }
 }
 
-class MasterModelRoot {
-  children: Array<MasterModelNode>;
+class MMRoot {
+  children: Array<MMNode>;
 
   constructor() {
     this.children = [];
   }
 
-  addChild(child: MasterModelNode) {
+  addChild(child: MMNode) {
     this.children.push(child);
   }
 }
-let masterModelRoot = new MasterModelRoot();
-export { masterModelRoot, MasterModelNode, MasterModelRoot };
+let masterModelRoot = new MMRoot();
+export { masterModelRoot, MMNode, MMRoot };
