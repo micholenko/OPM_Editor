@@ -80,8 +80,6 @@ export const cyStylesheet = [
       'min-height': 0
     }
   },
-
-
   {
     selector: 'edge',
     style: {
@@ -141,6 +139,15 @@ export const cyStylesheet = [
       'target-arrow-shape': 'vee'
     }
   },
+
+  {
+    selector: 'node[display], edge[display]',
+    style: {
+      'display': 'data(display)'
+    }
+  },
+
+
   // cytoscape-edge-handles extention
 
   {

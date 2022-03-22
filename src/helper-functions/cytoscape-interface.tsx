@@ -1,7 +1,8 @@
-import { Core, NodeSingular } from "cytoscape";
+import { Core, EdgeCollection, EdgeSingular, NodeSingular } from "cytoscape";
 import { masterModelRoot, MMNode, MMRoot, NodeType } from "../model/master-model";
 import { edgeArray, derivedEdgeArray, MMEdge, EdgeArray, EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
+import { ACTIONS } from "../components/App";
 
 
 let currentMMNode = masterModelRoot;
@@ -12,7 +13,7 @@ interface NodeData {
   label: string,
   type: NodeType,
   MMRef: MMNode | null,
-  parent: string
+  parent: string;
 }
 
 interface EdgeData {
@@ -24,7 +25,8 @@ interface EdgeData {
   target: MMNode,
 }
 
-const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot ) => {
+const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot) => {
+  console.log(data)
   if (data['MMRef'] === null) {
     let modelNode = new MMNode(data['id'], data['type'], data['label']);
     parentMMNode.addChild(modelNode);
@@ -54,6 +56,44 @@ const cyAddEdge = (cy: Core, data: EdgeData) => {
 
   });
   return addedEdge;
+};
+
+const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
+  const MMRef = node.data('MMRef') as MMNode;
+
+  if (MMRef.diagram !== null){
+    const diagram = MMRef.diagram
+    diagram.parent?.removeChild(diagram)
+    dispatch({type: ACTIONS.UPDATE_TREE})
+  }
+
+  MMRef.deleted = true;
+  node.data({ 'MMRef': null });
+  for (const connectedEdge of node.connectedEdges().toArray()) {
+    const edgeMMRef = connectedEdge.data('MMRef');
+
+    MMRef.deleted = true;
+    edgeArray.removeEdge(edgeMMRef);
+    if (edgeMMRef.originalEdge !== null) {
+      edgeArray.removeEdge(edgeMMRef.originalEdge);
+      edgeMMRef.originalEdge.deleted = true;
+    }
+    derivedEdgeArray.removeEdgesById(edgeMMRef.id);
+    connectedEdge.data({ 'MMRef': null });
+  }
+};
+
+const removeEdgeContextMenu = (edge: EdgeSingular) => {
+  const MMRef = edge.data('MMRef');
+
+  MMRef.deleted = true;
+  edgeArray.removeEdge(MMRef);
+  if (MMRef.originalEdge !== null) {
+    edgeArray.removeEdge(MMRef.originalEdge);
+    MMRef.originalEdge.deleted = true;
+  }
+  derivedEdgeArray.removeEdgesById(MMRef.id);
+  edge.data({ 'MMRef': null });
 };
 
 const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType) => {
@@ -93,6 +133,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
 
   // add inzoomed node to new diagram
   cyAddNode(cy, inzoomedNode.data(), { x: 0, y: 0 }, currentMMNode);
+  
 
   let MMRef = inzoomedNode.data('MMRef') as MMNode;
   // add 2 default subnodes
@@ -102,7 +143,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     label: type + ' ' + counter,
     parent: parentId,
     type: type,
-    MMRef: MMRef
+    MMRef: null
   };
   cyAddNode(cy, data, { x: 50, y: 50 }, MMRef);
 
@@ -112,7 +153,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     label: type + ' ' + counter,
     parent: parentId,
     type: type,
-    MMRef: MMRef
+    MMRef: null
   };
   cyAddNode(cy, data, { x: 150, y: 150 }, MMRef);
 
@@ -207,4 +248,4 @@ const cyAddConnectedNodes = (cy: Core, MMNode: MMNode) => {
   cyAddOriginalEdges(cy, MMNode);
   cyAddDerivedEdges(cy, MMNode);
 };
-export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes, cyAddEdge };
+export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes, cyAddEdge, removeNodeContextMenu, removeEdgeContextMenu };

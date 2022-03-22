@@ -19,7 +19,8 @@ export interface StateInterface {
   showEdgeSelectonModal: boolean,
   currentNode: NodeSingular | null,
   currentEdge: EdgeSingular | null,
-  propagation: Propagation
+  propagation: Propagation,
+  timestamp: Date
 }
 
 export enum PropagationEnum {
@@ -34,7 +35,8 @@ export const ACTIONS = {
   EDGE_SELECTION: 'edge-selection',
   CHANGE_CURRENT_NODE: 'change-current-node',
   CHANGE_CURRENT_EDGE: 'change-current-edge',
-  CHANGE_PROPAGATION: 'change-propagation'
+  CHANGE_PROPAGATION: 'change-propagation',
+  UPDATE_TREE: 'update-tree',
 };
 
 function reducer(state, action) {
@@ -47,6 +49,8 @@ function reducer(state, action) {
       return { ...state, showEdgeSelectonModal: action.payload };
     case ACTIONS.CHANGE_PROPAGATION:
       return {...state, propagation: action.payload}
+    case ACTIONS.UPDATE_TREE:
+      return {...state, timestamp: new Date()}
     default:
       console.log('invalid dispatch type')
   }

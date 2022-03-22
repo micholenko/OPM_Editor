@@ -1,51 +1,70 @@
-import { MMNode, masterModelRoot, MMRoot} from "./master-model";
+import { MMNode, masterModelRoot, MMRoot } from "./master-model";
 
 class DiagramTreeNode {
-    label: React.Key;
-    parent: DiagramTreeNode | null;
-    children: Array<DiagramTreeNode>;
-    mainNode: MMNode | MMRoot;
-    diagramJson: any;
+  label: React.Key;
+  labelId: number;
+  parent: DiagramTreeNode | null;
+  children: Array<DiagramTreeNode>;
+  mainNode: MMNode | MMRoot;
+  diagramJson: any;
 
-    constructor(label: React.Key = '', mainNode: MMNode | MMRoot, parent = null, ) {
-        this.label = label;
-        this.parent = parent;
-        this.children = [];
-        this.diagramJson = null;
-        this.mainNode = mainNode;
-    }
+  constructor(label: React.Key = '', mainNode: MMNode | MMRoot, parent = null,) {
+    this.label = label;
+    this.labelId = 0;
+    this.parent = parent;
+    this.children = [];
+    this.diagramJson = null;
+    this.mainNode = mainNode;
+  }
 
-    addChild(child: DiagramTreeNode): number {
-        this.children.push(child);
-        child.parent = this;
-        const index = this.children.length.toString()
+  _findLowestAvailableId(): number {
+    const sortedChildren = this.children.sort((a, b) => {
+      return a.labelId - b.labelId;
+    });
+    let index = 1;
+    for (const child of sortedChildren) {
+      console.log(`${index} ${child.label}`);
+      if (child.labelId !== index)
+        break;
+      index++;
+    }
+    return index;
+  }
 
-        child.label = this.label
-        if (this !== diagramTreeRoot)
-            child.label += '.'
-        child.label += index;
-        return 0;
-    }
-    removeChild(child: DiagramTreeNode): number {
-        let index = this.children.indexOf(child);
-        if (index !== -1) {
-            this.children.splice(index, 1);
-            return 0;
-        }
-        return 1;
-    }
+  addChild(child: DiagramTreeNode) {
+    child.parent = this;
 
-    update(): void{
-        
-    }
+    const index = this._findLowestAvailableId();
+    child.labelId = index;
 
-    get isLeaf() {
-        return this.children.length === 0;
-    }
 
-    get hasChildren() {
-        return !this.isLeaf;
+    child.label = this.label;
+    if (this !== diagramTreeRoot)
+      child.label += '.';
+    child.label += index.toString();
+
+    this.children.push(child);
+
+  }
+  removeChild(child: DiagramTreeNode) {
+    let index = this.children.indexOf(child);
+    if (index !== -1) {
+      this.children.splice(index, 1);
+      return 0;
     }
+  }
+
+  update(): void {
+
+  }
+
+  get isLeaf() {
+    return this.children.length === 0;
+  }
+
+  get hasChildren() {
+    return !this.isLeaf;
+  }
 }
 
 

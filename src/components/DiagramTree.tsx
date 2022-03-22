@@ -110,6 +110,11 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
     }
   }, [state.lastCreatedDiagram]);
 
+  useEffect(() => {
+    setTreedata([constructTreeJson(initTreeData, diagramTreeRoot)]);
+  }, [state.timestamp])
+  
+
   const onExpand = (expandedKeysValue: React.Key[]) => {
     setExpandedKeys(expandedKeysValue);
   };

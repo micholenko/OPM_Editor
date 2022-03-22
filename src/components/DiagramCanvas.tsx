@@ -12,7 +12,7 @@ import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
 import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
 
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
-import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
+import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes, removeEdgeContextMenu, removeNodeContextMenu } from '../helper-functions/cytoscape-interface';
 import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-functions/tippy-elements';
 import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../helper-functions/edge-interface';
 
@@ -94,38 +94,27 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
     cy.contextMenus({
       menuItems: [
         {
+          id: 'hide',
+          content: 'hide',
+          tooltipText: 'hide',
+          selector: 'node, edge',
+          onClickFunction: function (event) {
+            const target = event.target;
+            target.data({ display: 'none' });
+          },
+        },
+        {
           id: 'remove',
           content: 'remove',
           tooltipText: 'remove',
           selector: 'node, edge',
           onClickFunction: function (event) {
             const target = event.target;
-            const elemMMRef = target.data('MMRef'); //to function set deleted and null reference
             if (target.isNode()) {
-              elemMMRef.deleted = true;
-              target.data({ 'MMRef': null });
-              for (const connectedEdge of target.connectedEdges()) {
-                const edgeMMRef = connectedEdge.data('MMRef');
-
-                elemMMRef.deleted = true;
-                edgeArray.removeEdge(edgeMMRef);
-                if (edgeMMRef.originalEdge !== null) {
-                  edgeArray.removeEdge(elemMMRef.originalEdge);
-                  edgeMMRef.originalEdge.deleted = true;
-                }
-                derivedEdgeArray.removeEdgesById(edgeMMRef.id);
-                connectedEdge.data({ 'MMRef': null });
-              }
+              removeNodeContextMenu(target, dispatch);
             }
             else if (target.isEdge()) {
-              elemMMRef.deleted = true;
-              edgeArray.removeEdge(elemMMRef);
-              if (elemMMRef.originalEdge !== null) {
-                edgeArray.removeEdge(elemMMRef.originalEdge);
-                elemMMRef.originalEdge.deleted = true;
-              }
-              derivedEdgeArray.removeEdgesById(elemMMRef.id);
-              target.data({ 'MMRef': null });
+              removeEdgeContextMenu(target);
             }
             target.remove();
           },
@@ -230,6 +219,17 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
               MMRef.affiliation = Affiliation.Systemic;
 
             node.data({ labelWidth: node.width() + 1 }); // workaround: width has to be changed or ghost node does not appear
+          },
+          hasTrailingDivider: true,
+        },
+        {
+          id: 'show-hidden',
+          content: 'show hidden',
+          coreAsWell: true,
+          onClickFunction: function (event) {
+            for (const element of cy.elements()) {
+              element.data({ display: 'element' });
+            }
           },
           hasTrailingDivider: true,
         },
