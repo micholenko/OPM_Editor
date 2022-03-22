@@ -1,6 +1,6 @@
 import { Core, NodeSingular } from "cytoscape";
 import { edgeArray, MMEdge, derivedEdgeArray } from '../model/edge-model';
-import { edgeType } from '../model/edge-model';
+import { EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { cy } from '../components/DiagramCanvas';
 import {cyAddEdge} from './cytoscape-interface'
@@ -56,7 +56,7 @@ const addDerivedEdges = (originalEdge: MMEdge) => {
   derivedEdgeArray.addEdge(derivedEdge);
 };
 
-export const edgeCreate = (type: edgeType) => {
+export const edgeCreate = (type: EdgeType) => {
   if (sourceNode === null || targetNode === null)
     return;
 

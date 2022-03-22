@@ -5,7 +5,7 @@ import { Modal, List, Card } from "antd";
 import 'antd/dist/antd.css';
 
 import edgeTypes from '../options/edge-types.json';
-import { edgeType } from '../model/edge-model';
+import { EdgeType } from '../model/edge-model';
 import { ACTIONS, StateInterface } from './App';
 
 import { edgeCreate, edgeCancel } from '../helper-functions/edge-interface';
@@ -38,14 +38,14 @@ const EdgeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
             gutter: 12,
             column: 3
           }}
-          dataSource={edgeTypes as edgeType[]}
-          renderItem={(edgeType: edgeType)=> (
+          dataSource={edgeTypes as EdgeType[]}
+          renderItem={(EdgeType: EdgeType)=> (
             <List.Item>
               <Card
                 hoverable
-                title={edgeType}
+                title={EdgeType}
                 onClick={() => {
-                  edgeCreate(edgeType);
+                  edgeCreate(EdgeType);
                   dispatch({ type: ACTIONS.EDGE_SELECTION, payload: false });
                 }}>
                   picture

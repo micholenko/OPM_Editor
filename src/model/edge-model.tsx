@@ -1,25 +1,31 @@
 import { MMNode } from "./master-model";
 
-export type edgeType = 'consumption' | 'effect' | 'aggregation' | 'instrument' | 'tagged';
+export enum EdgeType {
+  Consumption = 'consumption',
+  Effect = 'effect',
+  Aggregation = 'aggregation',
+  Instrument = 'instrument',
+  Tagged = 'tagged',
+};
 
 class MMEdge {
   id: string;
   source: MMNode;
   target: MMNode;
-  type: edgeType;
+  type: EdgeType;
   label: string;
   originalEdge: MMEdge | null;
-  derivedEdges: Array<MMEdge>
+  derivedEdges: Array<MMEdge>;
   deleted: boolean;
 
-  constructor(id: string, source: MMNode, target: MMNode, type: edgeType, originalEdge: MMEdge | null = null, label: string = '') {
+  constructor(id: string, source: MMNode, target: MMNode, type: EdgeType, originalEdge: MMEdge | null = null, label: string = '') {
     this.id = id;
     this.source = source;
     this.target = target;
     this.type = type;
     this.label = label;
     this.originalEdge = originalEdge;
-    this.derivedEdges = []
+    this.derivedEdges = [];
     this.deleted = false;
   }
 }
@@ -42,9 +48,9 @@ class EdgeArray {
   }
 
   removeEdgesById(id: string) {
-    for (const edge of this.edges){
+    for (const edge of this.edges) {
       if (edge.id === id)
-        this.removeEdge(edge)
+        this.removeEdge(edge);
     }
   }
 

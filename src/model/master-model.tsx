@@ -2,6 +2,11 @@ import { DiagramTreeNode } from "./diagram-tree-model";
 
 import {Essence, Affiliation} from '../enums/node-property-enums'
 
+enum NodeType {
+  Object = 'object',
+  Process = 'process',
+  State = 'state',
+}
 
 class MMNode {
   id: string;
@@ -61,4 +66,4 @@ class MMRoot {
   }
 }
 let masterModelRoot = new MMRoot();
-export { masterModelRoot, MMNode, MMRoot };
+export { masterModelRoot, MMNode, MMRoot, NodeType};

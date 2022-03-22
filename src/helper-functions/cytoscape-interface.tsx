@@ -1,13 +1,31 @@
 import { Core, NodeSingular } from "cytoscape";
-import { masterModelRoot, MMNode, MMRoot } from "../model/master-model";
-import { edgeArray, derivedEdgeArray, MMEdge, EdgeArray, edgeType } from '../model/edge-model';
+import { masterModelRoot, MMNode, MMRoot, NodeType } from "../model/master-model";
+import { edgeArray, derivedEdgeArray, MMEdge, EdgeArray, EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 
 
 let currentMMNode = masterModelRoot;
 
-const cyAddNode = (cy: Core, data: any, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot, createModelNode = true) => {
-  if (createModelNode) {
+
+interface NodeData {
+  id: string,
+  label: string,
+  type: NodeType,
+  MMRef: MMNode | null,
+  parent: string
+}
+
+interface EdgeData {
+  id: string,
+  label: string,
+  type: EdgeType,
+  MMRef: MMEdge | null,
+  source: MMNode,
+  target: MMNode,
+}
+
+const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot ) => {
+  if (data['MMRef'] === null) {
     let modelNode = new MMNode(data['id'], data['type'], data['label']);
     parentMMNode.addChild(modelNode);
     data['MMRef'] = modelNode;
@@ -18,16 +36,9 @@ const cyAddNode = (cy: Core, data: any, position = { x: 0, y: 0 }, parentMMNode:
   });
 };
 
-interface edgeData {
-  id: string,
-  label: string,
-  type: edgeType,
-  MMRef: MMEdge | null,
-  source: MMNode,
-  target: MMNode,
-}
 
-const cyAddEdge = (cy: Core, data: edgeData) => {
+
+const cyAddEdge = (cy: Core, data: EdgeData) => {
   if (data['MMRef'] === null) {
     let modelEdge = new MMEdge(data['id'], data['source'], data['target'], data['type']);
     edgeArray.addEdge(modelEdge);
@@ -36,7 +47,7 @@ const cyAddEdge = (cy: Core, data: edgeData) => {
 
   const addedEdge = cy.add({
     data: {
-      ...data, 
+      ...data,
       source: data['source'].id,
       target: data['target'].id,
     }
@@ -45,7 +56,7 @@ const cyAddEdge = (cy: Core, data: edgeData) => {
   return addedEdge;
 };
 
-const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'process' | 'state') => {
+const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType) => {
 
   const counter = eleCounter.value;
   const defaultLabel = [type + " " + counter];
@@ -53,7 +64,8 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'proces
     id: counter,
     label: defaultLabel[0],
     type: type,
-    parent: null,
+    parent: '',
+    MMRef: null,
   };
 
   let pos = event.position;
@@ -63,7 +75,7 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'proces
   };
 
   if (event.target !== cy) { //on element
-    data['parent'] = event.target.id();
+    data['parent'] = event.target.id() as string;
     if (type === 'state')
       event.target.data({ hasState: 'true' });
     else
@@ -76,22 +88,23 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: 'object' | 'proces
 
 const cyAddInzoomedNodes = (cy: Core, event: any) => {
   let inzoomedNode = event.target;
-  let type = inzoomedNode.data('type');
-  let parentId = inzoomedNode.id();
+  let type = inzoomedNode.data('type') as NodeType;
+  let parentId = inzoomedNode.id() as string;
 
   // add inzoomed node to new diagram
-  cyAddNode(cy, inzoomedNode.data(), { x: 0, y: 0 }, currentMMNode, false);
+  cyAddNode(cy, inzoomedNode.data(), { x: 0, y: 0 }, currentMMNode);
 
-  currentMMNode = inzoomedNode.data('MMRef');
+  let MMRef = inzoomedNode.data('MMRef') as MMNode;
   // add 2 default subnodes
   let counter = eleCounter.value;
   let data = {
     id: counter,
     label: type + ' ' + counter,
-    parent: inzoomedNode.id(),
+    parent: parentId,
     type: type,
+    MMRef: MMRef
   };
-  cyAddNode(cy, data, { x: 50, y: 50 }, currentMMNode);
+  cyAddNode(cy, data, { x: 50, y: 50 }, MMRef);
 
   counter = eleCounter.value;
   data = {
@@ -99,8 +112,9 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     label: type + ' ' + counter,
     parent: parentId,
     type: type,
+    MMRef: MMRef
   };
-  cyAddNode(cy, data, { x: 150, y: 150 }, currentMMNode);
+  cyAddNode(cy, data, { x: 150, y: 150 }, MMRef);
 
 };
 
@@ -156,10 +170,10 @@ const cyAddOriginalEdges = (cy: Core, MMNode: MMNode) => {
 
       if (connectedNode.type === 'state' && !eleAlreadyIn(cy, parent.id)) {
         const nodeParentData = createCyNodeData(parent);
-        cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode, false);
+        cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
         nodeData['parent'] = parent ? parent.id : null;
       }
-      cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent, false);
+      cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent);
     }
 
     const edgeData = createCyEdgeData(edge);
@@ -182,7 +196,7 @@ const cyAddDerivedEdges = (cy: Core, MMNode: MMNode) => {
 
     if (!eleAlreadyIn(cy, connectedNode.id)) {
       const nodeData = createCyNodeData(connectedNode);
-      cyAddNode(cy, nodeData, { x: 0, y: 0 }, currentMMNode, false);
+      cyAddNode(cy, nodeData, { x: 0, y: 0 }, currentMMNode);
     }
     const edgeData = createCyEdgeData(edge);
     cyAddEdge(cy, edgeData);
