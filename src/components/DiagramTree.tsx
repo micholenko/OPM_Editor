@@ -7,7 +7,7 @@ import { ACTIONS, useReducerProps } from './App';
 import { cy } from './DiagramCanvas';
 
 import { cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
-import { MMNode } from '../model/master-model';
+import { masterModelRoot, MMNode } from '../model/master-model';
 
 import '../css/general.css';
 import { MMEdge } from '../model/edge-model';
@@ -65,16 +65,26 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
       edge.data('source') != MMRef.source.id ||
       edge.data('target') != MMRef.target.id || //edge.source()
       MMRef.originalEdge?.deleted) {
-      edge.remove();
 
-      const prevSourceId = edge.source().data('MMRef').id;
       const prevTargetId = edge.target().data('MMRef').id;
-      console.log(prevSourceId !== MMRef.source.id);
-      if (prevSourceId !== MMRef.source.id) {
-        edge.source().remove();
+      const prevSourceId = edge.source().data('MMRef').id;
+      
+      edge.remove();
+      if (mainNode === masterModelRoot) {
+        if (prevSourceId !== MMRef.source.id && MMRef.source.diagram !== null) {
+          edge.source().remove();
+        }
+        else if (prevTargetId !== MMRef.target.id && MMRef.target.diagram !== null) {
+          edge.target().remove();
+        }
       }
-      else if (prevTargetId !== MMRef.target.id) {
-        edge.target().remove();
+      else {
+        if (mainNode.id === prevSourceId) {
+          edge.target().remove();
+        }
+        else if (mainNode.id === prevTargetId) {
+          edge.source().remove();
+        }
       }
     }
     else {
@@ -112,8 +122,8 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
 
   useEffect(() => {
     setTreedata([constructTreeJson(initTreeData, diagramTreeRoot)]);
-  }, [state.timestamp])
-  
+  }, [state.timestamp]);
+
 
   const onExpand = (expandedKeysValue: React.Key[]) => {
     setExpandedKeys(expandedKeysValue);
@@ -128,7 +138,6 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
     cy.elements().remove();
 
     const modelReference = info.node.modelReference;
-    console.log(modelReference.diagramJson);
     cy.json(modelReference.diagramJson);
     //add extra
 
