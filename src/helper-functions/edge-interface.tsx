@@ -3,7 +3,7 @@ import { edgeArray, MMEdge, derivedEdgeArray } from '../model/edge-model';
 import { EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { cy } from '../components/DiagramCanvas';
-import {cyAddEdge} from './cytoscape-interface'
+import { cyAddEdge } from './cytoscape-interface';
 
 let sourceNode: NodeSingular | null = null;
 let targetNode: NodeSingular | null = null;
@@ -60,9 +60,6 @@ export const edgeCreate = (type: EdgeType) => {
   if (sourceNode === null || targetNode === null)
     return;
 
-  if (type === 'aggregation'){
-    
-  }
   const counter = eleCounter.value;
   const data = {
     id: counter,
@@ -74,12 +71,13 @@ export const edgeCreate = (type: EdgeType) => {
   };
   const addedEdge = cyAddEdge(cy, data);
 
-  if (sourceNode?.isChild() || targetNode?.isChild())
+  if (sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
+     targetNode?.isChild() && targetNode?.data('type') !== 'state') {
     addDerivedEdges(addedEdge.data('MMRef'));
-
+  }
   targetNode.removeClass('eh-hover');
-sourceNode = null;
-targetNode = null;
+  sourceNode = null;
+  targetNode = null;
 };
 
 export const edgeCancel = () => {
@@ -90,7 +88,7 @@ export const edgeCancel = () => {
 
 export const edgeReconnect = (sourceID: string, targetID: string, data: any) => {
   const edgeId = data['id'];
-  const MMRef = data['MMRef'];
+  const MMRef = data['MMRef'] as MMEdge;
   const edge = cy.getElementById(edgeId);
 
   sourceNode = cy.getElementById(sourceID);
@@ -104,11 +102,13 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
     target: targetID
   });
 
-  if (sourceNode?.isChild() || targetNode?.isChild())
-    addDerivedEdges(MMRef);
+  derivedEdgeArray.removeEdgesById(edgeId)
 
-  console.log(edgeArray);
-  console.log(derivedEdgeArray);
+  if (sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
+     targetNode?.isChild() && targetNode?.data('type') !== 'state') {
+    addDerivedEdges(MMRef);
+  }
+
 };
 
 

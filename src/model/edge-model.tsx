@@ -41,6 +41,7 @@ class EdgeArray {
   }
 
   removeEdge(edge: MMEdge) {
+    edge.deleted = true
     var index = this.edges.indexOf(edge);
     if (index !== -1) {
       this.edges.splice(index, 1);

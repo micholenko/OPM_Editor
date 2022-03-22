@@ -26,7 +26,7 @@ interface EdgeData {
 }
 
 const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot) => {
-  console.log(data)
+  console.log(data);
   if (data['MMRef'] === null) {
     let modelNode = new MMNode(data['id'], data['type'], data['label']);
     parentMMNode.addChild(modelNode);
@@ -61,10 +61,10 @@ const cyAddEdge = (cy: Core, data: EdgeData) => {
 const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
   const MMRef = node.data('MMRef') as MMNode;
 
-  if (MMRef.diagram !== null){
-    const diagram = MMRef.diagram
-    diagram.parent?.removeChild(diagram)
-    dispatch({type: ACTIONS.UPDATE_TREE})
+  if (MMRef.diagram !== null) {
+    const diagram = MMRef.diagram;
+    diagram.parent?.removeChild(diagram);
+    dispatch({ type: ACTIONS.UPDATE_TREE });
   }
 
   MMRef.deleted = true;
@@ -133,7 +133,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
 
   // add inzoomed node to new diagram
   cyAddNode(cy, inzoomedNode.data(), { x: 0, y: 0 }, currentMMNode);
-  
+
 
   let MMRef = inzoomedNode.data('MMRef') as MMNode;
   // add 2 default subnodes
@@ -209,10 +209,12 @@ const cyAddOriginalEdges = (cy: Core, MMNode: MMNode) => {
       let parent = connectedNode.parent as MMNode;
       const nodeData = createCyNodeData(connectedNode);
 
-      if (connectedNode.type === 'state' && !eleAlreadyIn(cy, parent.id)) {
-        const nodeParentData = createCyNodeData(parent);
-        cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
+      if (connectedNode.type === 'state') {
         nodeData['parent'] = parent ? parent.id : null;
+        if (!eleAlreadyIn(cy, parent.id)) {
+          const nodeParentData = createCyNodeData(parent);
+          cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
+        }
       }
       cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent);
     }
@@ -245,7 +247,7 @@ const cyAddDerivedEdges = (cy: Core, MMNode: MMNode) => {
 };
 
 const cyAddConnectedNodes = (cy: Core, MMNode: MMNode) => {
-  cyAddOriginalEdges(cy, MMNode);
   cyAddDerivedEdges(cy, MMNode);
+  cyAddOriginalEdges(cy, MMNode);
 };
 export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes, cyAddEdge, removeNodeContextMenu, removeEdgeContextMenu };
