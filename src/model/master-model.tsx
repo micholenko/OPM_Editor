@@ -31,12 +31,12 @@ class MMNode {
     this.affiliation = Affiliation.Systemic;
   }
 
-  addChild = (child: MMNode): number => {
+  addChild(child: MMNode): number {
     this.children.push(child);
     child.parent = this;
     return 0;
   }
-  removeChild = (child: MMNode): number =>{
+  removeChild(child: MMNode): number {
     let index = this.children.indexOf(child);
     if (index !== -1) {
       this.children.splice(index, 1);
@@ -61,14 +61,14 @@ class MMRoot {
     this.children = [];
   }
 
-  addChild = (child: MMNode) =>{
+  addChild = (child: MMNode) => {
     this.children.push(child);
-  }
+  };
 }
 let masterModelRoot = new MMRoot();
 
 const importMMRoot = (newRoot: MMRoot) => {
-  masterModelRoot = newRoot
-}
+  masterModelRoot = newRoot;
+};
 
 export { masterModelRoot, MMNode, MMRoot, NodeType, importMMRoot };

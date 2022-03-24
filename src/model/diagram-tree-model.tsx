@@ -17,7 +17,7 @@ class DiagramTreeNode {
     this.mainNode = mainNode;
   }
 
-  _findLowestAvailableId = (): number => {
+  _findLowestAvailableId(): number {
     const sortedChildren = this.children.sort((a, b) => {
       return a.labelId - b.labelId;
     });
@@ -31,7 +31,7 @@ class DiagramTreeNode {
     return index;
   }
 
-  addChild = (child: DiagramTreeNode) => {
+  addChild(child: DiagramTreeNode) {
     child.parent = this;
 
     const index = this._findLowestAvailableId();
@@ -46,7 +46,7 @@ class DiagramTreeNode {
     this.children.push(child);
 
   }
-  removeChild = (child: DiagramTreeNode) => {
+  removeChild(child: DiagramTreeNode) {
     let index = this.children.indexOf(child);
     if (index !== -1) {
       this.children.splice(index, 1);
@@ -68,6 +68,6 @@ let diagramTreeRoot = new DiagramTreeNode('SD', masterModelRoot);
 
 const importDiagramTreeRoot = (newDiagramTreeRoot: DiagramTreeNode) => {
   diagramTreeRoot = newDiagramTreeRoot;
-}
+};
 
 export { diagramTreeRoot, DiagramTreeNode, importDiagramTreeRoot };

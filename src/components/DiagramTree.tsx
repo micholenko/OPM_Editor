@@ -46,6 +46,13 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
 
   for (const node of cy.nodes() as any) {
     const MMRef = node.data('MMRef') as MMNode;
+    if (MMRef.type === 'state') {
+      const parent = MMRef.parent as MMNode;
+      if (parent.deleted === true) {
+        node.remove();
+        continue;
+      }
+    }
     if (MMRef.deleted) {
       node.remove();
       continue;
@@ -68,7 +75,7 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
 
       const prevTargetId = edge.target().data('MMRef').id;
       const prevSourceId = edge.source().data('MMRef').id;
-      
+
       edge.remove();
       if (mainNode === masterModelRoot) {
         if (prevSourceId !== MMRef.source.id && MMRef.source.diagram !== null) {
@@ -135,13 +142,13 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
       return;
 
     const json = cy.json();
-    delete json.style
-    console.log(json)
-    currentDiagram.diagramJson = json
+    delete json.style;
+    console.log(json);
+    currentDiagram.diagramJson = json;
     cy.elements().remove();
 
     const modelReference = info.node.modelReference;
-    console.log(modelReference.diagramJson)
+    console.log(modelReference.diagramJson);
     cy.json(modelReference.diagramJson);
     //add extra
 

@@ -71,8 +71,9 @@ export const edgeCreate = (type: EdgeType) => {
   };
   const addedEdge = cyAddEdge(cy, data);
 
-  if (sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
-     targetNode?.isChild() && targetNode?.data('type') !== 'state') {
+  if ((sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
+    targetNode?.isChild() && targetNode?.data('type') !== 'state') &&
+    sourceNode?.parent() !== targetNode?.parent()) {
     addDerivedEdges(addedEdge.data('MMRef'));
   }
   targetNode.removeClass('eh-hover');
@@ -102,10 +103,11 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
     target: targetID
   });
 
-  derivedEdgeArray.removeEdgesById(edgeId)
+  derivedEdgeArray.removeEdgesById(edgeId);
 
-  if (sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
-     targetNode?.isChild() && targetNode?.data('type') !== 'state') {
+  if ((sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
+    targetNode?.isChild() && targetNode?.data('type') !== 'state') &&
+    sourceNode?.parent() !== targetNode?.parent()) {
     addDerivedEdges(MMRef);
   }
 

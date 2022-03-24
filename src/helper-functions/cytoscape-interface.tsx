@@ -69,6 +69,12 @@ const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
 
   MMRef.deleted = true;
   node.data({ 'MMRef': null });
+
+  for (const childNode of MMRef.children){
+    if (childNode.type === 'state'){
+      childNode.deleted = true
+    }
+  }
   for (const connectedEdge of node.connectedEdges().toArray()) {
     const edgeMMRef = connectedEdge.data('MMRef');
 
@@ -197,7 +203,8 @@ const createCyEdgeData = (edge: MMEdge): any => {
 const cyAddOriginalEdges = (cy: Core, MMNode: MMNode) => {
   let connectedEdges = getConnectedEdges(MMNode, edgeArray);
   for (const edge of connectedEdges) {
-    if (eleAlreadyIn(cy, edge.id)) {
+    if (eleAlreadyIn(cy, edge.id) || 
+      edge.source.deleted || edge.target.deleted) {
       continue;
     }
     let connectedNode;
@@ -229,7 +236,8 @@ const cyAddDerivedEdges = (cy: Core, MMNode: MMNode) => {
   let connectedEdges = getConnectedEdges(MMNode, derivedEdgeArray);
   console.table(connectedEdges);
   for (const edge of connectedEdges) {
-    if (eleAlreadyIn(cy, edge.id)) {
+    if (eleAlreadyIn(cy, edge.id) || 
+      edge.source.deleted || edge.target.deleted) {
       continue;
     }
     let connectedNode;
