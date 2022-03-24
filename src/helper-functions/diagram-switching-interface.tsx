@@ -92,10 +92,10 @@ export const updateFromMasterModel = (diagram: DiagramTreeNode) => {
     });
   }
   else {
-    cyAddConnectedNodes(cy, mainNode);
     const nodes = mainNode.children;
     nodes.forEach((node: MMNode) => {
       cyAddConnectedNodes(cy, node);
     });
+    cyAddConnectedNodes(cy, mainNode);
   }
 };

@@ -247,8 +247,17 @@ const cyAddDerivedEdges = (cy: Core, MMNode: MMNode) => {
       connectedNode = edge.source;
 
     if (!eleAlreadyIn(cy, connectedNode.id)) {
+      let parent = connectedNode.parent as MMNode;
       const nodeData = createCyNodeData(connectedNode);
-      cyAddNode(cy, nodeData, { x: 0, y: 0 }, currentMMNode);
+
+      if (connectedNode.type === 'state') {
+        nodeData['parent'] = parent ? parent.id : null;
+        if (!eleAlreadyIn(cy, parent.id)) {
+          const nodeParentData = createCyNodeData(parent);
+          cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
+        }
+      }
+      cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent);
     }
     const edgeData = createCyEdgeData(edge);
     cyAddEdge(cy, edgeData);

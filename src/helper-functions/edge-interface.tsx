@@ -1,4 +1,4 @@
-import { Core, NodeSingular } from "cytoscape";
+import { Core, EdgeSingular, NodeSingular } from "cytoscape";
 import { edgeArray, MMEdge, derivedEdgeArray } from '../model/edge-model';
 import { EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
@@ -87,6 +87,32 @@ export const edgeCancel = () => {
   targetNode = null;
 };
 
+const reconnectInCompound = (edge: EdgeSingular): boolean => {
+  const oldSource = edge.source();
+  const oldTarget = edge.target();
+  const newSource = sourceNode;
+  const newTarget = targetNode;
+
+  // from parent to child
+  if (newSource?.parent() === oldSource ||
+    newTarget?.parent() === oldTarget) {
+    return true;
+  }
+
+  // from child to a child of the same parent
+  if (newSource?.parent() === oldSource.parent() ||
+    newTarget?.parent() === oldTarget.parent()) {
+    return true;
+  }
+
+  // from child to parent
+  if (newSource === oldSource.parent() ||
+    newTarget === oldTarget.parent()) {
+    return true;
+  }
+  return false;
+};
+
 export const edgeReconnect = (sourceID: string, targetID: string, data: any) => {
   const edgeId = data['id'];
   const MMRef = data['MMRef'] as MMEdge;
@@ -98,18 +124,27 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
   MMRef.source = sourceNode?.data('MMRef');
   MMRef.target = targetNode?.data('MMRef');
 
-  edge.move({
-    source: sourceID,
-    target: targetID
-  });
+  if (MMRef.originalEdge !== null) {
+    console.log('was derived')
+    edgeArray.removeEdge(MMRef.originalEdge);
+    MMRef.originalEdge = null;
+    edgeArray.addEdge(MMRef);
+  }
 
-  derivedEdgeArray.removeEdgesById(edgeId);
+  if (!reconnectInCompound(edge)) {
+    derivedEdgeArray.removeEdgesById(edgeId);
+  }
 
   if ((sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
     targetNode?.isChild() && targetNode?.data('type') !== 'state') &&
     sourceNode?.parent() !== targetNode?.parent()) {
     addDerivedEdges(MMRef);
   }
+
+  edge.move({
+    source: sourceID,
+    target: targetID
+  });
 
 };
 
