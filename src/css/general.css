@@ -67,6 +67,11 @@
 	overflow: hidden;
 }
 
+.top-toolbar .demo-selection {
+	margin: 5px;
+	width: 120px;
+}
+
 .left-sidebar {
 	display: flex;
 	flex-direction: column;
