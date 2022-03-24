@@ -4,14 +4,9 @@ import 'antd/dist/antd.css';
 import { useEffect, useState } from 'react';
 import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
 import { ACTIONS, useReducerProps } from './App';
-import { cy } from './DiagramCanvas';
-
-import { cyAddConnectedNodes } from '../helper-functions/cytoscape-interface';
-import { masterModelRoot, MMNode } from '../model/master-model';
 
 import '../css/general.css';
-import { MMEdge } from '../model/edge-model';
-
+import { switchDiagrams, updateFromMasterModel } from '../helper-functions/diagram-switching-interface'
 
 interface DataNode {
   title: string;
@@ -35,73 +30,7 @@ const constructTreeJson = (data: any, parentNode: DiagramTreeNode): DataNode => 
   return data;
 };
 
-const getEdgeLabel = (MMRef: MMEdge): string => {
-  if (MMRef.originalEdge)
-    return MMRef.originalEdge.label;
-  else
-    return MMRef.label;
-};
 
-const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
-
-  for (const node of cy.nodes() as any) {
-    const MMRef = node.data('MMRef') as MMNode;
-    if (MMRef.type === 'state') {
-      const parent = MMRef.parent as MMNode;
-      if (parent.deleted === true) {
-        node.remove();
-        continue;
-      }
-    }
-    if (MMRef.deleted) {
-      node.remove();
-      continue;
-    }
-
-    node.data({
-      label: MMRef.label,
-      labelWidth: MMRef.label.length * 8.5
-    });
-  }
-
-  //remove unlinked
-  // @ts-ignore
-  for (const edge of cy.edges()) {
-    const MMRef = edge.data('MMRef');
-    if (MMRef.deleted ||
-      edge.data('source') != MMRef.source.id ||
-      edge.data('target') != MMRef.target.id || //edge.source()
-      MMRef.originalEdge?.deleted) {
-
-      const prevTargetId = edge.target().data('MMRef').id;
-      const prevSourceId = edge.source().data('MMRef').id;
-
-      edge.remove();
-      if (mainNode === masterModelRoot) {
-        if (prevSourceId !== MMRef.source.id && MMRef.source.diagram !== null) {
-          edge.source().remove();
-        }
-        else if (prevTargetId !== MMRef.target.id && MMRef.target.diagram !== null) {
-          edge.target().remove();
-        }
-      }
-      else {
-        if (mainNode.id === prevSourceId) {
-          edge.target().remove();
-        }
-        else if (mainNode.id === prevTargetId) {
-          edge.source().remove();
-        }
-      }
-    }
-    else {
-      edge.data({
-        label: getEdgeLabel(MMRef),
-      });
-    }
-  }
-
-};
 
 const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
   let initTreeData: DataNode =
@@ -136,36 +65,17 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
     setExpandedKeys(expandedKeysValue);
   };
 
+
   const onSelect = (selectedKeys: React.Key[], info: any) => {
-    const currentDiagram = state.currentDiagram;
     if (info.node.selected === true)
       return;
 
-    const json = cy.json();
-    delete json.style;
-    console.log(json);
-    currentDiagram.diagramJson = json;
-    cy.elements().remove();
+    const nextDiagram = info.node.modelReference as DiagramTreeNode 
 
-    const modelReference = info.node.modelReference;
-    console.log(modelReference.diagramJson);
-    cy.json(modelReference.diagramJson);
-    //add extra
+    switchDiagrams(state.currentDiagram, nextDiagram)
+    updateFromMasterModel(nextDiagram)
 
-    updateNodesFromMM(cy, modelReference.mainNode);
-    if (modelReference === diagramTreeRoot) {
-      const nodes = modelReference.mainNode.children;
-      nodes.forEach((node: MMNode) => {
-        cyAddConnectedNodes(cy, node);
-      });
-    }
-    else {
-      cyAddConnectedNodes(cy, modelReference.mainNode);
-    }
-
-    //cy.center();
-
-    dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: modelReference });
+    dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: nextDiagram });
   };
 
   return (
