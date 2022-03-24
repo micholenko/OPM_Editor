@@ -4,6 +4,7 @@ import { EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { cy } from '../components/DiagramCanvas';
 import { cyAddEdge } from './cytoscape-interface';
+import { MMNode } from "../model/master-model";
 
 let sourceNode: NodeSingular | null = null;
 let targetNode: NodeSingular | null = null;
@@ -36,6 +37,8 @@ export const edgeCheckValidTargets = (callback: Function) => {
   }
 };
 
+
+
 const addDerivedEdges = (originalEdge: MMEdge) => {
   const derivedEdge = new MMEdge(
     originalEdge.id,
@@ -56,9 +59,41 @@ const addDerivedEdges = (originalEdge: MMEdge) => {
   derivedEdgeArray.addEdge(derivedEdge);
 };
 
+const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
+
+  const derivedEdge = new MMEdge(
+    originalEdge.id,
+    sourceNode?.data('MMRef'),
+    targetNode?.data('MMRef'),
+    originalEdge.type,
+    originalEdge,
+    originalEdge.label
+  );
+
+  if (originalEdge.source.isPart) {
+    derivedEdge.source = originalEdge.source.parent as MMNode;
+    if (targetNode?.isChild()) {
+      derivedEdge.target = targetNode.parent()[0].data('MMRef');
+    }
+
+  }
+  else if (originalEdge.target.isPart) {
+    derivedEdge.target = originalEdge.target.parent as MMNode;
+    if (sourceNode?.isChild()) {
+      derivedEdge.source = sourceNode.parent()[0].data('MMRef');
+    }
+  }
+
+  derivedEdgeArray.addEdge(derivedEdge);
+};
+
+
 export const edgeCreate = (type: EdgeType) => {
   if (sourceNode === null || targetNode === null)
     return;
+
+  const sourceRef = sourceNode.data('MMRef') as MMNode;
+  const targetRef = targetNode.data('MMRef') as MMNode;
 
   const counter = eleCounter.value;
   const data = {
@@ -66,10 +101,19 @@ export const edgeCreate = (type: EdgeType) => {
     label: '',
     type: type,
     MMRef: null,
-    source: sourceNode.data('MMRef'),
-    target: targetNode.data('MMRef'),
+    source: sourceRef,
+    target: targetRef,
   };
   const addedEdge = cyAddEdge(cy, data);
+
+  if (type === EdgeType.Aggregation) {
+    targetRef.parent?.removeChild(targetRef);
+    targetRef.isPart = true;
+    sourceRef.addChild(targetRef);
+  }
+  else if (sourceRef.isPart === true || targetRef.isPart == true) {
+    addDerivedEdgesAggregation(addedEdge.data('MMRef'));
+  }
 
   if ((sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
     targetNode?.isChild() && targetNode?.data('type') !== 'state') &&
@@ -120,12 +164,14 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
 
   sourceNode = cy.getElementById(sourceID);
   targetNode = cy.getElementById(targetID);
+  const sourceRef = sourceNode?.data('MMRef') as MMNode;
+  const targetRef = targetNode?.data('MMRef') as MMNode;
 
-  MMRef.source = sourceNode?.data('MMRef');
-  MMRef.target = targetNode?.data('MMRef');
+  MMRef.source = sourceRef
+  MMRef.target = targetRef
 
   if (MMRef.originalEdge !== null) {
-    console.log('was derived')
+    console.log('was derived');
     edgeArray.removeEdge(MMRef.originalEdge);
     MMRef.originalEdge = null;
     edgeArray.addEdge(MMRef);
@@ -133,6 +179,10 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
 
   if (!reconnectInCompound(edge)) {
     derivedEdgeArray.removeEdgesById(edgeId);
+  }
+
+  if (sourceRef.isPart === true || targetRef.isPart == true) {
+    addDerivedEdgesAggregation(MMRef);
   }
 
   if ((sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||

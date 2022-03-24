@@ -18,6 +18,7 @@ class MMNode {
   deleted: boolean;
   essence: Essence;
   affiliation: Affiliation;
+  isPart: boolean;
 
   constructor(id: string, type: 'object' | 'process' | 'state', label: string) {
     this.id = id;
@@ -29,6 +30,7 @@ class MMNode {
     this.deleted = false;
     this.essence = Essence.Informatical;
     this.affiliation = Affiliation.Systemic;
+    this.isPart = false;
   }
 
   addChild(child: MMNode): number {
@@ -64,6 +66,14 @@ class MMRoot {
   addChild = (child: MMNode) => {
     this.children.push(child);
   };
+  removeChild(child: MMNode): number {
+    let index = this.children.indexOf(child);
+    if (index !== -1) {
+      this.children.splice(index, 1);
+      return 0;
+    }
+    return 1;
+  }
 }
 let masterModelRoot = new MMRoot();
 

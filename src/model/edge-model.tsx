@@ -41,7 +41,7 @@ class EdgeArray {
   }
 
   removeEdge(edge: MMEdge) {
-    edge.deleted = true
+    edge.deleted = true;
     var index = this.edges.indexOf(edge);
     if (index !== -1) {
       this.edges.splice(index, 1);
@@ -49,9 +49,12 @@ class EdgeArray {
   }
 
   removeEdgesById(id: string) {
-    for (const edge of this.edges) {
-      if (edge.id === id)
+    for (let i = 0; i < this.edges.length; i++) {
+      const edge = this.edges[i]
+      if (edge.id === id) {
         this.removeEdge(edge);
+        i--;
+      }
     }
   }
 
@@ -93,8 +96,8 @@ let edgeArray = new EdgeArray();
 let derivedEdgeArray = new EdgeArray();
 
 const importEdgeArrays = (newEdgeArray: EdgeArray, newDerivedEdgeArray: EdgeArray) => {
-  edgeArray = newEdgeArray
-  derivedEdgeArray = newDerivedEdgeArray
-}
+  edgeArray = newEdgeArray;
+  derivedEdgeArray = newDerivedEdgeArray;
+};
 
-export { edgeArray, derivedEdgeArray, MMEdge, EdgeArray, importEdgeArrays};
+export { edgeArray, derivedEdgeArray, MMEdge, EdgeArray, importEdgeArrays };

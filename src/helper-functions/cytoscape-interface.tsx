@@ -91,15 +91,8 @@ const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
 };
 
 const removeEdgeContextMenu = (edge: EdgeSingular) => {
-  const MMRef = edge.data('MMRef');
-
-  MMRef.deleted = true;
-  edgeArray.removeEdge(MMRef);
-  if (MMRef.originalEdge !== null) {
-    edgeArray.removeEdge(MMRef.originalEdge);
-    MMRef.originalEdge.deleted = true;
-  }
-  derivedEdgeArray.removeEdgesById(MMRef.id);
+  edgeArray.removeEdgesById(edge.id())
+  derivedEdgeArray.removeEdgesById(edge.id())
   edge.data({ 'MMRef': null });
 };
 
@@ -204,7 +197,8 @@ const cyAddOriginalEdges = (cy: Core, MMNode: MMNode) => {
   let connectedEdges = getConnectedEdges(MMNode, edgeArray);
   for (const edge of connectedEdges) {
     if (eleAlreadyIn(cy, edge.id) || 
-      edge.source.deleted || edge.target.deleted) {
+      edge.source.deleted || edge.target.deleted || 
+      edge.type === EdgeType.Aggregation) {
       continue;
     }
     let connectedNode;
