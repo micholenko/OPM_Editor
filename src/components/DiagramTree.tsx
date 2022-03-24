@@ -134,10 +134,14 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
     if (info.node.selected === true)
       return;
 
-    currentDiagram.diagramJson = cy.json();
+    const json = cy.json();
+    delete json.style
+    console.log(json)
+    currentDiagram.diagramJson = json
     cy.elements().remove();
 
     const modelReference = info.node.modelReference;
+    console.log(modelReference.diagramJson)
     cy.json(modelReference.diagramJson);
     //add extra
 

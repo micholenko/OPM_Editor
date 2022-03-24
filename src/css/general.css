@@ -33,6 +33,11 @@
 	justify-content: space-between;
 }
 
+.top-toolbar-right{
+	display: flex;
+	align-items: center;
+}
+
 .top-toolbar .app-title {
 	margin-bottom: 0px;
 	margin: 5px;
@@ -83,4 +88,16 @@
 
 .display-block {
 	display: block;
+}
+
+.export-icon {
+	font-size: 36px;
+	height: 100%;
+}
+
+.top-toolbar .export-button {
+	padding: 0px;
+	border: 0px;
+	margin: 5px;
+	height: fit-content;
 }

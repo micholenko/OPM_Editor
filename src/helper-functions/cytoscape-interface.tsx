@@ -78,6 +78,7 @@ const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
       edgeArray.removeEdge(edgeMMRef.originalEdge);
       edgeMMRef.originalEdge.deleted = true;
     }
+    console.log(derivedEdgeArray)
     derivedEdgeArray.removeEdgesById(edgeMMRef.id);
     connectedEdge.data({ 'MMRef': null });
   }

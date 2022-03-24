@@ -89,7 +89,12 @@ class EdgeArray {
   }
 };
 
-
 let edgeArray = new EdgeArray();
 let derivedEdgeArray = new EdgeArray();
-export { edgeArray, derivedEdgeArray, MMEdge, EdgeArray };
+
+const importEdgeArrays = (newEdgeArray: EdgeArray, newDerivedEdgeArray: EdgeArray) => {
+  edgeArray = newEdgeArray
+  derivedEdgeArray = newDerivedEdgeArray
+}
+
+export { edgeArray, derivedEdgeArray, MMEdge, EdgeArray, importEdgeArrays};
