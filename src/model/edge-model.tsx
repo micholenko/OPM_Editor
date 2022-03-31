@@ -6,6 +6,7 @@ export enum EdgeType {
   Aggregation = 'aggregation',
   Instrument = 'instrument',
   Tagged = 'tagged',
+  Agent = 'agent'
 };
 
 class MMEdge {

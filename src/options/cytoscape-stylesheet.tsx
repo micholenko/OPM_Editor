@@ -134,6 +134,12 @@ export const cyStylesheet = [
     }
   },
   {
+    selector: 'edge[type = "agent"]',
+    style: {
+      'target-arrow-shape': 'circle',
+    }
+  },
+  {
     selector: 'edge[type = "tagged"]',
     style: {
       'target-arrow-shape': 'vee'
