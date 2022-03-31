@@ -262,4 +262,9 @@ const cyAddConnectedNodes = (cy: Core, MMNode: MMNode) => {
   cyAddDerivedEdges(cy, MMNode);
   cyAddOriginalEdges(cy, MMNode);
 };
-export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes, cyAddEdge, removeNodeContextMenu, removeEdgeContextMenu };
+
+const cyAddConnectedNodesInzoom = (cy: Core, MMNode: MMNode) => {
+  cyAddOriginalEdges(cy, MMNode);
+  cyAddDerivedEdges(cy, MMNode);
+};
+export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, cyAddConnectedNodes, cyAddEdge, removeNodeContextMenu, removeEdgeContextMenu ,eleAlreadyIn};
