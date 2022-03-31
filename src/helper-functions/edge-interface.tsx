@@ -3,7 +3,7 @@ import { edgeArray, MMEdge, derivedEdgeArray } from '../model/edge-model';
 import { EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { cy } from '../components/DiagramCanvas';
-import { cyAddEdge } from './cytoscape-interface';
+import { cyAddEdge, eleAlreadyIn } from './cytoscape-interface';
 import { MMNode } from "../model/master-model";
 
 let sourceNode: NodeSingular | null = null;
@@ -61,6 +61,7 @@ const addDerivedEdges = (originalEdge: MMEdge) => {
 
 const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
 
+  derivedEdgeArray.removeEdgesById(originalEdge.id)
   const derivedEdge = new MMEdge(
     originalEdge.id,
     sourceNode?.data('MMRef'),
@@ -71,14 +72,22 @@ const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
   );
 
   if (originalEdge.source.isPart) {
-    derivedEdge.source = originalEdge.source.parent as MMNode;
+    // @ts-ignore
+    const parentId = originalEdge.source.parent?.id;
+    if (eleAlreadyIn(cy, parentId)) {
+      derivedEdge.source = originalEdge.source.parent as MMNode;
+    }
     if (targetNode?.isChild()) {
       derivedEdge.target = targetNode.parent()[0].data('MMRef');
     }
 
   }
   else if (originalEdge.target.isPart) {
-    derivedEdge.target = originalEdge.target.parent as MMNode;
+    // @ts-ignore
+    const parentId = originalEdge.target.parent?.id;
+    if (eleAlreadyIn(cy, parentId)) {
+      derivedEdge.target = originalEdge.target.parent as MMNode;
+    }
     if (sourceNode?.isChild()) {
       derivedEdge.source = sourceNode.parent()[0].data('MMRef');
     }
@@ -167,13 +176,13 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
   const sourceRef = sourceNode?.data('MMRef') as MMNode;
   const targetRef = targetNode?.data('MMRef') as MMNode;
 
-  MMRef.source = sourceRef
-  MMRef.target = targetRef
+  MMRef.source = sourceRef;
+  MMRef.target = targetRef;
 
-  if (MMRef.originalEdge !== null) {
+  if (MMRef.originalEdge !== undefined) {
     console.log('was derived');
     edgeArray.removeEdge(MMRef.originalEdge);
-    MMRef.originalEdge = null;
+    MMRef.originalEdge = undefined;
     edgeArray.addEdge(MMRef);
   }
 

@@ -12,7 +12,7 @@ import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
 import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
 
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
-import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodes, removeEdgeContextMenu, removeNodeContextMenu } from '../helper-functions/cytoscape-interface';
+import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, removeEdgeContextMenu, removeNodeContextMenu } from '../helper-functions/cytoscape-interface';
 import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-functions/tippy-elements';
 import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../helper-functions/edge-interface';
 
@@ -124,7 +124,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           id: 'in-zoom',
           content: 'in-zoom',
           tooltipText: 'in-zoom',
-          selector: 'node[type != "state"]',
+          selector: 'node[type = "process"]node:childless',
           onClickFunction: function (event) {
             var target = event.target;
             let nextDiagram;
@@ -146,7 +146,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
             cyAddInzoomedNodes(cy, event);
 
             if (propagation.current !== PropagationEnum.None)
-              cyAddConnectedNodes(cy, MMReference);
+              cyAddConnectedNodesInzoom(cy, MMReference);
 
             let layout = cy.layout(defaultOptions);
             layout.run();
@@ -173,7 +173,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           content: 'add object',
           tooltipText: 'add object',
           coreAsWell: true,
-          selector: 'node[type != "state"]',
+          selector: '$node > node[type != "state"]',
           onClickFunction: function (event) {
             cyAddNodeFromContextMenu(cy, event, 'object');
           }
@@ -183,7 +183,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           content: 'add process',
           tooltipText: 'add process',
           coreAsWell: true,
-          selector: 'node[type != "state"]',
+          selector: '$node > node[type != "state"]',
           onClickFunction: function (event) {
             cyAddNodeFromContextMenu(cy, event, 'process');
           },

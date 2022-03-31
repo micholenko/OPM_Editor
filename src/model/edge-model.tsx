@@ -14,11 +14,11 @@ class MMEdge {
   target: MMNode;
   type: EdgeType;
   label: string;
-  originalEdge: MMEdge | null;
+  originalEdge: MMEdge | undefined;
   derivedEdges: Array<MMEdge>;
   deleted: boolean;
 
-  constructor(id: string, source: MMNode, target: MMNode, type: EdgeType, originalEdge: MMEdge | null = null, label: string = '') {
+  constructor(id: string, source: MMNode, target: MMNode, type: EdgeType, originalEdge: MMEdge | undefined = undefined, label: string = '') {
     this.id = id;
     this.source = source;
     this.target = target;
