@@ -152,8 +152,7 @@ export const cyStylesheet = [
   {
     selector: 'edge[MMRef.originalEdge]',
     style: {
-      'line-color': 'LightGrey',
-      'target-arrow-color': 'LightGrey'
+      'line-style': 'dashed'
     }
   },
 
