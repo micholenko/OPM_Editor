@@ -1,12 +1,15 @@
 import { MMNode } from "./master-model";
 
 export enum EdgeType {
-  Consumption = 'consumption',
-  Effect = 'effect',
-  Aggregation = 'aggregation',
-  Instrument = 'instrument',
-  Tagged = 'tagged',
-  Agent = 'agent'
+  Consumption = 'Consumption/Result',
+  Tagged = 'Tagged',
+  Effect = 'Effect',
+  Instrument = 'Instrument',
+  Agent = 'Agent',
+  Aggregation = 'Aggregation-participation',
+  Exhibition = 'Exhibition-characterization',
+  Generalization = 'Generalization-specialization',
+  Classification = 'Classification-instantiation',
 };
 
 class MMEdge {

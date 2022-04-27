@@ -94,14 +94,14 @@ export const cyStylesheet = [
     }
   },
   {
-    selector: 'edge[type = "consumption"]',
+    selector: 'edge[type = "Consumption/Result"]',
     style: {
       'target-arrow-shape': 'triangle'
     }
   },
 
   {
-    selector: 'edge[type = "effect"]',
+    selector: 'edge[type = "Effect"]',
     style: {
       'source-arrow-shape': 'triangle',
       'target-arrow-shape': 'triangle'
@@ -109,7 +109,7 @@ export const cyStylesheet = [
   },
 
   {
-    selector: 'edge[type = "aggregation"]',
+    selector: 'edge[type = "Aggregation-participation"]',
     style: {
       "curve-style": "taxi",
       "taxi-direction": "downward",
@@ -118,25 +118,60 @@ export const cyStylesheet = [
       'arrow-scale': 3,
       'source-distance-from-node': '30px',
       'target-endpoint': 'outside-to-node'
+    }
+  },
 
-
+  {
+    selector: 'edge[type = "Exhibition-characterization"]',
+    style: {
+      "curve-style": "taxi",
+      "taxi-direction": "downward",
+      "taxi-turn": '100px',
+      'source-arrow-shape': 'triangle',
+      'arrow-scale': 3,
+      'source-distance-from-node': '30px',
+      'target-endpoint': 'outside-to-node'
     }
   },
   {
-    selector: 'edge[type = "instrument"]',
+    selector: 'edge[type = "Generalization-specialization"]',
+    style: {
+      "curve-style": "taxi",
+      "taxi-direction": "downward",
+      "taxi-turn": '100px',
+      'source-arrow-shape': 'triangle',
+      'arrow-scale': 3,
+      'source-distance-from-node': '30px',
+      'target-endpoint': 'outside-to-node'
+    }
+  },
+  {
+    selector: 'edge[type = "Classification-instantiation"]',
+    style: {
+      "curve-style": "taxi",
+      "taxi-direction": "downward",
+      "taxi-turn": '100px',
+      'source-arrow-shape': 'triangle',
+      'arrow-scale': 3,
+      'source-distance-from-node': '30px',
+      'target-endpoint': 'outside-to-node'
+    }
+  },
+  {
+    selector: 'edge[type = "Instrument"]',
     style: {
       'target-arrow-shape': 'circle',
       'target-arrow-fill': 'hollow',
     }
   },
   {
-    selector: 'edge[type = "agent"]',
+    selector: 'edge[type = "Agent"]',
     style: {
       'target-arrow-shape': 'circle',
     }
   },
   {
-    selector: 'edge[type = "tagged"]',
+    selector: 'edge[type = "Tagged"]',
     style: {
       'target-arrow-shape': 'vee'
     }
