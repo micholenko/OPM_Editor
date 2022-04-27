@@ -1,11 +1,8 @@
 export const cyStylesheet = [
   // cytoscape elements
   {
-    selector: 'node[label]',
+    selector: 'node',
     style: {
-      'content': 'data(MMRef.label)',
-      'ghost': 'data(MMRef.essence)',
-      'border-style': 'data(MMRef.affiliation)',
       'border-width': '2px',
       'background-color': 'white',
       'width': '70px',
@@ -17,6 +14,28 @@ export const cyStylesheet = [
       'ghost-opacity': 0.4,
     }
   },
+
+  {
+    selector: 'node[MMRef.label]',
+    style: {
+      'content': 'data(MMRef.label)',
+    }
+  },
+
+  {
+    selector: 'node[MMRef.essence]',
+    style: {
+      'ghost': 'data(MMRef.essence)',
+    }
+  },
+
+  {
+    selector: 'node[MMRef.affiliation]',
+    style: {
+      'border-style': 'data(MMRef.affiliation)',
+    }
+  },
+
   {
     selector: 'node[type = "object"]',
     style: {
@@ -107,9 +126,11 @@ export const cyStylesheet = [
       'target-arrow-shape': 'triangle'
     }
   },
-
   {
-    selector: 'edge[type = "Aggregation-participation"]',
+    selector: `edge[type = "Aggregation-participation"],
+              edge[type = "Exhibition-characterization"], 
+              edge[type = "Generalization-specialization"], 
+              edge[type = "Classification-instantiation"]`,
     style: {
       "curve-style": "taxi",
       "taxi-direction": "downward",
@@ -120,41 +141,22 @@ export const cyStylesheet = [
       'target-endpoint': 'outside-to-node'
     }
   },
-
   {
     selector: 'edge[type = "Exhibition-characterization"]',
     style: {
-      "curve-style": "taxi",
-      "taxi-direction": "downward",
-      "taxi-turn": '100px',
-      'source-arrow-shape': 'triangle',
-      'arrow-scale': 3,
-      'source-distance-from-node': '30px',
-      'target-endpoint': 'outside-to-node'
+      'source-arrow-shape': 'diamond',
     }
   },
   {
     selector: 'edge[type = "Generalization-specialization"]',
     style: {
-      "curve-style": "taxi",
-      "taxi-direction": "downward",
-      "taxi-turn": '100px',
-      'source-arrow-shape': 'triangle',
-      'arrow-scale': 3,
-      'source-distance-from-node': '30px',
-      'target-endpoint': 'outside-to-node'
+      'source-arrow-fill': 'hollow',
     }
   },
   {
     selector: 'edge[type = "Classification-instantiation"]',
     style: {
-      "curve-style": "taxi",
-      "taxi-direction": "downward",
-      "taxi-turn": '100px',
-      'source-arrow-shape': 'triangle',
-      'arrow-scale': 3,
-      'source-distance-from-node': '30px',
-      'target-endpoint': 'outside-to-node'
+      'source-arrow-shape': 'chevron',
     }
   },
   {
