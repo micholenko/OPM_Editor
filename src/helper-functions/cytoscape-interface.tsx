@@ -26,7 +26,7 @@ interface EdgeData {
 }
 
 const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot) => {
-  console.log(data);
+  data['label'] = data['label'].charAt(0).toUpperCase() + data['label'].substring(1).toLowerCase();
   if (data['MMRef'] === null) {
     let modelNode = new MMNode(data['id'], data['type'], data['label']);
     parentMMNode.addChild(modelNode);

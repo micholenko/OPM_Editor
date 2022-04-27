@@ -95,8 +95,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
       menuItems: [
         {
           id: 'hide',
-          content: 'hide',
-          tooltipText: 'hide',
+          content: 'Hide',
           selector: 'node, edge',
           onClickFunction: function (event) {
             const target = event.target;
@@ -105,8 +104,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
         },
         {
           id: 'remove',
-          content: 'remove',
-          tooltipText: 'remove',
+          content: 'Remove',
           selector: 'node, edge',
           onClickFunction: function (event) {
             const target = event.target;
@@ -122,8 +120,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
         },
         {
           id: 'in-zoom',
-          content: 'in-zoom',
-          tooltipText: 'in-zoom',
+          content: 'In-zoom',
           selector: 'node[type = "process"]node:childless',
           onClickFunction: function (event) {
             var target = event.target;
@@ -160,8 +157,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
         },
         {
           id: 'add-state',
-          content: 'add state',
-          tooltipText: 'add state',
+          content: 'Add State',
           coreAsWell: false,
           selector: 'node[type = "object"]',
           onClickFunction: function (event) {
@@ -170,8 +166,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
         },
         {
           id: 'add-object',
-          content: 'add object',
-          tooltipText: 'add object',
+          content: 'Add Object',
           coreAsWell: true,
           selector: '$node > node[type != "state"]',
           onClickFunction: function (event) {
@@ -180,8 +175,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
         },
         {
           id: 'add-process',
-          content: 'add process',
-          tooltipText: 'add process',
+          content: 'Add Process',
           coreAsWell: true,
           selector: '$node > node[type != "state"]',
           onClickFunction: function (event) {
@@ -191,7 +185,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
         },
         {
           id: 'change-essence',
-          content: 'change essence',
+          content: 'Change Essence',
           coreAsWell: false,
           selector: 'node[type != "state"]',
           onClickFunction: function (event) {
@@ -207,7 +201,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
         },
         {
           id: 'change-affiliation',
-          content: 'change affiliation',
+          content: 'Change Affiliation',
           coreAsWell: false,
           selector: 'node[type != "state"]',
           onClickFunction: function (event) {
@@ -224,7 +218,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
         },
         {
           id: 'show-hidden',
-          content: 'show hidden',
+          content: 'Show Hidden',
           coreAsWell: true,
           onClickFunction: function (event) {
             for (const element of cy.elements()) {
