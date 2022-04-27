@@ -23,8 +23,6 @@ export const cyStylesheet = [
       'shape': 'rectangle',
       'border-color': 'green',
       'padding': '5 px',
-      
-      
     }
   },
   {
@@ -40,6 +38,7 @@ export const cyStylesheet = [
     style: {
       'shape': 'round-rectangle',
       'border-color': 'orange',
+      'min-width': 50
     }
   },
   {
@@ -48,9 +47,6 @@ export const cyStylesheet = [
       'width': 'data(labelWidth)',
     }
   },
-  
-  
-
   {
     selector: '$node > node[type = "state"]',
     style: {
