@@ -38,7 +38,8 @@ const nodeLabelEditingPopup = (cy: Core) => {
         buttonConfirm.addEventListener("click", function (event) {
           event.preventDefault();
           targetNode.data({ label: newLabel });
-          targetNode.data({ labelWidth: newLabel.length * 8.5 });
+          const newLabelWidth = newLabel.length * 8.5 > 60 ?  newLabel.length  * 8.5 : 60
+          targetNode.data({ labelWidth: newLabelWidth });
           targetNode.data('MMRef').label = newLabel;
           tip.hide();
           console.log('hello')

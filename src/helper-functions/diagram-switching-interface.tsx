@@ -28,10 +28,9 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
       node.remove();
       continue;
     }
-
+    const newLabelWidth = MMRef.label.length * 8.5 > 60 ?  MMRef.label.length  * 8.5 : 60
     node.data({
-      label: MMRef.label,
-      labelWidth: MMRef.label.length * 8.5
+      labelWidth: newLabelWidth
     });
   }
 
