@@ -41,7 +41,7 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
 
 
 
-const cyAddEdge = (cy: Core, data: EdgeData, shouldPropagate:boolean = false): EdgeSingular => {
+const cyAddEdge = (cy: Core, data: EdgeData, shouldPropagate: boolean = false): EdgeSingular => {
   if (data['MMRef'] === null) {
     let modelEdge = new MMEdge(data['id'], data['source'], data['target'], data['type'], shouldPropagate);
     edgeArray.addEdge(modelEdge);
@@ -71,36 +71,46 @@ const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
   MMRef.deleted = true;
   node.data({ 'MMRef': null });
 
-  for (const childNode of MMRef.children){
-    if (childNode.type === 'state'){
-      childNode.deleted = true
+  for (const childNode of MMRef.children) {
+    if (childNode.type === 'state') {
+      childNode.deleted = true;
     }
   }
+
   for (const connectedEdge of node.connectedEdges().toArray()) {
     const edgeMMRef = connectedEdge.data('MMRef');
 
     MMRef.deleted = true;
     edgeArray.removeEdge(edgeMMRef);
-    if (edgeMMRef.originalEdge !== null) {
+    if (edgeMMRef.originalEdge !== undefined) {
       edgeArray.removeEdge(edgeMMRef.originalEdge);
-      edgeMMRef.originalEdge.deleted = true;
+      edgeMMRef.originalEdge.removeAllDerived();
     }
-    console.log(derivedEdgeArray)
-    derivedEdgeArray.removeEdgesById(edgeMMRef.id);
+    else {
+      edgeArray.removeEdge(edgeMMRef);
+      edgeMMRef.removeAllDerived();
+    }
     connectedEdge.data({ 'MMRef': null });
   }
 };
 
 const removeEdgeContextMenu = (edge: EdgeSingular) => {
-  edgeArray.removeEdgesById(edge.id())
-  derivedEdgeArray.removeEdgesById(edge.id())
+  const MMRef = edge.data('MMRef') as MMEdge;
+  if (MMRef.originalEdge !== undefined) {
+    edgeArray.removeEdge(MMRef.originalEdge);
+    MMRef.originalEdge.removeAllDerived();
+  }
+  else {
+    edgeArray.removeEdge(MMRef);
+    MMRef.removeAllDerived();
+  }
+
   edge.data({ 'MMRef': null });
 };
 
 const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType, currentDiagram: DiagramTreeNode) => {
-
-  currentMMNode = currentDiagram.mainNode
-  console.log(currentMMNode)
+  currentMMNode = currentDiagram.mainNode;
+  console.log(currentMMNode);
   const counter = eleCounter.value;
   const defaultLabel = [type + " " + counter];
   let data = {
@@ -116,7 +126,7 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType, currentD
     x: pos.x,
     y: pos.y,
   };
-  console.log(currentMMNode)
+  console.log(currentMMNode);
   if (event.target !== cy) { //on element
     data['parent'] = event.target.id() as string;
     if (type === 'state')
@@ -199,7 +209,7 @@ const createCyEdgeData = (edge: MMEdge): any => {
 const cyAddOriginalEdges = (cy: Core, MMNode: MMNode) => {
   let connectedEdges = getConnectedEdges(MMNode, edgeArray);
   for (const edge of connectedEdges) {
-    if (eleAlreadyIn(cy, edge.id) || 
+    if (eleAlreadyIn(cy, edge.id) ||
       edge.source.deleted || edge.target.deleted ||
       edge.propagation == false ||
       edge.type === EdgeType.Aggregation) {
@@ -234,7 +244,7 @@ const cyAddDerivedEdges = (cy: Core, MMNode: MMNode) => {
   let connectedEdges = getConnectedEdges(MMNode, derivedEdgeArray);
   console.table(connectedEdges);
   for (const edge of connectedEdges) {
-    if (eleAlreadyIn(cy, edge.id) || 
+    if (eleAlreadyIn(cy, edge.id) ||
       edge.source.deleted || edge.target.deleted) {
       continue;
     }
@@ -271,4 +281,4 @@ const cyAddConnectedNodesInzoom = (cy: Core, MMNode: MMNode) => {
   cyAddOriginalEdges(cy, MMNode);
   cyAddDerivedEdges(cy, MMNode);
 };
-export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, cyAddConnectedNodes, cyAddEdge, removeNodeContextMenu, removeEdgeContextMenu ,eleAlreadyIn};
+export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, cyAddConnectedNodes, cyAddEdge, removeNodeContextMenu, removeEdgeContextMenu, eleAlreadyIn };
