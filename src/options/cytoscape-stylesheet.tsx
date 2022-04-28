@@ -144,7 +144,8 @@ export const cyStylesheet = [
   {
     selector: 'edge[type = "Exhibition-characterization"]',
     style: {
-      'source-arrow-shape': 'diamond',
+      'source-arrow-shape': 'triangle-inner-triangle',
+      'source-arrow-fill': 'hollow',
     }
   },
   {
@@ -156,7 +157,8 @@ export const cyStylesheet = [
   {
     selector: 'edge[type = "Classification-instantiation"]',
     style: {
-      'source-arrow-shape': 'chevron',
+      'source-arrow-shape': 'triangle-inner-circle',
+      'source-arrow-fill': 'hollow',
     }
   },
   {
