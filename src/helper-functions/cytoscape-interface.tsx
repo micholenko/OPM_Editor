@@ -3,6 +3,7 @@ import { masterModelRoot, MMNode, MMRoot, NodeType } from "../model/master-model
 import { edgeArray, derivedEdgeArray, MMEdge, EdgeArray, EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { ACTIONS } from "../components/App";
+import { DiagramTreeNode } from "../model/diagram-tree-model";
 
 
 let currentMMNode = masterModelRoot;
@@ -40,9 +41,9 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
 
 
 
-const cyAddEdge = (cy: Core, data: EdgeData) => {
+const cyAddEdge = (cy: Core, data: EdgeData, shouldPropagate:boolean = false): EdgeSingular => {
   if (data['MMRef'] === null) {
-    let modelEdge = new MMEdge(data['id'], data['source'], data['target'], data['type']);
+    let modelEdge = new MMEdge(data['id'], data['source'], data['target'], data['type'], shouldPropagate);
     edgeArray.addEdge(modelEdge);
     data['MMRef'] = modelEdge;
   }
@@ -96,8 +97,10 @@ const removeEdgeContextMenu = (edge: EdgeSingular) => {
   edge.data({ 'MMRef': null });
 };
 
-const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType) => {
+const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType, currentDiagram: DiagramTreeNode) => {
 
+  currentMMNode = currentDiagram.mainNode
+  console.log(currentMMNode)
   const counter = eleCounter.value;
   const defaultLabel = [type + " " + counter];
   let data = {
@@ -113,7 +116,7 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType) => {
     x: pos.x,
     y: pos.y,
   };
-
+  console.log(currentMMNode)
   if (event.target !== cy) { //on element
     data['parent'] = event.target.id() as string;
     if (type === 'state')
@@ -197,7 +200,8 @@ const cyAddOriginalEdges = (cy: Core, MMNode: MMNode) => {
   let connectedEdges = getConnectedEdges(MMNode, edgeArray);
   for (const edge of connectedEdges) {
     if (eleAlreadyIn(cy, edge.id) || 
-      edge.source.deleted || edge.target.deleted || 
+      edge.source.deleted || edge.target.deleted ||
+      edge.propagation == false ||
       edge.type === EdgeType.Aggregation) {
       continue;
     }

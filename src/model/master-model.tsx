@@ -33,10 +33,9 @@ class MMNode {
     this.isPart = false;
   }
 
-  addChild(child: MMNode): number {
+  addChild(child: MMNode) {
     this.children.push(child);
     child.parent = this;
-    return 0;
   }
   removeChild(child: MMNode): number {
     let index = this.children.indexOf(child);
@@ -65,6 +64,7 @@ class MMRoot {
 
   addChild = (child: MMNode) => {
     this.children.push(child);
+    child.parent = this;
   };
   removeChild(child: MMNode): number {
     let index = this.children.indexOf(child);

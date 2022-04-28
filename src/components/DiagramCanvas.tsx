@@ -170,7 +170,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           coreAsWell: true,
           selector: '$node > node[type != "state"]',
           onClickFunction: function (event) {
-            cyAddNodeFromContextMenu(cy, event, 'object');
+            cyAddNodeFromContextMenu(cy, event, 'object', currentDiagram.current);
           }
         },
         {
@@ -179,7 +179,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           coreAsWell: true,
           selector: '$node > node[type != "state"]',
           onClickFunction: function (event) {
-            cyAddNodeFromContextMenu(cy, event, 'process');
+            cyAddNodeFromContextMenu(cy, event, 'process', currentDiagram.current);
           },
           hasTrailingDivider: true,
         },

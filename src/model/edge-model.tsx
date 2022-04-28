@@ -21,8 +21,9 @@ class MMEdge {
   originalEdge: MMEdge | undefined;
   derivedEdges: Array<MMEdge>;
   deleted: boolean;
+  propagation: boolean;
 
-  constructor(id: string, source: MMNode, target: MMNode, type: EdgeType, originalEdge: MMEdge | undefined = undefined, label: string = '') {
+  constructor(id: string, source: MMNode, target: MMNode, type: EdgeType, propagation: boolean, originalEdge: MMEdge | undefined = undefined, label: string = '') {
     this.id = id;
     this.source = source;
     this.target = target;
@@ -31,6 +32,18 @@ class MMEdge {
     this.originalEdge = originalEdge;
     this.derivedEdges = [];
     this.deleted = false;
+    this.propagation = propagation;
+  }
+
+  addDerivedEdge(derivedEdge: MMEdge) {
+    this.derivedEdges.push(derivedEdge)
+  }
+
+  removeAllDerived(){
+    for (const derivedEdge of this.derivedEdges){
+      derivedEdgeArray.removeEdge(derivedEdge);
+    }
+    this.derivedEdges = [];
   }
 }
 

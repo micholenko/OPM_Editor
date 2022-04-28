@@ -89,7 +89,7 @@ const EdgeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
 
                 }}
                 onClick={() => {
-                  edgeCreate(edge.name);
+                  edgeCreate(edge.name, state);
                   dispatch({ type: ACTIONS.EDGE_SELECTION, payload: false });
                 }}>
                 <Image

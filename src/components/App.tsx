@@ -8,6 +8,8 @@ import { DiagramTreeNode, diagramTreeRoot } from '../model/diagram-tree-model';
 import EdgeSelectionModal from './EdgeSelectionModal';
 import { EdgeSingular, NodeSingular } from 'cytoscape';
 
+
+
 export interface useReducerProps {
   state: StateInterface;
   dispatch: Function;
@@ -29,6 +31,9 @@ export enum PropagationEnum {
   Complete
 }
 
+export let propagation: PropagationEnum = PropagationEnum.OneLevel
+export let currentDiagram: DiagramTreeNode = diagramTreeRoot
+
 export const ACTIONS = {
   CHANGE_DIAGRAM: 'change-diagram',
   INZOOM_DIAGRAM: 'inzoom-diagram',
@@ -42,12 +47,15 @@ export const ACTIONS = {
 function reducer(state, action) {
   switch (action.type) {
     case ACTIONS.CHANGE_DIAGRAM:
+      currentDiagram = action.payload;
       return { ...state, currentDiagram: action.payload };
     case ACTIONS.INZOOM_DIAGRAM:
+      currentDiagram = action.payload;
       return { ...state, currentDiagram: action.payload, lastCreatedDiagram: action.payload };
     case ACTIONS.EDGE_SELECTION:
       return { ...state, showEdgeSelectonModal: action.payload };
     case ACTIONS.CHANGE_PROPAGATION:
+      propagation = action.payload
       return {...state, propagation: action.payload}
     case ACTIONS.UPDATE_TREE:
       return {...state, timestamp: new Date()}
