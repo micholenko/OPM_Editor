@@ -2,7 +2,7 @@ import React from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Upload } from 'antd';
 import { useReducerProps } from './App';
-import { importJson } from '../helper-functions/import-interface';
+import { importJson } from '../helper-functions/import-export-interface';
 
 const dummyRequest = ({ file, onSuccess }: any) => {
   setTimeout(() => {

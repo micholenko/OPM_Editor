@@ -1,11 +1,15 @@
 import { cy } from "../components/DiagramCanvas";
 
-import { parse, reviver } from 'telejson';
-import { ACTIONS } from "../components/App";
-import { DiagramTreeNode, importDiagramTreeRoot } from '../model/diagram-tree-model';
-import { EdgeArray, importEdgeArrays, MMEdge } from '../model/edge-model';
-import { importMMRoot, MMNode, MMRoot } from '../model/master-model';
-import { eleCounter, ElementCounter } from '../helper-functions/elementCounter';
+import { parse, reviver, stringify, replacer } from 'telejson';
+import { ACTIONS, currentDiagram } from "../components/App";
+import { DiagramTreeNode, diagramTreeRoot, importDiagramTreeRoot } from '../model/diagram-tree-model';
+import { derivedEdgeArray, edgeArray, EdgeArray, importEdgeArrays, MMEdge } from '../model/edge-model';
+import { importMMRoot, masterModelRoot, MMNode, MMRoot } from '../model/master-model';
+import { eleCounter, ElementCounter } from './elementCounter';
+
+// @ts-ignore
+import { saveAs } from "file-saver";
+import { updateFromMasterModel } from "./diagram-switching-interface";
 
 const setMMNodePrototype = (node: MMNode) => {
   Object.setPrototypeOf(node, MMNode.prototype);
@@ -59,6 +63,25 @@ export const importJson = (stringJson: any, dispatch: Function) => {
 
   const diagramRoot = importedData['diagramTreeRoot'];
   cy.json(diagramRoot.diagramJson);
+  updateFromMasterModel(diagramRoot)
   dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: diagramRoot });
   dispatch({ type: ACTIONS.UPDATE_TREE });
 };
+
+export const exportJson = () => {
+  currentDiagram.diagramJson = cy.json()
+
+  const data = {
+      masterModelRoot: masterModelRoot,
+      edgeArray: edgeArray,
+      derivedEdgeArray: derivedEdgeArray,
+      diagramTreeRoot: diagramTreeRoot,
+      eleCounter: eleCounter.value,
+    };
+    //@ts-ignore
+    const stringified = JSON.stringify(data, replacer({allowClass:true, allowFunction:false}))
+    let blob = new Blob([stringified], {
+      type: "text/plain;charset=utf-8"
+    });
+    saveAs(blob, "graph.json");
+}
