@@ -12,6 +12,13 @@ export enum EdgeType {
   Classification = 'Classification-instantiation',
 };
 
+export const hierarchicalStructuralEdges = [
+  EdgeType.Aggregation,
+  EdgeType.Exhibition,
+  EdgeType.Generalization,
+  EdgeType.Classification,
+]
+
 class MMEdge {
   id: string;
   source: MMNode;
@@ -22,6 +29,7 @@ class MMEdge {
   derivedEdges: Array<MMEdge>;
   deleted: boolean;
   propagation: boolean;
+  preferOriginal: boolean;
 
   constructor(id: string, source: MMNode, target: MMNode, type: EdgeType, propagation: boolean, originalEdge: MMEdge | undefined = undefined, label: string = '') {
     this.id = id;
@@ -33,6 +41,7 @@ class MMEdge {
     this.derivedEdges = [];
     this.deleted = false;
     this.propagation = propagation;
+    this.preferOriginal = false;
   }
 
   addDerivedEdge(derivedEdge: MMEdge) {
@@ -92,6 +101,21 @@ class EdgeArray {
     });
     return returnArray;
   };
+
+  findStructuralParents(node: MMNode): MMNode | null {
+    for (const edge of this.edges) {
+      if (hierarchicalStructuralEdges.includes(edge.type) && edge.target == node)
+        return edge.source
+    }
+    return null
+  }
+  findStructuralChildren(node: MMNode): MMNode | null {
+    for (const edge of this.edges) {
+      if (hierarchicalStructuralEdges.includes(edge.type) && edge.source == node)
+        return edge.target
+    }
+    return null
+  }
 
   findRelatedEdges(node: MMNode): Array<MMEdge> {
     let returnArray: Array<MMEdge> = [];

@@ -1,5 +1,5 @@
 import { Core, EdgeSingular, NodeSingular } from "cytoscape";
-import { edgeArray, MMEdge, derivedEdgeArray } from '../model/edge-model';
+import { edgeArray, MMEdge, derivedEdgeArray, hierarchicalStructuralEdges } from '../model/edge-model';
 import { EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { cy } from '../components/DiagramCanvas';
@@ -39,7 +39,7 @@ export const edgeCheckValidTargets = (callback: Function) => {
 };
 
 
-const addDerivedEdge = (source: MMNode, target: MMNode, originalEdge: MMEdge) => {
+const addDerivedEdge = (source: MMNode, target: MMNode, originalEdge: MMEdge): MMEdge => {
   const derivedEdge = new MMEdge(
     originalEdge.id,
     source,
@@ -52,9 +52,10 @@ const addDerivedEdge = (source: MMNode, target: MMNode, originalEdge: MMEdge) =>
 
   originalEdge.addDerivedEdge(derivedEdge);
   derivedEdgeArray.addEdge(derivedEdge);
+  return derivedEdge;
 };
 
-const edgeDerivation = (sourceRef: MMNode, targetRef:MMNode, addedEdgeRef:MMEdge) => {
+const edgeDerivation = (sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEdge) => {
   if (sourceNode === null || targetNode === null)
     return;
 
@@ -100,7 +101,7 @@ const edgeDerivation = (sourceRef: MMNode, targetRef:MMNode, addedEdgeRef:MMEdge
       }
     } */
   };
-}
+};
 
 
 const addDerivedEdges = (originalEdge: MMEdge) => {
@@ -126,41 +127,23 @@ const addDerivedEdges = (originalEdge: MMEdge) => {
 };
 
 const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
+  const shouldPropagate = propagation == PropagationEnum.None ? false : true;
+  let derivedEdge;
+  if (shouldPropagate === true) {
+    if (originalEdge.source.isPart) {
+      const parent = edgeArray.findStructuralParents(originalEdge.source) as MMNode;
+      console.log(parent);
+      derivedEdge = addDerivedEdge(parent, originalEdge.target, originalEdge);
 
-  derivedEdgeArray.removeEdgesById(originalEdge.id);
-  const derivedEdge = new MMEdge(
-    originalEdge.id,
-    sourceNode?.data('MMRef'),
-    targetNode?.data('MMRef'),
-    originalEdge.type,
-    false,
-    originalEdge,
-    originalEdge.label
-  );
-
-  if (originalEdge.source.isPart) {
-    // @ts-ignore
-    const parentId = originalEdge.source.parent?.id;
-    if (eleAlreadyIn(cy, parentId)) {
-      derivedEdge.source = originalEdge.source.parent as MMNode;
     }
-    if (targetNode?.isChild()) {
-      derivedEdge.target = targetNode.parent()[0].data('MMRef');
+    else if (originalEdge.target.isPart) {
+      const parent = edgeArray.findStructuralParents(originalEdge.source) as MMNode;
+      console.log(parent);
+      derivedEdge = addDerivedEdge(parent, originalEdge.target, originalEdge);
     }
-
+    //@ts-ignore
+    derivedEdge.preferOriginal = true;
   }
-  else if (originalEdge.target.isPart) {
-    // @ts-ignore
-    const parentId = originalEdge.target.parent?.id;
-    if (eleAlreadyIn(cy, parentId)) {
-      derivedEdge.target = originalEdge.target.parent as MMNode;
-    }
-    if (sourceNode?.isChild()) {
-      derivedEdge.source = sourceNode.parent()[0].data('MMRef');
-    }
-  }
-
-  derivedEdgeArray.addEdge(derivedEdge);
 };
 
 
@@ -187,19 +170,15 @@ export const edgeCreate = (type: EdgeType, state: StateInterface) => {
   const addedEdge = cyAddEdge(cy, data, shouldPropagate);
   const addedEdgeRef = addedEdge.data('MMRef');
 
-  edgeDerivation(sourceRef, targetRef, addedEdgeRef)
-
-  if (type === EdgeType.Aggregation) {
-    targetRef.parent?.removeChild(targetRef);
+  if (hierarchicalStructuralEdges.includes(type)) {
     targetRef.isPart = true;
-    sourceRef.addChild(targetRef);
   }
-  else if (sourceRef.isPart === true || targetRef.isPart == true) {
-    addDerivedEdgesAggregation(addedEdge.data('MMRef'));
+  else {
+    edgeDerivation(sourceRef, targetRef, addedEdgeRef);
+    if (sourceRef.isPart === true || targetRef.isPart == true) {
+      addDerivedEdgesAggregation(addedEdge.data('MMRef'));
+    }
   }
-
-
-  
 
   targetNode.removeClass('eh-hover');
   sourceNode = null;
@@ -274,7 +253,7 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
   const shouldPropagate = propagation === PropagationEnum.None ? false : true;
   MMRef.propagation = shouldPropagate;
 
-  edgeDerivation(sourceRef, targetRef, MMRef)
+  edgeDerivation(sourceRef, targetRef, MMRef);
 
   /* if (shouldPropagate) {
     if ((sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
