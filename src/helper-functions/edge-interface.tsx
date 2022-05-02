@@ -6,6 +6,7 @@ import { cy } from '../components/DiagramCanvas';
 import { cyAddEdge, eleAlreadyIn } from './cytoscape-interface';
 import { masterModelRoot, MMNode } from "../model/master-model";
 import { PropagationEnum, propagation, currentDiagram, StateInterface } from "../components/App";
+import { diagramTreeRoot } from "../model/diagram-tree-model";
 
 let sourceNode: NodeSingular | null = null;
 let targetNode: NodeSingular | null = null;
@@ -55,54 +56,64 @@ const addDerivedEdge = (source: MMNode, target: MMNode, originalEdge: MMEdge): M
   return derivedEdge;
 };
 
-const edgeDerivation = (sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEdge) => {
+const deriveAll = (propagate: boolean, sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEdge, sourceMain: boolean, iterator: MMNode) => {
   if (sourceNode === null || targetNode === null)
     return;
 
-  let iterator;
-  const mainNode = currentDiagram.mainNode;
-  const shouldPropagate = propagation == PropagationEnum.None ? false : true;
-
-  if (shouldPropagate === true) {
-    if (propagation === PropagationEnum.OneLevel) {
-      if (sourceNode.isChild() && sourceNode.parent()[0].data('MMRef') === mainNode) {
-        addDerivedEdge(mainNode as MMNode, targetRef, addedEdgeRef);
-      }
-      else if (targetNode.isChild() && targetNode?.parent()[0].data('MMRef') === mainNode) {
-        addDerivedEdge(sourceRef, mainNode as MMNode, addedEdgeRef);
-      }
+  if (sourceMain) {
+    while (iterator !== masterModelRoot) {
+      const derivedEdge = addDerivedEdge(iterator as MMNode, targetRef, addedEdgeRef);
+      derivedEdge.propagation = propagate;
+      //@ts-ignore
+      iterator = iterator.parent;
     }
-    else if (propagation === PropagationEnum.Complete) {
-      if (sourceRef === mainNode || (sourceNode.isChild() && sourceNode.parent()[0].data('MMRef') === mainNode)) {
-        iterator = sourceRef.parent;
-        while (iterator !== masterModelRoot) {
-          addDerivedEdge(iterator as MMNode, targetRef, addedEdgeRef);
-          //@ts-ignore
-          iterator = iterator.parent;
-        }
-      }
-      else if (targetRef === mainNode || (targetNode.isChild() && targetNode?.parent()[0].data('MMRef') === mainNode)) {
-        iterator = targetRef.parent;
-        while (iterator !== masterModelRoot) {
-          addDerivedEdge(sourceRef, iterator as MMNode, addedEdgeRef);
-          //@ts-ignore
-          iterator = iterator.parent;
-        }
-      }
-
-
+  }
+  else {
+    while (iterator !== masterModelRoot) {
+      const derivedEdge = addDerivedEdge(sourceRef, iterator as MMNode, addedEdgeRef);
+      derivedEdge.propagation = propagate;
+      //@ts-ignore
+      iterator = iterator.parent;
     }
-    /* if (propagation == PropagationEnum.OneLevel) {
-  
-      if ((sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||
-        targetNode?.isChild() && targetNode?.data('type') !== 'state') &&
-        sourceNode?.parent() !== targetNode?.parent()) {
-        addDerivedEdges(addedEdge.data('MMRef'));
-      }
-    } */
-  };
+  }
 };
 
+const edgeDerivation = (sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEdge) => {
+  if (sourceNode === null || targetNode === null || currentDiagram === diagramTreeRoot)
+    return;
+
+  const mainNode = currentDiagram.mainNode as MMNode;
+
+  let sourceMain, iterator;
+  if (sourceRef === mainNode || (sourceNode.isChild() && sourceNode.parent()[0].data('MMRef') === mainNode)) {
+    sourceMain = true;
+    iterator = sourceRef.parent as MMNode;
+  }
+  else {
+    sourceMain = false;
+    iterator = targetRef.parent as MMNode;
+  }
+
+  if (propagation === PropagationEnum.None) {
+    deriveAll(false, sourceRef, targetRef, addedEdgeRef, sourceMain, iterator);
+  }
+  else if (propagation === PropagationEnum.Complete) {
+    deriveAll(true, sourceRef, targetRef, addedEdgeRef, sourceMain, iterator);
+  }
+  else if (propagation === PropagationEnum.OneLevel) {
+    if (sourceMain) {
+      const derivedEdge = addDerivedEdge(mainNode as MMNode, targetRef, addedEdgeRef);
+      derivedEdge.propagation = true;
+      iterator = mainNode.parent as MMNode;
+    }
+    else {
+      const derivedEdge = addDerivedEdge(sourceRef, mainNode as MMNode, addedEdgeRef);
+      derivedEdge.propagation = true;
+      iterator = mainNode.parent as MMNode;
+    }
+    deriveAll(false, sourceRef, targetRef, addedEdgeRef, sourceMain, iterator);
+  }
+};
 
 const addDerivedEdges = (originalEdge: MMEdge) => {
   const derivedEdge = new MMEdge(
@@ -145,7 +156,6 @@ const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
     derivedEdge.preferOriginal = true;
   }
 };
-
 
 export const edgeCreate = (type: EdgeType, state: StateInterface) => {
   if (sourceNode === null || targetNode === null)

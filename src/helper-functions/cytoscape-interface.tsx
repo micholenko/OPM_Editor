@@ -207,33 +207,57 @@ const createCyEdgeData = (edge: MMEdge): any => {
 };
 
 const skipForOriginal = (cy: Core, edge: MMEdge): boolean => {
-  const sourceNodeId = edge.originalEdge?.source.id as string
-  const targetNodeId = edge.originalEdge?.target.id as string
-  const originalEdge = edge.originalEdge
-
-  console.log('here')
-  console.log(sourceNodeId)
-  console.log(targetNodeId)
-  console.log(edge.preferOriginal && cy.getElementById(sourceNodeId) && cy.getElementById(targetNodeId))
-  console.log(cy.getElementById(sourceNodeId))
-  console.log(cy.getElementById(targetNodeId))
-  console.log('here')
+  const sourceNodeId = edge.originalEdge?.source.id as string;
+  const targetNodeId = edge.originalEdge?.target.id as string;
   if (edge.preferOriginal && eleAlreadyIn(cy, sourceNodeId) && eleAlreadyIn(cy, targetNodeId))
-    return true
+    return true;
   else
-    return false
-}
+    return false;
+};
 
 const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
   for (const edge of edges) {
     if (eleAlreadyIn(cy, edge.id) ||
       edge.source.deleted || edge.target.deleted ||
-      edge.originalEdge === undefined && edge.propagation == false){
+      edge.propagation == false) {
       continue;
     }
 
     if (edge.originalEdge !== undefined && skipForOriginal(cy, edge))
-     continue
+      continue;
+
+    let connectedNode;
+    if (MMNode === edge.source)
+      connectedNode = edge.target;
+    else
+      connectedNode = edge.source;
+
+    if (!eleAlreadyIn(cy, connectedNode.id)) {
+      let parent = connectedNode.parent as MMNode;
+      const nodeData = createCyNodeData(connectedNode);
+
+      if (connectedNode.type === 'state') {
+        nodeData['parent'] = parent ? parent.id : null;
+        if (!eleAlreadyIn(cy, parent.id)) {
+          const nodeParentData = createCyNodeData(parent);
+          cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
+        }
+      }
+      cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent);
+    }
+
+    const edgeData = createCyEdgeData(edge);
+    cyAddEdge(cy, edgeData);
+  }
+};
+
+const cyAddEdgesTest = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
+  for (const edge of edges) {
+    if (eleAlreadyIn(cy, edge.id) ||
+      edge.source.deleted || edge.target.deleted) {
+      continue;
+    }
+
 
     let connectedNode;
     if (MMNode === edge.source)
@@ -266,9 +290,9 @@ const cyAddConnectedNodes = (cy: Core, MMNode: MMNode) => {
   let connectedDerivedEdges = getConnectedEdges(MMNode, derivedEdgeArray);
   // let connectedPreferedEdges = connectedDerivedEdges.map((edge) => edge.preferOriginal ? edge.originalEdge : null) as Array<MMEdge>;
   // connectedPreferedEdges = connectedDerivedEdges.filter((edge) => edge !== null);
-  console.log(connectedStructuralEdges)
-  console.log(connectedDerivedEdges)
-  console.log(connectedOriginalEdges)
+  console.log(connectedStructuralEdges);
+  console.log(connectedDerivedEdges);
+  console.log(connectedOriginalEdges);
   cyAddEdges(cy, MMNode, connectedStructuralEdges);
   // cyAddEdges(cy, MMNode, connectedPreferedEdges);
   cyAddEdges(cy, MMNode, connectedDerivedEdges);
@@ -281,4 +305,21 @@ const cyAddConnectedNodesInzoom = (cy: Core, MMNode: MMNode) => {
   let connectedDerivedEdges = getConnectedEdges(MMNode, derivedEdgeArray);
   cyAddEdges(cy, MMNode, connectedDerivedEdges);
 };
-export { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, cyAddConnectedNodes, cyAddEdge, removeNodeContextMenu, removeEdgeContextMenu, eleAlreadyIn };
+
+const cyAddAllConnected = (cy: Core, node: MMNode) => {
+  let connectedOriginalEdges = getConnectedEdges(node, edgeArray);
+  cyAddEdgesTest(cy, node, connectedOriginalEdges);
+  let connectedDerivedEdges = getConnectedEdges(node, derivedEdgeArray);
+  cyAddEdgesTest(cy, node, connectedDerivedEdges);
+}
+export {
+  cyAddNodeFromContextMenu,
+  cyAddInzoomedNodes,
+  cyAddConnectedNodesInzoom,
+  cyAddConnectedNodes,
+  cyAddEdge,
+  removeNodeContextMenu,
+  removeEdgeContextMenu,
+  eleAlreadyIn,
+  cyAddAllConnected
+};

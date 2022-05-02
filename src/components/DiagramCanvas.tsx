@@ -12,7 +12,7 @@ import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
 import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
 
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
-import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, removeEdgeContextMenu, removeNodeContextMenu } from '../helper-functions/cytoscape-interface';
+import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, removeEdgeContextMenu, removeNodeContextMenu, cyAddAllConnected } from '../helper-functions/cytoscape-interface';
 import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-functions/tippy-elements';
 import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../helper-functions/edge-interface';
 
@@ -215,6 +215,18 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
             node.data({ labelWidth: node.width() + 1 }); // workaround: width has to be changed or ghost node does not appear
           },
           hasTrailingDivider: true,
+        },
+        {
+          id: 'add-all-connected',
+          content: 'Add All Connected',
+          coreAsWell: false,
+          selector: 'node',
+          onClickFunction: function (event) {
+            const node = event.target;
+            const MMRef = node.data('MMRef');
+            cyAddAllConnected(cy, MMRef)
+          },
+          hasTrailingDivider: false,
         },
         {
           id: 'show-hidden',
