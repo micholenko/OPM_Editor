@@ -144,7 +144,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           coreAsWell: false,
           selector: 'node[type = "object"]',
           onClickFunction: function (event) {
-            cyAddNodeFromContextMenu(cy, event, 'state');
+            cyAddNodeFromContextMenu(cy, event, 'state', currentDiagram.current);
           },
         },
         {
