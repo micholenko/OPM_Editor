@@ -41,17 +41,6 @@ cytoscape.use(coseBilkent);
 
 let cy: Core;
 
-var defaultOptions = {
-  name: "cose-bilkent",
-  // other options
-  fit: false,
-  padding: 250,
-  nodeDimensionsIncludeLabels: true,
-  idealEdgeLength: 150,
-  edgeElasticity: 0.1,
-  nodeRepulsion: 8500
-};
-
 const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
   const currentDiagram = useRef();
   currentDiagram.current = state.currentDiagram;
@@ -145,12 +134,6 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
             if (propagation.current !== PropagationEnum.None)
               cyAddConnectedNodesInzoom(cy, MMReference);
 
-            let layout = cy.layout(defaultOptions);
-            layout.run();
-
-            cy.pan({ x: 500, y: 250 });
-            cy.zoom(1);
-
             dispatch({ type: ACTIONS.INZOOM_DIAGRAM, payload: nextDiagram });
           },
           hasTrailingDivider: true
@@ -239,7 +222,6 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           },
           hasTrailingDivider: true,
         },
-
       ]
     });
   };
@@ -256,7 +238,6 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
     registerPopperHandlers(cy);
     console.log('reregistered');
     cy.edgeEditing(eeDefaults);
-
   }, []);
 
   return (

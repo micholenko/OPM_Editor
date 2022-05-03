@@ -5,9 +5,15 @@ import { eleCounter } from './elementCounter';
 import { ACTIONS } from "../components/App";
 import { DiagramTreeNode } from "../model/diagram-tree-model";
 
+let options = {
+  name: 'random',
+  fit: false,
+  padding: 30,
+  boundingBox: {},
+  avoidOverlap: true,
+};
 
 let currentMMNode = masterModelRoot;
-
 
 interface NodeData {
   id: string,
@@ -25,6 +31,26 @@ interface EdgeData {
   source: MMNode,
   target: MMNode,
 }
+interface CyViewport {
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  w: number,
+  h: number,
+}
+
+const cropViewport = (viewport: CyViewport): CyViewport => {
+  const widthDiff = viewport.w / 6;
+  const heightDiff = viewport.h / 6;
+  viewport.x1 = viewport.x1 + widthDiff;
+  viewport.x2 = viewport.x2 - widthDiff;
+  viewport.y1 = viewport.y1 + heightDiff;
+  viewport.y2 = viewport.y2 - heightDiff;
+  viewport.w = viewport.w - widthDiff * 2;
+  viewport.h = viewport.h - heightDiff * 2;
+  return viewport;
+};
 
 const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot) => {
   data['label'] = data['label'].charAt(0).toUpperCase() + data['label'].substring(1).toLowerCase();
@@ -33,10 +59,23 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
     parentMMNode.addChild(modelNode);
     data['MMRef'] = modelNode;
   }
+
+  cy.elements().lock();
+
   cy.add({
     data: data,
     position: position
   });
+
+  if (position.x === 0 && position.y === 0) {
+    const boundingBox = cropViewport(cy.extent());
+    options.boundingBox = boundingBox;
+    const layout = cy.layout(options);
+    layout.run();
+  }
+
+  cy.elements().unlock();
+
 };
 
 
@@ -144,9 +183,12 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
   let type = inzoomedNode.data('type') as NodeType;
   let parentId = inzoomedNode.id() as string;
 
-  // add inzoomed node to new diagram
-  cyAddNode(cy, inzoomedNode.data(), { x: 0, y: 0 }, currentMMNode);
+  const viewport = cy.extent();
+  const centerX = (viewport.x1 + viewport.x2) / 2;
+  const centerY = (viewport.y1 + viewport.y2) / 2;
 
+  // add inzoomed node to new diagram
+  cyAddNode(cy, inzoomedNode.data(), { x: centerX, y: centerY }, currentMMNode);
 
   let MMRef = inzoomedNode.data('MMRef') as MMNode;
   // add 2 default subnodes
@@ -158,7 +200,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     type: type,
     MMRef: null
   };
-  cyAddNode(cy, data, { x: 50, y: 50 }, MMRef);
+  cyAddNode(cy, data, { x: centerX - 20, y: centerY - 40 }, MMRef);
 
   counter = eleCounter.value;
   data = {
@@ -168,7 +210,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     type: type,
     MMRef: null
   };
-  cyAddNode(cy, data, { x: 150, y: 150 }, MMRef);
+  cyAddNode(cy, data, { x: centerX + 20, y: centerY + 40 }, MMRef);
 
 };
 
@@ -311,7 +353,7 @@ const cyAddAllConnected = (cy: Core, node: MMNode) => {
   cyAddEdgesTest(cy, node, connectedOriginalEdges);
   let connectedDerivedEdges = getConnectedEdges(node, derivedEdgeArray);
   cyAddEdgesTest(cy, node, connectedDerivedEdges);
-}
+};
 export {
   cyAddNodeFromContextMenu,
   cyAddInzoomedNodes,
