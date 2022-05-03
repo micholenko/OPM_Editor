@@ -6,7 +6,7 @@ import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
 import { ACTIONS, useReducerProps } from './App';
 
 import '../css/general.css';
-import { switchDiagrams, updateFromMasterModel } from '../helper-functions/diagram-switching-interface'
+import { switchDiagrams, updateFromMasterModel } from '../controller/diagram-switching'
 
 interface DataNode {
   title: string;

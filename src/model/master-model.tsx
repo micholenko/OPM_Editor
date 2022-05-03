@@ -1,12 +1,21 @@
 import { DiagramTreeNode } from "./diagram-tree-model";
 
-import { Essence, Affiliation } from '../enums/node-property-enums';
-
 enum NodeType {
   Object = 'object',
   Process = 'process',
   State = 'state',
 }
+
+enum Essence {
+  Informatical = 'no',
+  Physical = 'yes'
+}
+
+enum Affiliation {
+  Systemic = 'solid',
+  Environmental = 'dashed'
+}
+
 
 class MMNode {
   id: string;
@@ -81,4 +90,4 @@ const importMMRoot = (newRoot: MMRoot) => {
   masterModelRoot = newRoot;
 };
 
-export { masterModelRoot, MMNode, MMRoot, NodeType, importMMRoot };
+export { masterModelRoot, MMNode, MMRoot, NodeType, importMMRoot, Essence, Affiliation };

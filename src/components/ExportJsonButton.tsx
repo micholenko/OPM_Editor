@@ -1,7 +1,7 @@
 import React from 'react';
 import { DownloadOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
-import { exportJson } from '../helper-functions/import-export-interface';
+import { exportJson } from '../controller/import-export';
 
 
 const ExportJsonButton = () => {

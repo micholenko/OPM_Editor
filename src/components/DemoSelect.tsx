@@ -1,7 +1,7 @@
 import React from 'react';
 import { Select } from 'antd';
 import { useReducerProps } from './App';
-import { importJson } from '../helper-functions/import-export-interface';
+import { importJson } from '../controller/import-export';
 import simpleDemo from '../demos/simple.json';
 const { Option } = Select;
 

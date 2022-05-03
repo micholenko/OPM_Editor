@@ -12,9 +12,9 @@ import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
 import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
 
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
-import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, removeEdgeContextMenu, removeNodeContextMenu, cyAddAllConnected } from '../helper-functions/cytoscape-interface';
-import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../helper-functions/tippy-elements';
-import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../helper-functions/edge-interface';
+import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, removeEdgeContextMenu, removeNodeContextMenu, cyAddAllConnected } from '../controller/general';
+import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../controller/tippy-elements';
+import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../controller/edge';
 
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import '../css/general.css';
@@ -22,7 +22,7 @@ import '../css/general.css';
 import { ACTIONS, useReducerProps, PropagationEnum } from './App';
 import { json } from 'stream/consumers';
 
-import { Essence, Affiliation } from '../enums/node-property-enums';
+import { Essence, Affiliation } from "../model/master-model";
 
 var $ = require('jquery');
 var konva = require('konva');

@@ -7,17 +7,17 @@ import 'antd/dist/antd.css';
 import { EdgeType } from '../model/edge-model';
 import { ACTIONS, StateInterface } from './App';
 
-import { edgeCreate, edgeCancel } from '../helper-functions/edge-interface';
+import { edgeCreate, edgeCancel } from '../controller/edge';
 
-import consumptionResultImg from './../data/consumption-result.svg';
-import taggedImg from './../data/tagged.svg';
-import effectImg from './../data/effect.svg';
-import instrumentImg from './../data/instrument.svg';
-import agentImg from './../data/agent.svg';
-import aggregationImg from './../data/aggregation.svg';
-import exhibitionImg from './../data/exhibition.svg';
-import generalizationImg from './../data/generalization.svg';
-import classificationImg from './../data/classification.svg';
+import consumptionResultImg from './../data/edge-type-images/consumption-result.svg';
+import taggedImg from './../data/edge-type-images/tagged.svg';
+import effectImg from './../data/edge-type-images/effect.svg';
+import instrumentImg from './../data/edge-type-images/instrument.svg';
+import agentImg from './../data/edge-type-images/agent.svg';
+import aggregationImg from './../data/edge-type-images/aggregation.svg';
+import exhibitionImg from './../data/edge-type-images/exhibition.svg';
+import generalizationImg from './../data/edge-type-images/generalization.svg';
+import classificationImg from './../data/edge-type-images/classification.svg';
 
 
 

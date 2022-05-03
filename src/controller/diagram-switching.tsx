@@ -3,7 +3,7 @@ import { cy } from "../components/DiagramCanvas";
 import { Core } from "cytoscape";
 import { masterModelRoot, MMNode } from "../model/master-model";
 import { DiagramTreeNode, diagramTreeRoot } from "../model/diagram-tree-model";
-import { cyAddConnectedNodes } from "./cytoscape-interface";
+import { cyAddConnectedNodes } from "./general";
 
 
 const getEdgeLabel = (MMRef: MMEdge): string => {

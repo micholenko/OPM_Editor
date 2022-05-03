@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { edgeReconnect } from "../helper-functions/edge-interface";
+import { edgeReconnect } from "../controller/edge";
 
 export const eeDefaults = {
   // A function parameter to get bend point positions, should return positions of bend points

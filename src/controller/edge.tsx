@@ -3,7 +3,7 @@ import { edgeArray, MMEdge, derivedEdgeArray, hierarchicalStructuralEdges } from
 import { EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { cy } from '../components/DiagramCanvas';
-import { cyAddEdge, eleAlreadyIn } from './cytoscape-interface';
+import { cyAddEdge, eleAlreadyIn } from './general';
 import { masterModelRoot, MMNode, MMRoot } from "../model/master-model";
 import { PropagationEnum, propagation, currentDiagram, StateInterface } from "../components/App";
 import { diagramTreeRoot } from "../model/diagram-tree-model";

@@ -9,7 +9,7 @@ import { eleCounter, ElementCounter } from './elementCounter';
 
 // @ts-ignore
 import { saveAs } from "file-saver";
-import { updateFromMasterModel } from "./diagram-switching-interface";
+import { updateFromMasterModel } from "./diagram-switching";
 
 const setMMNodePrototype = (node: MMNode) => {
   Object.setPrototypeOf(node, MMNode.prototype);
