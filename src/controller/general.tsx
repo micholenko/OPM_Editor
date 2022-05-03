@@ -1,9 +1,17 @@
-import { Core, EdgeCollection, EdgeSingular, NodeSingular } from "cytoscape";
-import { masterModelRoot, MMNode, MMRoot, NodeType } from "../model/master-model";
-import { edgeArray, derivedEdgeArray, MMEdge, EdgeArray, EdgeType, hierarchicalStructuralEdges } from '../model/edge-model';
-import { eleCounter } from './elementCounter';
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
+import { Core, EdgeSingular, NodeSingular } from "cytoscape";
 import { ACTIONS } from "../components/App";
 import { DiagramTreeNode } from "../model/diagram-tree-model";
+import { derivedEdgeArray, edgeArray, EdgeArray, EdgeType, hierarchicalStructuralEdges, MMEdge } from '../model/edge-model';
+import { masterModelRoot, MMNode, MMRoot, NodeType } from "../model/master-model";
+import { eleCounter } from './elementCounter';
+
 
 let options = {
   name: 'random',

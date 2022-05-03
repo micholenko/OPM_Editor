@@ -1,12 +1,20 @@
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
+import { Typography } from 'antd';
 import React from 'react';
 import './../css/general.css';
-import { Typography } from 'antd';
-import Propagation from './Propagation';
 import { useReducerProps } from './App';
-import ExportPngButton from './ExportPngButton';
-import ExportJsonButton from './ExportJsonButton';
-import ImportJsonButton from './ImportJsonButton';
 import DemoSelect from './DemoSelect';
+import ExportJsonButton from './ExportJsonButton';
+import ExportPngButton from './ExportPngButton';
+import ImportJsonButton from './ImportJsonButton';
+import Propagation from './Propagation';
+
 
 const TopToolbar: React.FC<useReducerProps> = ({ state, dispatch }) => {
   return (

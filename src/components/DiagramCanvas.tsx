@@ -1,28 +1,27 @@
 // @ts-nocheck
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import cytoscape, { CoreGraphManipulation, CoreGraphManipulationExt } from 'cytoscape';
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
+import cytoscape from 'cytoscape';
+import 'cytoscape-context-menus/cytoscape-context-menus.css';
+import coseBilkent from 'cytoscape-cose-bilkent';
 import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
-import coseBilkent from 'cytoscape-cose-bilkent';
-
-import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
-import { edgeArray, MMEdge, derivedEdgeArray } from '../model/edge-model';
-
-import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
-import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
-
-import { cyStylesheet } from '../options/cytoscape-stylesheet';
-import { cyAddNodeFromContextMenu, cyAddInzoomedNodes, cyAddConnectedNodesInzoom, removeEdgeContextMenu, removeNodeContextMenu, cyAddAllConnected } from '../controller/general';
-import { nodeLabelEditingPopup, edgeLabelEditingPopup } from '../controller/tippy-elements';
+import React, { useEffect, useRef } from 'react';
 import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../controller/edge';
-
-import 'cytoscape-context-menus/cytoscape-context-menus.css';
+import { cyAddAllConnected, cyAddConnectedNodesInzoom, cyAddInzoomedNodes, cyAddNodeFromContextMenu, removeEdgeContextMenu, removeNodeContextMenu } from '../controller/general';
+import { edgeLabelEditingPopup, nodeLabelEditingPopup } from '../controller/tippy-elements';
 import '../css/general.css';
-
-import { ACTIONS, useReducerProps, PropagationEnum } from './App';
-import { json } from 'stream/consumers';
-
-import { Essence, Affiliation } from "../model/master-model";
+import { DiagramTreeNode } from '../model/diagram-tree-model';
+import { Affiliation, Essence } from "../model/master-model";
+import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
+import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
+import { cyStylesheet } from '../options/cytoscape-stylesheet';
+import { ACTIONS, PropagationEnum, useReducerProps } from './App';
 
 var $ = require('jquery');
 var konva = require('konva');
@@ -246,3 +245,4 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
 
 export default DiagramCanvas;
 export { cy };
+

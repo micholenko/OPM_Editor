@@ -1,8 +1,16 @@
-import React from 'react';
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Upload } from 'antd';
-import { useReducerProps } from './App';
+import React from 'react';
 import { importJson } from '../controller/import-export';
+import { useReducerProps } from './App';
+
 
 const dummyRequest = ({ file, onSuccess }: any) => {
   setTimeout(() => {

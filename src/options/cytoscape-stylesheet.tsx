@@ -1,3 +1,10 @@
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
 export const cyStylesheet = [
   // cytoscape elements
   {
@@ -82,7 +89,7 @@ export const cyStylesheet = [
       'text-valign': 'top',
       'padding': 8,
       'min-width': 180,
-      'min-height': 300 
+      'min-height': 300
     }
   },
 
@@ -223,5 +230,4 @@ export const cyStylesheet = [
       'source-arrow-color': 'grey'
     }
   },
-
 ];

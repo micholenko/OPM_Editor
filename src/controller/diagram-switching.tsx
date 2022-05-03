@@ -1,8 +1,15 @@
-import { MMEdge } from "../model/edge-model";
-import { cy } from "../components/DiagramCanvas";
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
 import { Core } from "cytoscape";
-import { masterModelRoot, MMNode } from "../model/master-model";
+import { cy } from "../components/DiagramCanvas";
 import { DiagramTreeNode, diagramTreeRoot } from "../model/diagram-tree-model";
+import { MMEdge } from "../model/edge-model";
+import { masterModelRoot, MMNode } from "../model/master-model";
 import { cyAddConnectedNodes } from "./general";
 
 

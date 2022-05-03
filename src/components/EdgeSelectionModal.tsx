@@ -1,24 +1,25 @@
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
 
-import React from 'react';
-
-import { Modal, List, Card, Image } from "antd";
+import { Card, Image, List, Modal } from "antd";
 import 'antd/dist/antd.css';
-
+import React from 'react';
+import { edgeCancel, edgeCreate } from '../controller/edge';
 import { EdgeType } from '../model/edge-model';
-import { ACTIONS, StateInterface } from './App';
-
-import { edgeCreate, edgeCancel } from '../controller/edge';
-
-import consumptionResultImg from './../data/edge-type-images/consumption-result.svg';
-import taggedImg from './../data/edge-type-images/tagged.svg';
-import effectImg from './../data/edge-type-images/effect.svg';
-import instrumentImg from './../data/edge-type-images/instrument.svg';
 import agentImg from './../data/edge-type-images/agent.svg';
 import aggregationImg from './../data/edge-type-images/aggregation.svg';
+import classificationImg from './../data/edge-type-images/classification.svg';
+import consumptionResultImg from './../data/edge-type-images/consumption-result.svg';
+import effectImg from './../data/edge-type-images/effect.svg';
 import exhibitionImg from './../data/edge-type-images/exhibition.svg';
 import generalizationImg from './../data/edge-type-images/generalization.svg';
-import classificationImg from './../data/edge-type-images/classification.svg';
-
+import instrumentImg from './../data/edge-type-images/instrument.svg';
+import taggedImg from './../data/edge-type-images/tagged.svg';
+import { ACTIONS, StateInterface } from './App';
 
 
 interface ModalProps {

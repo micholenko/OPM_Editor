@@ -1,8 +1,14 @@
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
+import { Radio, RadioChangeEvent, Typography } from 'antd';
 import React from 'react';
-import { Radio, RadioChangeEvent } from 'antd';
-import { Typography } from 'antd';
-import { ACTIONS, useReducerProps } from './App';
-import { PropagationEnum } from './App';
+import { ACTIONS, PropagationEnum, useReducerProps } from './App';
+
 
 const Propagation: React.FC<useReducerProps> = ({state, dispatch}) => {
   const onChange = (evt: RadioChangeEvent) => {

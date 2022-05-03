@@ -1,13 +1,20 @@
 // @ts-nocheck
-import { useEffect, useReducer } from 'react';
-import './../css/general.css';
-import TopToolbar from './TopToolbar';
-import LeftSidebar from './LeftSidebar';
-import DiagramCanvas from './DiagramCanvas';
-import { DiagramTreeNode, diagramTreeRoot } from '../model/diagram-tree-model';
-import EdgeSelectionModal from './EdgeSelectionModal';
-import { EdgeSingular, NodeSingular } from 'cytoscape';
 
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
+import { EdgeSingular, NodeSingular } from 'cytoscape';
+import { useReducer } from 'react';
+import { DiagramTreeNode, diagramTreeRoot } from '../model/diagram-tree-model';
+import './../css/general.css';
+import DiagramCanvas from './DiagramCanvas';
+import EdgeSelectionModal from './EdgeSelectionModal';
+import LeftSidebar from './LeftSidebar';
+import TopToolbar from './TopToolbar';
 
 
 export interface useReducerProps {

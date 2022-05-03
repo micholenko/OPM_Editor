@@ -1,12 +1,19 @@
-import { Core, EdgeSingular, NodeSingular } from "cytoscape";
-import { edgeArray, MMEdge, derivedEdgeArray, hierarchicalStructuralEdges } from '../model/edge-model';
-import { EdgeType } from '../model/edge-model';
-import { eleCounter } from './elementCounter';
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
+import { EdgeSingular, NodeSingular } from "cytoscape";
+import { currentDiagram, propagation, PropagationEnum, StateInterface } from "../components/App";
 import { cy } from '../components/DiagramCanvas';
-import { cyAddEdge, eleAlreadyIn } from './general';
-import { masterModelRoot, MMNode, MMRoot } from "../model/master-model";
-import { PropagationEnum, propagation, currentDiagram, StateInterface } from "../components/App";
 import { diagramTreeRoot } from "../model/diagram-tree-model";
+import { derivedEdgeArray, edgeArray, EdgeType, hierarchicalStructuralEdges, MMEdge } from '../model/edge-model';
+import { masterModelRoot, MMNode } from "../model/master-model";
+import { eleCounter } from './elementCounter';
+import { cyAddEdge } from './general';
+
 
 let sourceNode: NodeSingular | null = null;
 let targetNode: NodeSingular | null = null;

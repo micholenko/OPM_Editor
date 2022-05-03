@@ -1,12 +1,18 @@
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
 import { Tree } from 'antd';
-import { Core } from 'cytoscape';
 import 'antd/dist/antd.css';
 import { useEffect, useState } from 'react';
-import { diagramTreeRoot, DiagramTreeNode } from '../model/diagram-tree-model';
+import { switchDiagrams, updateFromMasterModel } from '../controller/diagram-switching';
+import '../css/general.css';
+import { DiagramTreeNode, diagramTreeRoot } from '../model/diagram-tree-model';
 import { ACTIONS, useReducerProps } from './App';
 
-import '../css/general.css';
-import { switchDiagrams, updateFromMasterModel } from '../controller/diagram-switching'
 
 interface DataNode {
   title: string;

@@ -1,8 +1,17 @@
-import React from 'react';
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
 import { Select } from 'antd';
-import { useReducerProps } from './App';
+import React from 'react';
 import { importJson } from '../controller/import-export';
 import simpleDemo from '../demos/simple.json';
+import { useReducerProps } from './App';
+
+
 const { Option } = Select;
 
 const DemoSelect: React.FC<useReducerProps> = ({ state, dispatch }) => {

@@ -1,4 +1,13 @@
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
+
 import { NodeSingular } from "cytoscape";
+
+
 export let ehDefaults = {
   canConnect: function (sourceNode: NodeSingular, targetNode: NodeSingular) {
     // whether an edge can be created between source and target

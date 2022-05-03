@@ -1,15 +1,21 @@
-import { cy } from "../components/DiagramCanvas";
-
-import { parse, reviver, stringify, replacer } from 'telejson';
-import { ACTIONS, currentDiagram } from "../components/App";
-import { DiagramTreeNode, diagramTreeRoot, importDiagramTreeRoot } from '../model/diagram-tree-model';
-import { derivedEdgeArray, edgeArray, EdgeArray, importEdgeArrays, MMEdge } from '../model/edge-model';
-import { importMMRoot, masterModelRoot, MMNode, MMRoot } from '../model/master-model';
-import { eleCounter, ElementCounter } from './elementCounter';
+/* 
+ * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * Copyright: Copyright 2022, OPM Editor
+ * Made for Bachelor's Thesis - Agile Model Editor
+ * License: MIT
+*/
 
 // @ts-ignore
 import { saveAs } from "file-saver";
+import { replacer, reviver } from 'telejson';
+import { ACTIONS, currentDiagram } from "../components/App";
+import { cy } from "../components/DiagramCanvas";
+import { DiagramTreeNode, diagramTreeRoot, importDiagramTreeRoot } from '../model/diagram-tree-model';
+import { derivedEdgeArray, edgeArray, EdgeArray, importEdgeArrays, MMEdge } from '../model/edge-model';
+import { importMMRoot, masterModelRoot, MMNode, MMRoot } from '../model/master-model';
 import { updateFromMasterModel } from "./diagram-switching";
+import { eleCounter, ElementCounter } from './elementCounter';
+
 
 const setMMNodePrototype = (node: MMNode) => {
   Object.setPrototypeOf(node, MMNode.prototype);
