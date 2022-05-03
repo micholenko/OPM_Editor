@@ -4,7 +4,7 @@ import { EdgeType } from '../model/edge-model';
 import { eleCounter } from './elementCounter';
 import { cy } from '../components/DiagramCanvas';
 import { cyAddEdge, eleAlreadyIn } from './cytoscape-interface';
-import { masterModelRoot, MMNode } from "../model/master-model";
+import { masterModelRoot, MMNode, MMRoot } from "../model/master-model";
 import { PropagationEnum, propagation, currentDiagram, StateInterface } from "../components/App";
 import { diagramTreeRoot } from "../model/diagram-tree-model";
 
@@ -94,6 +94,9 @@ const edgeDerivation = (sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEd
     iterator = targetRef.parent as MMNode;
   }
 
+  if (iterator === masterModelRoot || iterator === null)
+    return;
+
   if (propagation === PropagationEnum.None) {
     deriveAll(false, sourceRef, targetRef, addedEdgeRef, sourceMain, iterator);
   }
@@ -102,14 +105,14 @@ const edgeDerivation = (sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEd
   }
   else if (propagation === PropagationEnum.OneLevel) {
     if (sourceMain) {
-      const derivedEdge = addDerivedEdge(mainNode as MMNode, targetRef, addedEdgeRef);
+      const derivedEdge = addDerivedEdge(iterator, targetRef, addedEdgeRef);
       derivedEdge.propagation = true;
-      iterator = mainNode.parent as MMNode;
+      iterator = iterator.parent as MMNode;
     }
     else {
-      const derivedEdge = addDerivedEdge(sourceRef, mainNode as MMNode, addedEdgeRef);
+      const derivedEdge = addDerivedEdge(sourceRef, iterator, addedEdgeRef);
       derivedEdge.propagation = true;
-      iterator = mainNode.parent as MMNode;
+      iterator = iterator.parent as MMNode;
     }
     deriveAll(false, sourceRef, targetRef, addedEdgeRef, sourceMain, iterator);
   }
