@@ -16,6 +16,7 @@ const nodeLabelEditingPopup = (cy: Core) => {
       // content prop can be used when the target is a single element https://atomiks.github.io/tippyjs/v6/constructor/#prop
       content: () => {
         let content = document.createElement('div');
+        content.classList.add('renameDialog')
 
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
@@ -78,6 +79,7 @@ const edgeLabelEditingPopup = (cy: Core) => {
       // content prop can be used when the target is a single element https://atomiks.github.io/tippyjs/v6/constructor/#prop
       content: () => {
         let content = document.createElement('div');
+        content.classList.add('renameDialog')
 
         const inputElement = document.createElement('input');
         inputElement.type = 'text';

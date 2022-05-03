@@ -107,3 +107,27 @@
 	margin: 5px;
 	height: fit-content;
 }
+
+.renameDialog{
+	background-color: #dee2e6;
+	padding: 5px;
+	border: black 1.5px solid;
+}
+.renameDialog > * {
+	margin: 2px;
+}
+.renameDialog > button {
+	border-width: 0;
+	background-color: white;
+	border-radius: 2px;
+}
+
+.renameDialog > button:hover {
+	color: #1890ff;
+	transition: 0.3s;
+}
+
+.renameDialog > input {
+	border: black 1.5px solid;
+	border-radius: 2px;
+}
