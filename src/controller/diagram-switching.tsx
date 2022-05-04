@@ -14,10 +14,17 @@ import { cyAddConnectedNodes } from "./general";
 
 
 const getEdgeLabel = (MMRef: MMEdge): string => {
-  if (MMRef.originalEdge)
-    return MMRef.originalEdge.label;
-  else
-    return MMRef.label;
+  const origEdges = MMRef.originalEdges 
+  if (origEdges.length) {
+    MMRef.label = origEdges[0].label;
+    for (let i = 1; i < origEdges.length; i++) {
+      const label = origEdges[i].label;
+      if (label.length > 0) {
+        MMRef.label += ", " + label;
+      }
+    }
+  }
+  return MMRef.label;
 };
 
 const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
@@ -35,13 +42,12 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
       node.remove();
       continue;
     }
-    const newLabelWidth = MMRef.label.length * 8.5 > 60 ?  MMRef.label.length  * 8.5 : 60
+    const newLabelWidth = MMRef.label.length * 8.5 > 60 ? MMRef.label.length * 8.5 : 60;
     node.data({
       labelWidth: newLabelWidth
     });
   }
 
-  //remove unlinked
   // @ts-ignore
   for (const edge of cy.edges()) {
     const MMRef = edge.data('MMRef');
@@ -50,9 +56,27 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
       edge.data('target') != MMRef.target.id || //edge.source()
       MMRef.originalEdge?.deleted) {
 
+      edge.remove();
+    }
+    else {
+      edge.data({
+        label: getEdgeLabel(MMRef),
+      });
+    }
+  }
+
+  //remove unlinked
+  // @ts-ignore
+  /* for (const edge of cy.edges()) {
+    const MMRef = edge.data('MMRef');
+    if (MMRef.deleted ||
+      edge.data('source') != MMRef.source.id ||
+      edge.data('target') != MMRef.target.id || //edge.source()
+      MMRef.originalEdge?.deleted) {
+ 
       const prevTargetId = edge.target().data('MMRef').id;
       const prevSourceId = edge.source().data('MMRef').id;
-
+ 
       edge.remove();
       if (mainNode === masterModelRoot) {
         if (prevSourceId !== MMRef.source.id && MMRef.source.diagram !== null) {
@@ -76,13 +100,12 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
         label: getEdgeLabel(MMRef),
       });
     }
-  }
+  } */
 };
 
 export const switchDiagrams = (currentDiagram: DiagramTreeNode, nextDiagram: DiagramTreeNode) => {
   const json = cy.json();
   delete json.style;
-  console.log(json);
   currentDiagram.diagramJson = json;
   cy.elements().remove();
   cy.json(nextDiagram.diagramJson);

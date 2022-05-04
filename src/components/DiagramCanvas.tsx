@@ -252,7 +252,6 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
     registerContextMenu(cy);
     registerEdgeEventHandlers(cy);
     registerPopperHandlers(cy);
-    console.log('reregistered');
     cy.edgeEditing(eeDefaults);
   }, []);
 

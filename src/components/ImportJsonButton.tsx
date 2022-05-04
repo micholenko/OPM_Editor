@@ -24,7 +24,6 @@ const ImportJsonButton: React.FC<useReducerProps> = ({ state, dispatch }) => {
       const file = evt.file.originFileObj;
       const reader = new FileReader();
       reader.onload = function () {
-        console.log(reader.result)
         importJson(reader.result, dispatch)
       };
       reader.readAsText(file);

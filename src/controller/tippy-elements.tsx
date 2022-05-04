@@ -35,7 +35,6 @@ const nodeLabelEditingPopup = (cy: Core) => {
         inputElement.addEventListener("change", function (event) {
           // @ts-ignore
           newLabel = event.target.value;
-          console.log('input changed to ' + newLabel);
         });
         inputElement.classList.add('display-block');
         content.appendChild(inputElement);
@@ -51,7 +50,6 @@ const nodeLabelEditingPopup = (cy: Core) => {
           targetNode.data({ labelWidth: newLabelWidth });
           targetNode.data('MMRef').label = newLabel;
           tip.hide();
-          console.log('hello')
           
         });
 
@@ -97,7 +95,6 @@ const edgeLabelEditingPopup = (cy: Core) => {
         inputElement.addEventListener("change", function (event) {
           // @ts-ignore
           newLabel = event.target.value;
-          console.log('input changed to ' + newLabel);
         });
         inputElement.classList.add('display-block');
         content.appendChild(inputElement);
@@ -111,8 +108,9 @@ const edgeLabelEditingPopup = (cy: Core) => {
           targetEdge.data({ label: newLabel });
           const MMRef = targetEdge.data('MMRef')
           MMRef.label = newLabel;
-          if (MMRef.originalEdge)
+          if (MMRef.originalEdges.length)
             MMRef.originalEdge.label = newLabel;
+            
           tip.hide();
         });
         buttonConfirm.classList.add('tippyButton');

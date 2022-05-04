@@ -128,21 +128,33 @@ const edgeDerivation = (sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEd
 const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
   const shouldPropagate = propagation == PropagationEnum.None ? false : true;
   let derivedEdge;
-  if (shouldPropagate === true) {
-    if (originalEdge.source.isPart) {
-      const parent = edgeArray.findStructuralParents(originalEdge.source) as MMNode;
-      console.log(parent);
-      derivedEdge = addDerivedEdge(parent, originalEdge.target, originalEdge);
-
+  if (originalEdge.source.isPart) {
+    const parent = edgeArray.findStructuralParents(originalEdge.source) as MMNode;
+    const result = derivedEdgeArray.findEdgeByEndpoints(parent, originalEdge.target);
+    if (result !== null) {
+      result.originalEdges.push(originalEdge);
+      derivedEdge = result
     }
-    else if (originalEdge.target.isPart) {
-      const parent = edgeArray.findStructuralParents(originalEdge.source) as MMNode;
-      console.log(parent);
+    else {
       derivedEdge = addDerivedEdge(parent, originalEdge.target, originalEdge);
+      derivedEdge.propagation = shouldPropagate;
+      derivedEdge.preferOriginal = true;
     }
-    //@ts-ignore
-    derivedEdge.preferOriginal = true;
   }
+  else{
+    const parent = edgeArray.findStructuralParents(originalEdge.target) as MMNode;
+    const result = derivedEdgeArray.findEdgeByEndpoints(originalEdge.source, parent);
+    if (result !== null) {
+      result.originalEdges.push(originalEdge);
+      derivedEdge = result
+    }
+    else {
+      derivedEdge = addDerivedEdge(originalEdge.source, parent, originalEdge);
+      derivedEdge.propagation = shouldPropagate;
+      derivedEdge.preferOriginal = true;
+    }
+  }
+  
 };
 
 export const edgeCreate = (type: EdgeType, state: StateInterface) => {
@@ -171,9 +183,11 @@ export const edgeCreate = (type: EdgeType, state: StateInterface) => {
   if (hierarchicalStructuralEdges.includes(type)) {
     targetRef.isPart = true;
   }
-  else if (sourceRef.parent !== targetRef.parent){
-    edgeDerivation(sourceRef, targetRef, addedEdgeRef);
-    if (sourceRef.isPart === true || targetRef.isPart == true) {
+  else {
+    if (sourceRef.parent !== targetRef.parent) {
+      edgeDerivation(sourceRef, targetRef, addedEdgeRef);
+    }
+    if (sourceRef.isPart === true || targetRef.isPart === true) {
       addDerivedEdgesAggregation(addedEdge.data('MMRef'));
     }
   }
@@ -228,12 +242,13 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
   MMRef.source = sourceRef;
   MMRef.target = targetRef;
 
-  if (MMRef.originalEdge !== undefined) {
-    console.log('was derived');
-    edgeArray.removeEdge(MMRef.originalEdge);
-    MMRef.originalEdge.removeAllDerived();
+  if (MMRef.originalEdges.length) {
+    edgeArray.removeOriginalEdges(MMRef.originalEdges);
+    for (const edge of MMRef.originalEdges) {
+      edge.removeAllDerived();
+    }
     MMRef.deleted = false;
-    MMRef.originalEdge = undefined;
+    MMRef.originalEdges = [];
     edgeArray.addEdge(MMRef);
   }
   else {

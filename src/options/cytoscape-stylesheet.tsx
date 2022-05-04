@@ -196,13 +196,11 @@ export const cyStylesheet = [
   },
 
   {
-    selector: 'edge[MMRef.originalEdge]',
+    selector: 'edge[MMRef.originalEdges.length > 0]',
     style: {
-      'line-style': 'dashed'
+      'line-style': 'dashed',
     }
   },
-
-
 
   // cytoscape-edge-handles extention
 

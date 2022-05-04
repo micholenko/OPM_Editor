@@ -31,7 +31,6 @@ class DiagramTreeNode {
     });
     let index = 1;
     for (const child of sortedChildren) {
-      console.log(`${index} ${child.label}`);
       if (child.labelId !== index)
         break;
       index++;

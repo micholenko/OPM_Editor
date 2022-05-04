@@ -24,7 +24,7 @@ export const hierarchicalStructuralEdges = [
   EdgeType.Exhibition,
   EdgeType.Generalization,
   EdgeType.Classification,
-]
+];
 
 class MMEdge {
   id: string;
@@ -32,7 +32,7 @@ class MMEdge {
   target: MMNode;
   type: EdgeType;
   label: string;
-  originalEdge: MMEdge | undefined;
+  originalEdges: Array<MMEdge>;
   derivedEdges: Array<MMEdge>;
   deleted: boolean;
   propagation: boolean;
@@ -44,7 +44,7 @@ class MMEdge {
     this.target = target;
     this.type = type;
     this.label = label;
-    this.originalEdge = originalEdge;
+    this.originalEdges = originalEdge !== undefined ? [originalEdge] : [];
     this.derivedEdges = [];
     this.deleted = false;
     this.propagation = propagation;
@@ -52,11 +52,11 @@ class MMEdge {
   }
 
   addDerivedEdge(derivedEdge: MMEdge) {
-    this.derivedEdges.push(derivedEdge)
+    this.derivedEdges.push(derivedEdge);
   }
 
-  removeAllDerived(){
-    for (const derivedEdge of this.derivedEdges){
+  removeAllDerived() {
+    for (const derivedEdge of this.derivedEdges) {
       derivedEdgeArray.removeEdge(derivedEdge);
     }
     this.derivedEdges = [];
@@ -73,6 +73,15 @@ class EdgeArray {
     this.edges.push(newEdge);
   }
 
+  removeOriginalEdges(edges: Array<MMEdge>) {
+    for (const edge of edges) {
+      edge.deleted = true;
+      var index = this.edges.indexOf(edge);
+      if (index !== -1) {
+        this.edges.splice(index, 1);
+      }
+    }
+  }
   removeEdge(edge: MMEdge) {
     edge.deleted = true;
     var index = this.edges.indexOf(edge);
@@ -83,7 +92,7 @@ class EdgeArray {
 
   removeEdgesById(id: string) {
     for (let i = 0; i < this.edges.length; i++) {
-      const edge = this.edges[i]
+      const edge = this.edges[i];
       if (edge.id === id) {
         this.removeEdge(edge);
         i--;
@@ -111,17 +120,17 @@ class EdgeArray {
 
   findStructuralParents(node: MMNode): MMNode | null {
     for (const edge of this.edges) {
-      if (hierarchicalStructuralEdges.includes(edge.type) && edge.target == node)
-        return edge.source
+      if (hierarchicalStructuralEdges.includes(edge.type) && edge.target === node)
+        return edge.source;
     }
-    return null
+    return null;
   }
   findStructuralChildren(node: MMNode): MMNode | null {
     for (const edge of this.edges) {
       if (hierarchicalStructuralEdges.includes(edge.type) && edge.source == node)
-        return edge.target
+        return edge.target;
     }
-    return null
+    return null;
   }
 
   findRelatedEdges(node: MMNode): Array<MMEdge> {
@@ -129,6 +138,15 @@ class EdgeArray {
     returnArray.concat(this.findIngoingEdges(node));
     returnArray.concat(this.findOutgoingEdges(node));
     return returnArray;
+  }
+
+  findEdgeByEndpoints(source: MMNode, target: MMNode) {
+    const outgoingEdges = this.findOutgoingEdges(source);
+    for (const edge of outgoingEdges) {
+      if (edge.target === target)
+        return edge;
+    }
+    return null;
   }
 
   contains(edge: MMEdge): boolean {
