@@ -68,6 +68,7 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
     data['MMRef'] = modelNode;
   }
 
+  const parentBB = cy.getElementById(data.parent).boundingBox({ includeNodes: true });
   cy.elements().lock();
 
   cy.add({
@@ -76,7 +77,13 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
   });
 
   if (position.x === 0 && position.y === 0) {
-    const boundingBox = cropViewport(cy.extent());
+    let boundingBox;
+    if (data.type === 'state') {
+      boundingBox = parentBB;
+    }
+    else {
+      boundingBox = cropViewport(cy.extent());
+    }
     options.boundingBox = boundingBox;
     const layout = cy.layout(options);
     layout.run();
@@ -176,10 +183,6 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType, currentD
   console.log(currentMMNode);
   if (event.target !== cy) { //on element
     data['parent'] = event.target.id() as string;
-    if (type === 'state')
-      event.target.data({ hasState: 'true' });
-    else
-      event.target.data({ hasState: 'false' });
     cyAddNode(cy, data, nodePosition, event.target.data('MMRef'));
   }
   else
@@ -303,17 +306,18 @@ const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
 
 const cyAddEdgesTest = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
   for (const edge of edges) {
-    if (eleAlreadyIn(cy, edge.id) ||
-      edge.source.deleted || edge.target.deleted) {
-      continue;
-    }
-
-
     let connectedNode;
     if (MMNode === edge.source)
       connectedNode = edge.target;
     else
       connectedNode = edge.source;
+
+    cy.getElementById(connectedNode.id).data({ display: 'element' });
+
+    if (eleAlreadyIn(cy, edge.id) ||
+      edge.source.deleted || edge.target.deleted) {
+      continue;
+    }
 
     if (!eleAlreadyIn(cy, connectedNode.id)) {
       let parent = connectedNode.parent as MMNode;
@@ -356,12 +360,37 @@ const cyAddConnectedNodesInzoom = (cy: Core, MMNode: MMNode) => {
   cyAddEdges(cy, MMNode, connectedDerivedEdges);
 };
 
-const cyAddAllConnected = (cy: Core, node: MMNode) => {
+const cyBringAllConnected = (cy: Core, node: MMNode) => {
   let connectedOriginalEdges = getConnectedEdges(node, edgeArray);
   cyAddEdgesTest(cy, node, connectedOriginalEdges);
   let connectedDerivedEdges = getConnectedEdges(node, derivedEdgeArray);
   cyAddEdgesTest(cy, node, connectedDerivedEdges);
 };
+
+const cyBringAllStates = (cy: Core, node: NodeSingular) => {
+  const MMRef = node.data('MMRef');
+  console.log(node.position());
+  for (const child of MMRef.children) {
+    if (child.type === 'state') {
+      const data = {
+        id: child.id,
+        label: child.label,
+        type: NodeType.State,
+        MMRef: child,
+        parent: MMRef.id
+      };
+      if (eleAlreadyIn(cy, child.id)) {
+        const cyNode = cy.getElementById(child.id);
+        cyNode.move({ parent: MMRef.id });
+        cyNode.data({ display: 'element' });
+      }
+      else {
+        cyAddNode(cy, data, { x: 0, y: 0 }, MMRef);
+      }
+    }
+  }
+};
+
 export {
   cyAddNodeFromContextMenu,
   cyAddInzoomedNodes,
@@ -371,5 +400,6 @@ export {
   removeNodeContextMenu,
   removeEdgeContextMenu,
   eleAlreadyIn,
-  cyAddAllConnected
+  cyBringAllConnected,
+  cyBringAllStates
 };

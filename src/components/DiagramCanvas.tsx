@@ -13,7 +13,7 @@ import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
 import React, { useEffect, useRef } from 'react';
 import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../controller/edge';
-import { cyAddAllConnected, cyAddConnectedNodesInzoom, cyAddInzoomedNodes, cyAddNodeFromContextMenu, removeEdgeContextMenu, removeNodeContextMenu } from '../controller/general';
+import { cyBringAllStates, cyBringAllConnected, cyAddConnectedNodesInzoom, cyAddInzoomedNodes, cyAddNodeFromContextMenu, removeEdgeContextMenu, removeNodeContextMenu } from '../controller/general';
 import { edgeLabelEditingPopup, nodeLabelEditingPopup } from '../controller/tippy-elements';
 import '../css/general.css';
 import { DiagramTreeNode } from '../model/diagram-tree-model';
@@ -87,6 +87,8 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           selector: 'node, edge',
           onClickFunction: function (event) {
             const target = event.target;
+            target.data({ lastParent: target.data('parent')});
+            target.move({ parent: null });
             target.data({ display: 'none' });
           },
         },
@@ -199,14 +201,25 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           hasTrailingDivider: true,
         },
         {
-          id: 'add-all-connected',
-          content: 'Add All Connected',
+          id: 'bring-all-connected',
+          content: 'Bring All Connected',
           coreAsWell: false,
           selector: 'node',
           onClickFunction: function (event) {
             const node = event.target;
             const MMRef = node.data('MMRef');
-            cyAddAllConnected(cy, MMRef)
+            cyBringAllConnected(cy, MMRef);
+          },
+          hasTrailingDivider: false,
+        },
+        {
+          id: 'bring-all-states',
+          content: 'Bring All States',
+          coreAsWell: false,
+          selector: 'node[type = "object"]',
+          onClickFunction: function (event) {
+            const node = event.target;
+            cyBringAllStates(cy, node);
           },
           hasTrailingDivider: false,
         },
@@ -216,7 +229,11 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           coreAsWell: true,
           onClickFunction: function (event) {
             for (const element of cy.elements()) {
-              element.data({ display: 'element' });
+              if (element.data('display') === 'none') {
+                const parentId = element.data('lastParent')
+                element.move({ parent: parentId });
+                element.data({ display: 'element' });
+              }
             }
           },
           hasTrailingDivider: true,

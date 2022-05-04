@@ -125,28 +125,6 @@ const edgeDerivation = (sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEd
   }
 };
 
-const addDerivedEdges = (originalEdge: MMEdge) => {
-  const derivedEdge = new MMEdge(
-    originalEdge.id,
-    sourceNode?.data('MMRef'),
-    targetNode?.data('MMRef'),
-    originalEdge.type,
-    false,
-    originalEdge,
-    originalEdge.label
-  );
-
-  if (sourceNode?.isChild() && sourceNode?.data('type') !== 'state') {
-    derivedEdge.source = sourceNode.parent()[0].data('MMRef');
-  }
-  else if (targetNode?.isChild() && targetNode?.data('type') !== 'state') {
-    derivedEdge.target = targetNode.parent()[0].data('MMRef');
-  }
-
-  originalEdge.addDerivedEdge(derivedEdge);
-  derivedEdgeArray.addEdge(derivedEdge);
-};
-
 const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
   const shouldPropagate = propagation == PropagationEnum.None ? false : true;
   let derivedEdge;
@@ -193,7 +171,7 @@ export const edgeCreate = (type: EdgeType, state: StateInterface) => {
   if (hierarchicalStructuralEdges.includes(type)) {
     targetRef.isPart = true;
   }
-  else {
+  else if (sourceRef.parent !== targetRef.parent){
     edgeDerivation(sourceRef, targetRef, addedEdgeRef);
     if (sourceRef.isPart === true || targetRef.isPart == true) {
       addDerivedEdgesAggregation(addedEdge.data('MMRef'));
