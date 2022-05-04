@@ -125,36 +125,89 @@ const edgeDerivation = (sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEd
   }
 };
 
+const isSubElement = (node: MMNode) => {
+  return cy.getElementById(node.id).isChild();
+};
+
 const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
   const shouldPropagate = propagation == PropagationEnum.None ? false : true;
   let derivedEdge;
   if (originalEdge.source.isPart) {
+    let target;
+      if (isSubElement(originalEdge.target))
+        target = originalEdge.target.parent as MMNode;
+      else
+        target = originalEdge.target;
+    
     const parent = edgeArray.findStructuralParents(originalEdge.source) as MMNode;
-    const result = derivedEdgeArray.findEdgeByEndpoints(parent, originalEdge.target);
+    const result = derivedEdgeArray.findEdgeByEndpoints(parent, target);
+    console.log(result)
     if (result !== null) {
       result.originalEdges.push(originalEdge);
-      derivedEdge = result
+      derivedEdge = result;
+      originalEdge.addDerivedEdge(derivedEdge);
     }
     else {
-      derivedEdge = addDerivedEdge(parent, originalEdge.target, originalEdge);
+      let target;
+      if (isSubElement(originalEdge.target))
+        target = originalEdge.target.parent as MMNode;
+      else
+        target = originalEdge.target;
+
+      let otherDerived;
+      if (originalEdge.derivedEdges)
+        otherDerived = originalEdge.derivedEdges[0];
+
+      derivedEdge = addDerivedEdge(parent, target, originalEdge);
       derivedEdge.propagation = shouldPropagate;
-      derivedEdge.preferOriginal = true;
+      derivedEdge.preferedEdge = originalEdge;
+
+      if (otherDerived !== undefined) {
+        otherDerived.preferedEdge = originalEdge;
+        derivedEdge.preferedEdge = otherDerived;
+      }
     }
   }
-  else{
+  else {
     const parent = edgeArray.findStructuralParents(originalEdge.target) as MMNode;
     const result = derivedEdgeArray.findEdgeByEndpoints(originalEdge.source, parent);
     if (result !== null) {
       result.originalEdges.push(originalEdge);
-      derivedEdge = result
+      derivedEdge = result;
+      originalEdge.addDerivedEdge(derivedEdge);
     }
     else {
-      derivedEdge = addDerivedEdge(originalEdge.source, parent, originalEdge);
+      let source;
+      if (isSubElement(originalEdge.source))
+        source = originalEdge.source.parent as MMNode;
+      else
+        source = originalEdge.source;
+
+      let otherDerived;
+      if (originalEdge.derivedEdges)
+        otherDerived = originalEdge.derivedEdges[0];
+
+      derivedEdge = addDerivedEdge(source, parent, originalEdge);
       derivedEdge.propagation = shouldPropagate;
-      derivedEdge.preferOriginal = true;
+      derivedEdge.preferedEdge = originalEdge;
+
+      if (otherDerived !== undefined) {
+        otherDerived.preferedEdge = originalEdge;
+        derivedEdge.preferedEdge = otherDerived;
+      }
     }
   }
-  
+};
+
+const areRelated = (source: MMNode, target: MMNode): boolean => {
+  if (source.isPart && edgeArray.findStructuralParents(source) === target ||
+    target.isPart && edgeArray.findStructuralParents(target) === source) {
+    return true;
+  }
+  if (cy.getElementById(source.id).parent() === cy.getElementById(target.id).parent()) {
+    return true;
+  }
+  return false;
 };
 
 export const edgeCreate = (type: EdgeType, state: StateInterface) => {
@@ -178,17 +231,19 @@ export const edgeCreate = (type: EdgeType, state: StateInterface) => {
 
   const shouldPropagate = propagation == PropagationEnum.None ? false : true;
   const addedEdge = cyAddEdge(cy, data, shouldPropagate);
+  if (addedEdge === null)
+    return
   const addedEdgeRef = addedEdge.data('MMRef');
 
   if (hierarchicalStructuralEdges.includes(type)) {
     targetRef.isPart = true;
   }
   else {
-    if (sourceRef.parent !== targetRef.parent) {
+    if (!areRelated(sourceRef, targetRef)) {
       edgeDerivation(sourceRef, targetRef, addedEdgeRef);
     }
     if (sourceRef.isPart === true || targetRef.isPart === true) {
-      addDerivedEdgesAggregation(addedEdge.data('MMRef'));
+      addDerivedEdgesAggregation(addedEdgeRef);
     }
   }
 
@@ -201,32 +256,6 @@ export const edgeCancel = () => {
   targetNode?.removeClass('eh-hover');
   sourceNode = null;
   targetNode = null;
-};
-
-const reconnectInCompound = (edge: EdgeSingular): boolean => {
-  const oldSource = edge.source();
-  const oldTarget = edge.target();
-  const newSource = sourceNode;
-  const newTarget = targetNode;
-
-  // from parent to child
-  if (newSource?.parent() === oldSource ||
-    newTarget?.parent() === oldTarget) {
-    return true;
-  }
-
-  // from child to a child of the same parent
-  if (newSource?.parent() === oldSource.parent() ||
-    newTarget?.parent() === oldTarget.parent()) {
-    return true;
-  }
-
-  // from child to parent
-  if (newSource === oldSource.parent() ||
-    newTarget === oldTarget.parent()) {
-    return true;
-  }
-  return false;
 };
 
 export const edgeReconnect = (sourceID: string, targetID: string, data: any) => {
@@ -259,14 +288,21 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
     derivedEdgeArray.removeEdgesById(edgeId);
   } */
 
-  if (sourceRef.isPart === true || targetRef.isPart == true) {
-    addDerivedEdgesAggregation(MMRef);
-  }
 
   const shouldPropagate = propagation === PropagationEnum.None ? false : true;
   MMRef.propagation = shouldPropagate;
 
-  edgeDerivation(sourceRef, targetRef, MMRef);
+  if (hierarchicalStructuralEdges.includes(MMRef.type)) {
+    targetRef.isPart = true;
+  }
+  else {
+    if (!areRelated(sourceRef, targetRef)) {
+      edgeDerivation(sourceRef, targetRef, MMRef);
+    }
+    if (sourceRef.isPart === true || targetRef.isPart === true) {
+      addDerivedEdgesAggregation(MMRef);
+    }
+  }
 
   /* if (shouldPropagate) {
     if ((sourceNode?.isChild() && sourceNode?.data('type') !== 'state' ||

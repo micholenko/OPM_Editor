@@ -36,7 +36,7 @@ class MMEdge {
   derivedEdges: Array<MMEdge>;
   deleted: boolean;
   propagation: boolean;
-  preferOriginal: boolean;
+  preferedEdge: MMEdge | null;
 
   constructor(id: string, source: MMNode, target: MMNode, type: EdgeType, propagation: boolean, originalEdge: MMEdge | undefined = undefined, label: string = '') {
     this.id = id;
@@ -48,7 +48,7 @@ class MMEdge {
     this.derivedEdges = [];
     this.deleted = false;
     this.propagation = propagation;
-    this.preferOriginal = false;
+    this.preferedEdge = null;
   }
 
   addDerivedEdge(derivedEdge: MMEdge) {

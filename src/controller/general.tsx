@@ -61,6 +61,9 @@ const cropViewport = (viewport: CyViewport): CyViewport => {
 };
 
 const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot) => {
+  if (cy.getElementById(data.id).length > 0){
+    return;
+  }
   data['label'] = data['label'].charAt(0).toUpperCase() + data['label'].substring(1).toLowerCase();
   if (data['MMRef'] === null) {
     let modelNode = new MMNode(data['id'], data['type'], data['label']);
@@ -95,7 +98,10 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
 
 
 
-const cyAddEdge = (cy: Core, data: EdgeData, shouldPropagate: boolean = false): EdgeSingular => {
+const cyAddEdge = (cy: Core, data: EdgeData, shouldPropagate: boolean = false): EdgeSingular | null => {
+  if (cy.getElementById(data.id).length > 0){
+    return null;
+  }
   if (data['MMRef'] === null) {
     let modelEdge = new MMEdge(data['id'], data['source'], data['target'], data['type'], shouldPropagate);
     edgeArray.addEdge(modelEdge);
@@ -232,7 +238,9 @@ const getConnectedEdges = (MMNode: MMNode, array: EdgeArray): Array<MMEdge> => {
 };
 
 const eleAlreadyIn = (cy: Core, id: string): boolean => {
-  return cy.getElementById(id).length > 0;
+  const ele = cy.getElementById(id);
+  const result = cy.getElementById(id).length > 0 && ele.data('display') !== 'none';
+  return result;
 };
 
 const createCyNodeData = (node: MMNode): any => {
@@ -259,15 +267,38 @@ const createCyEdgeData = (edge: MMEdge): any => {
   };
 };
 
-const skipForOriginal = (cy: Core, edge: MMEdge): boolean => {
-  let sourceNodeId, targetNodeId;
-  if (edge.originalEdges.length) {
-    sourceNodeId = edge.originalEdges[0].source.id as string;
-    targetNodeId = edge.originalEdges[0].target.id as string;
-    if (edge.preferOriginal && eleAlreadyIn(cy, sourceNodeId) && eleAlreadyIn(cy, targetNodeId))
+const skipDerivedEdge = (cy: Core, edge: MMEdge): boolean => {
+  if (edge.preferedEdge !== null) {
+    const sourceId = edge.preferedEdge.source.id;
+    const targetId = edge.preferedEdge.target.id;
+    if (eleAlreadyIn(cy, sourceId) && eleAlreadyIn(cy, targetId))
       return true;
   }
-  return false
+  //@ts-ignore
+  for (const diagramEdge of cy.edges()){
+    const originalEdges = diagramEdge.data('MMRef').originalEdges
+    if (originalEdges.length > 1){
+      for(const origEdge of originalEdges){
+        if (eleAlreadyIn(cy, origEdge.id))
+          return true
+      }
+    }
+  } 
+  return false;
+};
+
+const derivedAlreadyIn = (cy: Core, edge: MMEdge): boolean => {
+  for (const derived of edge.derivedEdges) {
+    if (cy.getElementById(derived.id).data('MMRef') === derived) {
+      return true;
+    }
+  }
+  // @ts-ignore
+  for (const diagramEdge of cy.edges()){
+    if (diagramEdge.data('MMRef').preferedEdge == edge)
+      return true
+  }
+  return false;
 };
 
 const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
@@ -278,8 +309,11 @@ const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
       continue;
     }
 
-    /* if (edge.originalEdges.length && skipForOriginal(cy, edge))
-      continue; */
+    if (edge.originalEdges.length > 0 && skipDerivedEdge(cy, edge))
+      continue;
+
+    if (derivedAlreadyIn(cy, edge))
+      continue;
 
     let connectedNode;
     if (MMNode === edge.source)
@@ -347,6 +381,10 @@ const cyAddConnectedNodes = (cy: Core, MMNode: MMNode) => {
   let connectedDerivedEdges = getConnectedEdges(MMNode, derivedEdgeArray);
   // let connectedPreferedEdges = connectedDerivedEdges.map((edge) => edge.preferOriginal ? edge.originalEdge : null) as Array<MMEdge>;
   // connectedPreferedEdges = connectedDerivedEdges.filter((edge) => edge !== null);
+  console.log("-----");
+  console.log(connectedStructuralEdges);
+  console.log(connectedDerivedEdges);
+  console.log(connectedOriginalEdges);
   cyAddEdges(cy, MMNode, connectedStructuralEdges);
   // cyAddEdges(cy, MMNode, connectedPreferedEdges);
   cyAddEdges(cy, MMNode, connectedDerivedEdges);
@@ -362,10 +400,10 @@ const cyAddConnectedNodesInzoom = (cy: Core, MMNode: MMNode) => {
 
 const cyBringAllConnected = (cy: Core, node: MMNode) => {
   let connectedDerivedEdges = getConnectedEdges(node, derivedEdgeArray);
-  console.log(connectedDerivedEdges)
+  console.log(connectedDerivedEdges);
   cyAddEdgesTest(cy, node, connectedDerivedEdges);
   let connectedOriginalEdges = getConnectedEdges(node, edgeArray);
-  console.log(connectedOriginalEdges)
+  console.log(connectedOriginalEdges);
   cyAddEdgesTest(cy, node, connectedOriginalEdges);
 };
 
