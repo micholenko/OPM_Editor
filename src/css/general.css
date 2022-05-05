@@ -138,3 +138,8 @@
 	border: black 1.5px solid;
 	border-radius: 2px;
 }
+
+.cytoscapeEdgeSelectionCard {
+	width: 100%;
+	height: 100%;
+}

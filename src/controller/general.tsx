@@ -61,7 +61,7 @@ const cropViewport = (viewport: CyViewport): CyViewport => {
 };
 
 const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot) => {
-  if (cy.getElementById(data.id).length > 0){
+  if (cy.getElementById(data.id).length > 0) {
     return;
   }
   data['label'] = data['label'].charAt(0).toUpperCase() + data['label'].substring(1).toLowerCase();
@@ -69,7 +69,10 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
     let modelNode = new MMNode(data['id'], data['type'], data['label']);
     parentMMNode.addChild(modelNode);
     data['MMRef'] = modelNode;
+    if (data.parent !== '')
+      modelNode.isSubelementOfMain = true;
   }
+
 
   const parentBB = cy.getElementById(data.parent).boundingBox({ includeNodes: true });
   cy.elements().lock();
@@ -99,7 +102,7 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
 
 
 const cyAddEdge = (cy: Core, data: EdgeData, shouldPropagate: boolean = false): EdgeSingular | null => {
-  if (cy.getElementById(data.id).length > 0){
+  if (cy.getElementById(data.id).length > 0) {
     return null;
   }
   if (data['MMRef'] === null) {
@@ -143,8 +146,7 @@ const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
     MMRef.deleted = true;
     edgeArray.removeEdge(edgeMMRef);
     if (edgeMMRef.originalEdges.length) {
-      edgeArray.removeEdge(edgeMMRef.originalEdge);
-      edgeMMRef.originalEdge.removeAllDerived();
+      edgeArray.removeOriginalEdges(edgeMMRef.originalEdges);
     }
     else {
       edgeArray.removeEdge(edgeMMRef);
@@ -237,9 +239,10 @@ const getConnectedEdges = (MMNode: MMNode, array: EdgeArray): Array<MMEdge> => {
   return connectedEdges;
 };
 
-const eleAlreadyIn = (cy: Core, id: string): boolean => {
+const eleAlreadyInAndVisible = (cy: Core, id: string): boolean => {
   const ele = cy.getElementById(id);
-  const result = cy.getElementById(id).length > 0 && ele.data('display') !== 'none';
+  const result = ele.length > 0 && ele.data('display') !== 'none';
+  console.log(result);
   return result;
 };
 
@@ -271,19 +274,19 @@ const skipDerivedEdge = (cy: Core, edge: MMEdge): boolean => {
   if (edge.preferedEdge !== null) {
     const sourceId = edge.preferedEdge.source.id;
     const targetId = edge.preferedEdge.target.id;
-    if (eleAlreadyIn(cy, sourceId) && eleAlreadyIn(cy, targetId))
+    if (eleAlreadyInAndVisible(cy, sourceId) && eleAlreadyInAndVisible(cy, targetId))
       return true;
   }
   //@ts-ignore
-  for (const diagramEdge of cy.edges()){
-    const originalEdges = diagramEdge.data('MMRef').originalEdges
-    if (originalEdges.length > 1){
-      for(const origEdge of originalEdges){
-        if (eleAlreadyIn(cy, origEdge.id))
-          return true
+  for (const diagramEdge of cy.edges()) {
+    const originalEdges = diagramEdge.data('MMRef').originalEdges;
+    if (originalEdges.length > 1) {
+      for (const origEdge of originalEdges) {
+        if (eleAlreadyInAndVisible(cy, origEdge.id))
+          return true;
       }
     }
-  } 
+  }
   return false;
 };
 
@@ -294,16 +297,16 @@ const derivedAlreadyIn = (cy: Core, edge: MMEdge): boolean => {
     }
   }
   // @ts-ignore
-  for (const diagramEdge of cy.edges()){
+  for (const diagramEdge of cy.edges()) {
     if (diagramEdge.data('MMRef').preferedEdge == edge)
-      return true
+      return true;
   }
   return false;
 };
 
 const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
   for (const edge of edges) {
-    if (eleAlreadyIn(cy, edge.id) ||
+    if (eleAlreadyInAndVisible(cy, edge.id) ||
       edge.source.deleted || edge.target.deleted ||
       edge.propagation == false) {
       continue;
@@ -321,13 +324,13 @@ const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
     else
       connectedNode = edge.source;
 
-    if (!eleAlreadyIn(cy, connectedNode.id)) {
+    if (!eleAlreadyInAndVisible(cy, connectedNode.id)) {
       let parent = connectedNode.parent as MMNode;
       const nodeData = createCyNodeData(connectedNode);
 
       if (connectedNode.type === 'state') {
         nodeData['parent'] = parent ? parent.id : null;
-        if (!eleAlreadyIn(cy, parent.id)) {
+        if (!eleAlreadyInAndVisible(cy, parent.id)) {
           const nodeParentData = createCyNodeData(parent);
           cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
         }
@@ -340,39 +343,47 @@ const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
   }
 };
 
-const cyAddEdgesTest = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
-  for (const edge of edges) {
-    let connectedNode;
-    if (MMNode === edge.source)
-      connectedNode = edge.target;
-    else
-      connectedNode = edge.source;
+const bringConnectedEdge = (cy: Core, edge: MMEdge, targetNode: MMNode) => {
+  let connectedNode;
+  if (targetNode === edge.source)
+    connectedNode = edge.target;
+  else
+    connectedNode = edge.source;
 
-    cy.getElementById(connectedNode.id).data({ display: 'element' });
-    cy.getElementById(edge.id).data({ display: 'element' });
-
-    if (eleAlreadyIn(cy, edge.id) ||
-      edge.source.deleted || edge.target.deleted) {
-      continue;
-    }
-
-    if (!eleAlreadyIn(cy, connectedNode.id)) {
-      let parent = connectedNode.parent as MMNode;
-      const nodeData = createCyNodeData(connectedNode);
-
-      if (connectedNode.type === 'state') {
-        nodeData['parent'] = parent ? parent.id : null;
-        if (!eleAlreadyIn(cy, parent.id)) {
-          const nodeParentData = createCyNodeData(parent);
-          cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
-        }
-      }
-      cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent);
-    }
-
-    const edgeData = createCyEdgeData(edge);
-    cyAddEdge(cy, edgeData);
+  const diagramEdge = cy.getElementById(edge.id)
+  if (diagramEdge.length > 0 && diagramEdge.data('display') == 'none')
+  {
+    console.log('removed hidden')
+    console.log(cy.elements())
+    diagramEdge.remove()
+    console.log(cy.elements())
+    console.log('here')
   }
+  cy.getElementById(connectedNode.id).data({ display: 'element' });
+  cy.getElementById(edge.id).data({ display: 'element' });
+
+  /* if (eleAlreadyInAndVisible(cy, edge.id) ||
+    edge.source.deleted || edge.target.deleted) {
+    return;
+  } */
+
+  if (!eleAlreadyInAndVisible(cy, connectedNode.id)) {
+    let parent = connectedNode.parent as MMNode;
+    const nodeData = createCyNodeData(connectedNode);
+
+    if (connectedNode.type === 'state') {
+      nodeData['parent'] = parent ? parent.id : null;
+      if (!eleAlreadyInAndVisible(cy, parent.id)) {
+        const nodeParentData = createCyNodeData(parent);
+        cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
+      }
+    }
+    cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent);
+  }
+
+  const edgeData = createCyEdgeData(edge);
+  console.log(cy.elements())
+  cyAddEdge(cy, edgeData);
 };
 
 const cyAddConnectedNodes = (cy: Core, MMNode: MMNode) => {
@@ -398,13 +409,28 @@ const cyAddConnectedNodesInzoom = (cy: Core, MMNode: MMNode) => {
   cyAddEdges(cy, MMNode, connectedDerivedEdges);
 };
 
-const cyBringAllConnected = (cy: Core, node: MMNode) => {
-  let connectedDerivedEdges = getConnectedEdges(node, derivedEdgeArray);
-  console.log(connectedDerivedEdges);
-  cyAddEdgesTest(cy, node, connectedDerivedEdges);
-  let connectedOriginalEdges = getConnectedEdges(node, edgeArray);
-  console.log(connectedOriginalEdges);
-  cyAddEdgesTest(cy, node, connectedOriginalEdges);
+const getAllConnectedEdges = (cy: Core, node: MMNode): Array<MMEdge> => {
+  const connectedOriginalEdges = getConnectedEdges(node, edgeArray);
+  const connectedDerivedEdges = getConnectedEdges(node, derivedEdgeArray);
+  const allConnected = connectedOriginalEdges.concat(connectedDerivedEdges);
+  const filteredConnected = allConnected.filter((edge) => {
+    let connectedNode;
+    if (node === edge.source)
+      connectedNode = edge.target;
+    else
+      connectedNode = edge.source;
+
+    let result = false;
+    if (!eleAlreadyInAndVisible(cy, edge.id) ||
+      !eleAlreadyInAndVisible(cy, edge.target.id) ||
+      !eleAlreadyInAndVisible(cy, edge.source.id))
+      result = true;
+    if (connectedNode.isSubelementOfMain && !eleAlreadyInAndVisible(cy, edge.target.id))
+      result = false;
+    return result;
+  });
+
+  return filteredConnected;
 };
 
 const cyBringAllStates = (cy: Core, node: NodeSingular) => {
@@ -418,8 +444,8 @@ const cyBringAllStates = (cy: Core, node: NodeSingular) => {
         MMRef: child,
         parent: MMRef.id
       };
-      if (eleAlreadyIn(cy, child.id)) {
-        const cyNode = cy.getElementById(child.id);
+      let cyNode = cy.getElementById(child.id);
+      if (cyNode.length > 0) {
         cyNode.move({ parent: MMRef.id });
         cyNode.data({ display: 'element' });
       }
@@ -438,7 +464,9 @@ export {
   cyAddEdge,
   removeNodeContextMenu,
   removeEdgeContextMenu,
-  eleAlreadyIn,
-  cyBringAllConnected,
-  cyBringAllStates
+  eleAlreadyInAndVisible as eleAlreadyIn,
+  getAllConnectedEdges,
+  cyBringAllStates,
+  createCyEdgeData,
+  bringConnectedEdge
 };

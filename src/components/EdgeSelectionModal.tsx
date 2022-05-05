@@ -5,21 +5,14 @@
  * License: MIT
 */
 
-import { Card, Image, List, Modal } from "antd";
+import { List, Modal } from "antd";
 import 'antd/dist/antd.css';
 import React from 'react';
-import { edgeCancel, edgeCreate } from '../controller/edge';
-import { EdgeType } from '../model/edge-model';
-import agentImg from './../data/edge-type-images/agent.svg';
-import aggregationImg from './../data/edge-type-images/aggregation.svg';
-import classificationImg from './../data/edge-type-images/classification.svg';
-import consumptionResultImg from './../data/edge-type-images/consumption-result.svg';
-import effectImg from './../data/edge-type-images/effect.svg';
-import exhibitionImg from './../data/edge-type-images/exhibition.svg';
-import generalizationImg from './../data/edge-type-images/generalization.svg';
-import instrumentImg from './../data/edge-type-images/instrument.svg';
-import taggedImg from './../data/edge-type-images/tagged.svg';
+import { getAllConnectedEdges } from '../controller/general';
+import { MMNode } from "../model/master-model";
 import { ACTIONS, StateInterface } from './App';
+import { cy } from './DiagramCanvas';
+import EdgeSelectionCard from './EdgeSelectionCard';
 
 
 interface ModalProps {
@@ -27,81 +20,39 @@ interface ModalProps {
   dispatch: Function;
 };
 
-interface EdgeData {
-  name: EdgeType;
-  img: string;
-};
-
 const EdgeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
-  const imgSet = [
-    consumptionResultImg,
-    taggedImg,
-    effectImg,
-    instrumentImg,
-    agentImg,
-    aggregationImg,
-    exhibitionImg,
-    generalizationImg,
-    classificationImg,
-  ];
-  const EdgeTypeArray = Object.values(EdgeType);
-
-  const edgeData = EdgeTypeArray.map((type: EdgeType, index: number) => {
-    return {
-      'name': type,
-      'img': imgSet[index]
-    };
-  });
-
   const cancelModal = () => {
-    edgeCancel();
     dispatch({ type: ACTIONS.EDGE_SELECTION, payload: false });
   };
+  let connectedEdges;
+  if (state.targetNode !== null)
+    connectedEdges = getAllConnectedEdges(cy, state.targetNode);
+
   return (
     <div onContextMenu={(e) => {
       e.preventDefault();
     }}>
 
       <Modal
-        visible={state.showEdgeSelectonModal}
-        title="Choose an edge type:"
+        visible={state.showEdgeSelectionModal}
+        title="Choose an edge:"
         onCancel={cancelModal}
         footer={null}
-        width={600}
+        width={400}
       >
-        <List
+        {<List
           grid={{
             gutter: 12,
-            column: 3
+            column: 1
           }}
-          dataSource={edgeData as any}
-          renderItem={(edge: EdgeData) => (
+          locale={{emptyText: 'No additional edges can be added'}}
+          dataSource={connectedEdges}
+          renderItem={(edge: any) => (
             <List.Item>
-              <Card
-                headStyle={{ fontSize: 10, paddingLeft: 15 }}
-                hoverable
-                title={edge.name}
-                bodyStyle={{
-                  padding: '0px',
-                  height: '50px',
-                  marginTop: '10px',
-                  marginBottom: '5px',
-                  textAlign: 'center'
-
-                }}
-                onClick={() => {
-                  edgeCreate(edge.name, state);
-                  dispatch({ type: ACTIONS.EDGE_SELECTION, payload: false });
-                }}>
-                <Image
-                  src={edge.img}
-                  preview={false}
-                  height={50}
-                />
-              </Card>
+              <EdgeSelectionCard dispatch={dispatch} edge={edge} targetNode={state.targetNode as unknown as MMNode}/>
             </List.Item>
           )}
-        />
+        />}
       </Modal>
     </div>
   );

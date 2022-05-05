@@ -37,6 +37,7 @@
     "telejson": "^5.3.3",
     "tippy.js": "^6.3.7",
     "typescript": "^4.5.5",
+    "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

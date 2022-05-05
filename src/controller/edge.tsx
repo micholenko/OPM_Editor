@@ -132,7 +132,7 @@ const isSubElement = (node: MMNode) => {
 const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
   const shouldPropagate = propagation == PropagationEnum.None ? false : true;
   let derivedEdge;
-  if (originalEdge.source.isPart) {
+  if (originalEdge.source.isStructurePart) {
     let target;
       if (isSubElement(originalEdge.target))
         target = originalEdge.target.parent as MMNode;
@@ -200,8 +200,8 @@ const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
 };
 
 const areRelated = (source: MMNode, target: MMNode): boolean => {
-  if (source.isPart && edgeArray.findStructuralParents(source) === target ||
-    target.isPart && edgeArray.findStructuralParents(target) === source) {
+  if (source.isStructurePart && edgeArray.findStructuralParents(source) === target ||
+    target.isStructurePart && edgeArray.findStructuralParents(target) === source) {
     return true;
   }
   if (cy.getElementById(source.id).parent() === cy.getElementById(target.id).parent()) {
@@ -236,13 +236,13 @@ export const edgeCreate = (type: EdgeType, state: StateInterface) => {
   const addedEdgeRef = addedEdge.data('MMRef');
 
   if (hierarchicalStructuralEdges.includes(type)) {
-    targetRef.isPart = true;
+    targetRef.isStructurePart = true;
   }
-  else {
+  else if (sourceRef.isStructurePart || sourceRef.isSubelementOfMain || targetRef.isStructurePart || targetRef.isSubelementOfMain) {
     if (!areRelated(sourceRef, targetRef)) {
       edgeDerivation(sourceRef, targetRef, addedEdgeRef);
     }
-    if (sourceRef.isPart === true || targetRef.isPart === true) {
+    if (sourceRef.isStructurePart === true || targetRef.isStructurePart === true) {
       addDerivedEdgesAggregation(addedEdgeRef);
     }
   }
@@ -293,13 +293,13 @@ export const edgeReconnect = (sourceID: string, targetID: string, data: any) => 
   MMRef.propagation = shouldPropagate;
 
   if (hierarchicalStructuralEdges.includes(MMRef.type)) {
-    targetRef.isPart = true;
+    targetRef.isStructurePart = true;
   }
-  else {
+  else if (sourceRef.isStructurePart || sourceRef.isSubelementOfMain || targetRef.isStructurePart || targetRef.isSubelementOfMain) {
     if (!areRelated(sourceRef, targetRef)) {
       edgeDerivation(sourceRef, targetRef, MMRef);
     }
-    if (sourceRef.isPart === true || targetRef.isPart === true) {
+    if (sourceRef.isStructurePart === true || targetRef.isStructurePart === true) {
       addDerivedEdgesAggregation(MMRef);
     }
   }

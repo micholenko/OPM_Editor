@@ -68,7 +68,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
     });
 
     cy.on('ehstop', (evt: Event,) => {
-      const callback = () => dispatch({ type: ACTIONS.EDGE_SELECTION, payload: true });
+      const callback = () => dispatch({ type: ACTIONS.EDGE_TYPE_SELECTION, payload: true });
       edgeCheckValidTargets(callback);
     });
   };
@@ -201,14 +201,15 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           hasTrailingDivider: true,
         },
         {
-          id: 'bring-all-connected',
-          content: 'Bring All Connected',
+          id: 'bring-connected',
+          content: 'Bring Connected',
           coreAsWell: false,
           selector: 'node',
           onClickFunction: function (event) {
-            const node = event.target;
+            /* const node = event.target;
             const MMRef = node.data('MMRef');
-            cyBringAllConnected(cy, MMRef);
+            cyBringAllConnected(cy, MMRef); */
+            dispatch({ type: ACTIONS.EDGE_SELECTION, payload: {show: true, node: event.target.data('MMRef')} });
           },
           hasTrailingDivider: false,
         },

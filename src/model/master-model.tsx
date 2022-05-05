@@ -34,7 +34,8 @@ class MMNode {
   deleted: boolean;
   essence: Essence;
   affiliation: Affiliation;
-  isPart: boolean;
+  isStructurePart: boolean;
+  isSubelementOfMain: boolean;
 
   constructor(id: string, type: 'object' | 'process' | 'state', label: string) {
     this.id = id;
@@ -46,7 +47,8 @@ class MMNode {
     this.deleted = false;
     this.essence = Essence.Informatical;
     this.affiliation = Affiliation.Systemic;
-    this.isPart = false;
+    this.isStructurePart = false;
+    this.isSubelementOfMain = false;
   }
 
   addChild(child: MMNode) {

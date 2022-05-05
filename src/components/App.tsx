@@ -12,6 +12,7 @@ import { useReducer } from 'react';
 import { DiagramTreeNode, diagramTreeRoot } from '../model/diagram-tree-model';
 import './../css/general.css';
 import DiagramCanvas from './DiagramCanvas';
+import EdgeTypeSelectionModal from './EdgeTypeSelectionModal';
 import EdgeSelectionModal from './EdgeSelectionModal';
 import LeftSidebar from './LeftSidebar';
 import TopToolbar from './TopToolbar';
@@ -25,10 +26,12 @@ export interface useReducerProps {
 export interface StateInterface {
   currentDiagram: DiagramTreeNode,
   lastCreatedDiagram: DiagramTreeNode,
-  showEdgeSelectonModal: boolean,
+  showEdgeTypeSelectonModal: boolean,
+  showEdgeSelectionModal: boolean,
   currentNode: NodeSingular | null,
   currentEdge: EdgeSingular | null,
   propagation: Propagation,
+  targetNode: null,
   timestamp: Date
 }
 
@@ -44,6 +47,7 @@ export let currentDiagram: DiagramTreeNode = diagramTreeRoot
 export const ACTIONS = {
   CHANGE_DIAGRAM: 'change-diagram',
   INZOOM_DIAGRAM: 'inzoom-diagram',
+  EDGE_TYPE_SELECTION: 'edge-type-selection',
   EDGE_SELECTION: 'edge-selection',
   CHANGE_CURRENT_NODE: 'change-current-node',
   CHANGE_CURRENT_EDGE: 'change-current-edge',
@@ -59,8 +63,10 @@ function reducer(state, action) {
     case ACTIONS.INZOOM_DIAGRAM:
       currentDiagram = action.payload;
       return { ...state, currentDiagram: action.payload, lastCreatedDiagram: action.payload };
+    case ACTIONS.EDGE_TYPE_SELECTION:
+      return { ...state, showEdgeTypeSelectonModal: action.payload };
     case ACTIONS.EDGE_SELECTION:
-      return { ...state, showEdgeSelectonModal: action.payload };
+      return { ...state, showEdgeSelectionModal: action.payload.show, targetNode:action.payload.node  };
     case ACTIONS.CHANGE_PROPAGATION:
       propagation = action.payload
       return {...state, propagation: action.payload}
@@ -97,6 +103,7 @@ function App() {
           </div>
         </div>
       </div>
+      <EdgeTypeSelectionModal state={state} dispatch={dispatch} />
       <EdgeSelectionModal state={state} dispatch={dispatch} />
     </div>
   );
