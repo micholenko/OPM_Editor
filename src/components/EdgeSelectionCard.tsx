@@ -28,13 +28,21 @@ const EdgeSelectionCard: React.FC<ModalProps> = ({ dispatch, edge, targetNode })
   const ID = uuidv4();
 
   useEffect(() => {
-    console.log(ID);
+    const source = edge.source
+    const target = edge.target
+    const srcParent = source.parent as MMNode
+    const tgtParent = target.parent as MMNode
+    const isSourceState = source.type === 'state'
+    const isTargetState = target.type === 'state'
     let positions = [];
     if (hierarchicalStructuralEdges.includes(edge.type))
       positions = [{ x: 150, y: 30 }, { x: 210, y: 130 }];
+    else if (isSourceState)
+      positions = [{ x: 90, y: 60 }, { x: 270, y: 110 }];
+    else if (isTargetState)
+      positions = [{ x: 90, y: 40 }, { x: 270, y: 100 }];
     else
       positions = [{ x: 90, y: 40 }, { x: 270, y: 110 }];
-
     const cyCard = cytoscape({
       container: document.getElementById(ID), // container to render in
       //@ts-ignore
@@ -46,22 +54,49 @@ const EdgeSelectionCard: React.FC<ModalProps> = ({ dispatch, edge, targetNode })
       autounselectify: false,
       layout: { name: 'preset' },
     });
+
+    if (isSourceState){
+      cyCard.add({
+        group: 'nodes',
+        data: {
+          id: srcParent.id,
+          type: 'object',
+          MMRef: srcParent
+        },
+        position: positions[0]
+      })
+    }
+    else if (isTargetState) {
+      cyCard.add({
+        group: 'nodes',
+        data: {
+          id: tgtParent.id,
+          type: 'object',
+          MMRef: tgtParent
+        },
+        position: positions[1]
+      })
+    }
     cyCard.add([
       {
         group: 'nodes',
+        // @ts-ignore
         data: {
-          id: edge.source.id,
-          type: edge.source.type,
-          MMRef: edge.source
+          id: source.id,
+          type: source.type,
+          MMRef: source,
+          parent: isSourceState ? srcParent.id :  null
         },
         position: positions[0]
       },
       {
         group: 'nodes',
+        // @ts-ignore
         data: {
-          id: edge.target.id,
-          type: edge.target.type,
-          MMRef: edge.target
+          id: target.id,
+          type: target.type,
+          MMRef: target,
+          parent: isTargetState ? tgtParent.id : null
         },
         position: positions[1]
       },
@@ -71,8 +106,8 @@ const EdgeSelectionCard: React.FC<ModalProps> = ({ dispatch, edge, targetNode })
           id: edge.id,
           label: edge.label,
           type: edge.type,
-          source: edge.source.id,
-          target: edge.target.id,
+          source: source.id,
+          target: target.id,
           MMRef: edge,
         },
       }

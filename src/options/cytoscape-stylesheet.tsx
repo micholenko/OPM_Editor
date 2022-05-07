@@ -78,8 +78,8 @@ export const cyStylesheet = [
     style: {
       'text-valign': 'top',
       'padding': 8,
-      'min-width': 100,
-      'min-height': 100
+      'min-width': 80,
+      'min-height': 60
     }
   },
 
@@ -198,7 +198,7 @@ export const cyStylesheet = [
   {
     selector: 'edge[MMRef.originalEdges.length > 0]',
     style: {
-      'line-style': 'dashed',
+      'line-color': '#ccc',
     }
   },
 

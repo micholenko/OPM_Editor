@@ -90,6 +90,9 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
             target.data({ lastParent: target.data('parent')});
             target.move({ parent: null });
             target.data({ display: 'none' });
+            for (const child of target.children()){
+              child.data({ display: 'none' });
+            }
           },
         },
         {

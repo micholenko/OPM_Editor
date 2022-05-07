@@ -39,6 +39,11 @@ class MMEdge {
   preferedEdge: MMEdge | null;
 
   constructor(id: string, source: MMNode, target: MMNode, type: EdgeType, propagation: boolean, originalEdge: MMEdge | undefined = undefined, label: string = '') {
+    /* console.log(`creating edge s: ${source.id}, t: ${target.id}`)
+    if (originalEdge === undefined)
+      console.log('original')
+    else
+      console.log('derived') */
     this.id = id;
     this.source = source;
     this.target = target;
@@ -119,6 +124,8 @@ class EdgeArray {
   };
 
   findStructuralParents(node: MMNode): MMNode | null {
+    if (node.type == 'state')
+      return node.parent as MMNode
     for (const edge of this.edges) {
       if (hierarchicalStructuralEdges.includes(edge.type) && edge.target === node)
         return edge.source;

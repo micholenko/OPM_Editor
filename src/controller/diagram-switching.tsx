@@ -14,7 +14,7 @@ import { cyAddConnectedNodes } from "./general";
 
 
 const getEdgeLabel = (MMRef: MMEdge): string => {
-  const origEdges = MMRef.originalEdges 
+  const origEdges = MMRef.originalEdges
   if (origEdges.length) {
     MMRef.label = origEdges[0].label;
     for (let i = 1; i < origEdges.length; i++) {

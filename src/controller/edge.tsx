@@ -134,25 +134,20 @@ const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
   let derivedEdge;
   if (originalEdge.source.isStructurePart) {
     let target;
-      if (isSubElement(originalEdge.target))
-        target = originalEdge.target.parent as MMNode;
-      else
-        target = originalEdge.target;
-    
+    if (isSubElement(originalEdge.target))
+      target = originalEdge.target.parent as MMNode;
+    else
+      target = originalEdge.target;
+
     const parent = edgeArray.findStructuralParents(originalEdge.source) as MMNode;
     const result = derivedEdgeArray.findEdgeByEndpoints(parent, target);
-    console.log(result)
     if (result !== null) {
+      console.log('pushing orig edge');
       result.originalEdges.push(originalEdge);
       derivedEdge = result;
       originalEdge.addDerivedEdge(derivedEdge);
     }
     else {
-      let target;
-      if (isSubElement(originalEdge.target))
-        target = originalEdge.target.parent as MMNode;
-      else
-        target = originalEdge.target;
 
       let otherDerived;
       if (originalEdge.derivedEdges)
@@ -169,8 +164,13 @@ const addDerivedEdgesAggregation = (originalEdge: MMEdge) => {
     }
   }
   else {
+    let source;
+    if (isSubElement(originalEdge.source))
+      source = originalEdge.source.parent as MMNode;
+    else
+      source = originalEdge.source;
     const parent = edgeArray.findStructuralParents(originalEdge.target) as MMNode;
-    const result = derivedEdgeArray.findEdgeByEndpoints(originalEdge.source, parent);
+    const result = derivedEdgeArray.findEdgeByEndpoints(source, parent);
     if (result !== null) {
       result.originalEdges.push(originalEdge);
       derivedEdge = result;
@@ -232,7 +232,7 @@ export const edgeCreate = (type: EdgeType, state: StateInterface) => {
   const shouldPropagate = propagation == PropagationEnum.None ? false : true;
   const addedEdge = cyAddEdge(cy, data, shouldPropagate);
   if (addedEdge === null)
-    return
+    return;
   const addedEdgeRef = addedEdge.data('MMRef');
 
   if (hierarchicalStructuralEdges.includes(type)) {
