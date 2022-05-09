@@ -17,6 +17,7 @@ import { cyAddEdge } from './general';
 
 let sourceNode: NodeSingular | null = null;
 let targetNode: NodeSingular | null = null;
+let reconnectionActive: boolean
 
 export const edgeStartDrawing = (eh: any, evt: Event) => {
   sourceNode = evt.target as unknown as NodeSingular;
@@ -29,8 +30,8 @@ export const edgeStopDrawing = (eh: any) => {
 };
 
 export const edgeDragOver = (evt: any) => {
-  if (sourceNode != null) {
-    targetNode = evt.target;
+  targetNode = evt.target;
+  if (targetNode !== sourceNode) {
     targetNode?.addClass('eh-hover');
   }
 };
@@ -41,7 +42,9 @@ export const edgeDragOut = (evt: any) => {
 };
 
 export const edgeCheckValidTargets = (callback: Function) => {
-  if (sourceNode != null && targetNode != null) {
+  sourceNode?.removeClass('eh-hover');
+  targetNode?.removeClass('eh-hover');
+  if (sourceNode != null && targetNode != null && sourceNode !== targetNode) {
     callback();
   }
 };
@@ -62,6 +65,7 @@ const addDerivedEdge = (source: MMNode, target: MMNode, originalEdge: MMEdge): M
   derivedEdgeArray.addEdge(derivedEdge);
   return derivedEdge;
 };
+
 
 const deriveAll = (propagate: boolean, sourceRef: MMNode, targetRef: MMNode, addedEdgeRef: MMEdge, sourceMain: boolean, iterator: MMNode) => {
   if (sourceNode === null || targetNode === null)
@@ -259,6 +263,9 @@ export const edgeCancel = () => {
 };
 
 export const edgeReconnect = (sourceID: string, targetID: string, data: any) => {
+  if (sourceID === targetID)
+    return;
+
   const edgeId = data['id'];
   const MMRef = data['MMRef'] as MMEdge;
   const edge = cy.getElementById(edgeId);

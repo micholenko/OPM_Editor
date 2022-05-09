@@ -187,6 +187,12 @@ export const cyStylesheet = [
       'target-arrow-shape': 'vee'
     }
   },
+  {
+    selector: 'edge.eh-ghost-edge',
+    style: {
+      'target-arrow-shape': 'triangle'
+    }
+  },
 
   {
     selector: 'node[display], edge[display]',
