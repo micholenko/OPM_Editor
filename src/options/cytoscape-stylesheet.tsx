@@ -199,6 +199,7 @@ export const cyStylesheet = [
     selector: 'edge[MMRef.originalEdges.length > 0]',
     style: {
       'line-color': '#ccc',
+      'target-arrow-color': '#ccc',
     }
   },
 

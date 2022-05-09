@@ -75,7 +75,9 @@ export const importJson = (stringJson: any, dispatch: Function) => {
 };
 
 export const exportJson = () => {
-  currentDiagram.diagramJson = cy.json()
+  const json = cy.json()
+  delete json.style;
+  currentDiagram.diagramJson = json 
 
   const data = {
       masterModelRoot: masterModelRoot,
