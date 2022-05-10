@@ -9,12 +9,12 @@ import { Core } from "cytoscape";
 import { cy } from "../components/DiagramCanvas";
 import { DiagramTreeNode, diagramTreeRoot } from "../model/diagram-tree-model";
 import { MMEdge } from "../model/edge-model";
-import { masterModelRoot, MMNode } from "../model/master-model";
+import { MMNode } from "../model/node-model";
 import { cyAddConnectedNodes } from "./general";
 
 
 const getEdgeLabel = (MMRef: MMEdge): string => {
-  const origEdges = MMRef.originalEdges
+  const origEdges = MMRef.originalEdges;
   if (origEdges.length) {
     MMRef.label = origEdges[0].label;
     for (let i = 1; i < origEdges.length; i++) {
@@ -27,8 +27,7 @@ const getEdgeLabel = (MMRef: MMEdge): string => {
   return MMRef.label;
 };
 
-const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
-
+const updateNodesFromMM = (cy: Core) => {
   for (const node of cy.nodes() as any) {
     const MMRef = node.data('MMRef') as MMNode;
     if (MMRef.type === 'state') {
@@ -53,7 +52,7 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
     const MMRef = edge.data('MMRef');
     if (MMRef.deleted ||
       edge.data('source') != MMRef.source.id ||
-      edge.data('target') != MMRef.target.id || //edge.source()
+      edge.data('target') != MMRef.target.id ||
       MMRef.originalEdge?.deleted) {
 
       edge.remove();
@@ -64,43 +63,6 @@ const updateNodesFromMM = (cy: Core, mainNode: MMNode) => {
       });
     }
   }
-
-  //remove unlinked
-  // @ts-ignore
-  /* for (const edge of cy.edges()) {
-    const MMRef = edge.data('MMRef');
-    if (MMRef.deleted ||
-      edge.data('source') != MMRef.source.id ||
-      edge.data('target') != MMRef.target.id || //edge.source()
-      MMRef.originalEdge?.deleted) {
- 
-      const prevTargetId = edge.target().data('MMRef').id;
-      const prevSourceId = edge.source().data('MMRef').id;
- 
-      edge.remove();
-      if (mainNode === masterModelRoot) {
-        if (prevSourceId !== MMRef.source.id && MMRef.source.diagram !== null) {
-          edge.source().remove();
-        }
-        else if (prevTargetId !== MMRef.target.id && MMRef.target.diagram !== null) {
-          edge.target().remove();
-        }
-      }
-      else {
-        if (mainNode.id === prevSourceId) {
-          edge.target().remove();
-        }
-        else if (mainNode.id === prevTargetId) {
-          edge.source().remove();
-        }
-      }
-    }
-    else {
-      edge.data({
-        label: getEdgeLabel(MMRef),
-      });
-    }
-  } */
 };
 
 export const switchDiagrams = (currentDiagram: DiagramTreeNode, nextDiagram: DiagramTreeNode) => {
@@ -112,19 +74,9 @@ export const switchDiagrams = (currentDiagram: DiagramTreeNode, nextDiagram: Dia
 };
 
 export const updateFromMasterModel = (diagram: DiagramTreeNode) => {
-  const mainNode = diagram.mainNode as MMNode;
-  updateNodesFromMM(cy, mainNode);
-  if (diagram === diagramTreeRoot) {
-    const nodes = mainNode.children;
-    nodes.forEach((node: MMNode) => {
-      cyAddConnectedNodes(cy, node);
-    });
-  }
-  else {
-    const nodes = mainNode.children;
-    nodes.forEach((node: MMNode) => {
-      cyAddConnectedNodes(cy, node);
-    });
-    cyAddConnectedNodes(cy, mainNode);
+  updateNodesFromMM(cy);
+  for ( const node of cy.nodes()){
+    const MMRef = node.data('MMRef')
+    cyAddConnectedNodes(cy, MMRef);
   }
 };
