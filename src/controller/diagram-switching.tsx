@@ -1,18 +1,23 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Functions related to diagram switching: saving old and importing new diagrams, updating from master model
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { Core } from "cytoscape";
 import { cy } from "../components/DiagramCanvas";
-import { DiagramTreeNode, diagramTreeRoot } from "../model/diagram-tree-model";
+import { DiagramTreeNode } from "../model/diagram-tree-model";
 import { MMEdge } from "../model/edge-model";
 import { MMNode } from "../model/node-model";
-import { cyAddConnectedNodes } from "./general";
+import { addConnectedNodes } from "./general";
 
-
+/**
+ * Updates edge label on diagram switch. If the edge is merged (derived with multiple originals), name gets concatenated
+ * @param MMRef - Master model edge
+ * @returns - Single string or a concatenated name
+ */
 const getEdgeLabel = (MMRef: MMEdge): string => {
   const origEdges = MMRef.originalEdges;
   if (origEdges.length) {
@@ -27,7 +32,11 @@ const getEdgeLabel = (MMRef: MMEdge): string => {
   return MMRef.label;
 };
 
-const updateNodesFromMM = (cy: Core) => {
+/**
+ * Delete elements marked as deleted or edges that were relinked, update labels
+ * @param cy - Cytoscape instance
+ */
+const updateElementsFromMM = (cy: Core) => {
   for (const node of cy.nodes() as any) {
     const MMRef = node.data('MMRef') as MMNode;
     if (MMRef.type === 'state') {
@@ -47,8 +56,7 @@ const updateNodesFromMM = (cy: Core) => {
     });
   }
 
-  // @ts-ignore
-  for (const edge of cy.edges()) {
+  for (const edge of cy.edges() as any) {
     const MMRef = edge.data('MMRef');
     if (MMRef.deleted ||
       edge.data('source') != MMRef.source.id ||
@@ -65,18 +73,34 @@ const updateNodesFromMM = (cy: Core) => {
   }
 };
 
+/**
+ * Main diagram switching logic. Save old diagram and display new one.
+ * @param currentDiagram 
+ * @param nextDiagram 
+ */
 export const switchDiagrams = (currentDiagram: DiagramTreeNode, nextDiagram: DiagramTreeNode) => {
   const json = cy.json();
-  delete json.style;
+  delete json.style; //cy instance has stylesheet, no need to save it with every diagram
   currentDiagram.diagramJson = json;
   cy.elements().remove();
   cy.json(nextDiagram.diagramJson);
 };
 
-export const updateFromMasterModel = (diagram: DiagramTreeNode) => {
-  updateNodesFromMM(cy);
-  for ( const node of cy.nodes()){
-    const MMRef = node.data('MMRef')
-    cyAddConnectedNodes(cy, MMRef);
+/**
+ * Go through all displayed nodes and propagate possible edges
+ * @param cy Cytoscape instance
+ */
+const propagateFromMM = (cy: Core) => {
+  for (const node of cy.nodes() as any) {
+    const MMRef = node.data('MMRef');
+    addConnectedNodes(cy, MMRef);
   }
+};
+
+/**
+ * Update current diagram from master model
+ */
+export const updateFromMasterModel = () => {
+  updateElementsFromMM(cy);
+  propagateFromMM(cy);
 };

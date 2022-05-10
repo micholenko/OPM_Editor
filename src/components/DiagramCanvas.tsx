@@ -1,9 +1,10 @@
 // @ts-nocheck
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Diagram canvas handled by the Cytoscape.js library. 
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import cytoscape from 'cytoscape';
@@ -12,12 +13,12 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
 import React, { useEffect, useRef } from 'react';
-import { edgeCheckValidTargets, edgeDragOut, edgeDragOver, edgeStartDrawing, edgeStopDrawing } from '../controller/edge';
-import { cyBringAllStates, cyBringAllConnected, cyAddConnectedNodesInzoom, cyAddInzoomedNodes, cyAddNodeFromContextMenu, removeEdgeContextMenu, removeNodeContextMenu } from '../controller/general';
+import { edgeCreateDragOutOfElement, edgeCreateDragOverElement, edgeCreateStart, edgeCreateStop, edgeCreateValidate } from '../controller/edge';
+import { addConnectedNodesInzoom, addInzoomedNodes, addNodeFromContextMenu, bringAllStates, removeEdgeContextMenu, removeNodeContextMenu } from '../controller/general';
 import { edgeLabelEditingPopup, nodeLabelEditingPopup } from '../controller/tippy-elements';
 import '../css/general.css';
 import { DiagramTreeNode } from '../model/diagram-tree-model';
-import { Affiliation, Essence } from "../model/master-model";
+import { Affiliation, Essence } from "../model/node-model";
 import { eeDefaults } from '../options/cytoscape-edge-editing-defaults';
 import { ehDefaults } from '../options/cytoscape-edge-handles-defaults';
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
@@ -30,6 +31,8 @@ var edgeEditing = require('cytoscape-edge-editing');
 const nodeEditing = require('cytoscape-node-editing');
 
 window.$ = $;
+
+//extension registration
 contextMenus(cytoscape, $);
 edgeEditing(cytoscape, $, konva);
 nodeEditing(cytoscape, $, konva);
@@ -41,9 +44,9 @@ cytoscape.use(coseBilkent);
 let cy: Core;
 
 const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
+  //workaround
   const currentDiagram = useRef();
   currentDiagram.current = state.currentDiagram;
-
   const propagation = useRef();
   propagation.current = state.propagation;
 
@@ -51,25 +54,26 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
 
     let eh = cy.edgehandles(ehDefaults);
 
+    //edge creation events
     cy.on('cxttapstart', 'node', (evt: Event) => {
-      edgeStartDrawing(eh, evt);
+      edgeCreateStart(eh, evt);
     });
 
     cy.on('cxttapend', 'node', (evt: Event) => {
-      edgeStopDrawing(eh);
+      edgeCreateStop(eh);
     });
 
     cy.on('cxtdragover', 'node', (evt: Event) => {
-      edgeDragOver(evt);
+      edgeCreateDragOverElement(evt);
 
     });
     cy.on('cxtdragout', 'node', (evt: Event) => {
-      edgeDragOut(evt);
+      edgeCreateDragOutOfElement(evt);
     });
 
     cy.on('ehstop', (evt: Event,) => {
       const callback = () => dispatch({ type: ACTIONS.EDGE_TYPE_SELECTION, payload: true });
-      edgeCheckValidTargets(callback);
+      edgeCreateValidate(callback);
     });
   };
 
@@ -133,10 +137,10 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
             MMReference.diagram = nextDiagram;
             currentDiagram.current.addChild(nextDiagram);
 
-            cyAddInzoomedNodes(cy, event);
+            addInzoomedNodes(cy, event);
 
             if (propagation.current !== PropagationEnum.None)
-              cyAddConnectedNodesInzoom(cy, MMReference);
+              addConnectedNodesInzoom(cy, MMReference);
 
             dispatch({ type: ACTIONS.INZOOM_DIAGRAM, payload: nextDiagram });
           },
@@ -148,7 +152,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           coreAsWell: false,
           selector: 'node[type = "object"]',
           onClickFunction: function (event) {
-            cyAddNodeFromContextMenu(cy, event, 'state', currentDiagram.current);
+            addNodeFromContextMenu(cy, event, 'state', currentDiagram.current);
           },
         },
         {
@@ -157,7 +161,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           coreAsWell: true,
           selector: '$node > node[type != "state"]',
           onClickFunction: function (event) {
-            cyAddNodeFromContextMenu(cy, event, 'object', currentDiagram.current);
+            addNodeFromContextMenu(cy, event, 'object', currentDiagram.current);
           }
         },
         {
@@ -166,7 +170,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           coreAsWell: true,
           selector: '$node > node[type != "state"]',
           onClickFunction: function (event) {
-            cyAddNodeFromContextMenu(cy, event, 'process', currentDiagram.current);
+            addNodeFromContextMenu(cy, event, 'process', currentDiagram.current);
           },
           hasTrailingDivider: true,
         },
@@ -209,9 +213,6 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           coreAsWell: false,
           selector: 'node',
           onClickFunction: function (event) {
-            /* const node = event.target;
-            const MMRef = node.data('MMRef');
-            cyBringAllConnected(cy, MMRef); */
             dispatch({ type: ACTIONS.EDGE_SELECTION, payload: {show: true, node: event.target.data('MMRef')} });
           },
           hasTrailingDivider: false,
@@ -223,7 +224,7 @@ const DiagramCanvas: React.FC<useReducerProps> = ({ state, dispatch }) => {
           selector: 'node[type = "object"]',
           onClickFunction: function (event) {
             const node = event.target;
-            cyBringAllStates(cy, node);
+            bringAllStates(cy, node);
           },
           hasTrailingDivider: false,
         },

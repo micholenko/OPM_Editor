@@ -1,8 +1,9 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Diagram tree located in the left sidebar. Implemented with the use of Ant Design Tree component. 
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { Tree } from 'antd';
@@ -21,22 +22,23 @@ interface DataNode {
   children?: DataNode[];
 }
 
-const constructTreeJson = (data: any, parentNode: DiagramTreeNode): DataNode => {
-
-  parentNode.children.forEach((modelNode) => {
-    const newNode: any = {
+/**
+ * Recursive function that transforms the diagram tree model (class instaces) to
+ * a regular json that is required by the component
+ */
+const constructTreeJson = (jsonNode: any, parentModelNode: DiagramTreeNode): DataNode => {
+  parentModelNode.children.forEach((modelNode) => {
+    const newJsonNode: any = {
       title: modelNode.label,
       key: modelNode.label,
       modelReference: modelNode,
       children: []
     };
-    const treeNode = constructTreeJson(newNode, modelNode);
-    data.children.push(treeNode);
+    const child = constructTreeJson(newJsonNode, modelNode);
+    jsonNode.children.push(child);
   });
-  return data;
+  return jsonNode;
 };
-
-
 
 const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
   let initTreeData: DataNode =
@@ -71,7 +73,11 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
     setExpandedKeys(expandedKeysValue);
   };
 
-
+  /**
+   * Actions to be done on diagram selection in the diagram tree.
+   * Diagrams have to be switched and the selected diagram is updated
+   * @param info - Object with the selected node
+   */
   const onSelect = (selectedKeys: React.Key[], info: any) => {
     if (info.node.selected === true)
       return;
@@ -79,7 +85,7 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
     const nextDiagram = info.node.modelReference as DiagramTreeNode 
 
     switchDiagrams(state.currentDiagram, nextDiagram)
-    updateFromMasterModel(nextDiagram)
+    updateFromMasterModel()
 
     dispatch({ type: ACTIONS.CHANGE_DIAGRAM, payload: nextDiagram });
   };
@@ -88,8 +94,7 @@ const DiagramTree: React.FC<useReducerProps> = ({ state, dispatch }) => {
     <Tree
       className='diagram-tree'
       style={{ marginTop: '5px', height: '100%' }}
-      height={500} //set to scroll
-      /* draggable={{ icon: false }} */
+      height={500}
       showLine={{ showLeafIcon: false }}
       selectedKeys={[state.currentDiagram.label]}
       onSelect={onSelect}

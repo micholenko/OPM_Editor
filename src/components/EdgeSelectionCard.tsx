@@ -1,8 +1,10 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Card component in the EdgeSelectionModal. Implemented with Ant Design Card component.
+ *    Each card has its unique Cytoscape.js instance to render available options.
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { Card } from 'antd';
@@ -10,9 +12,9 @@ import cytoscape from 'cytoscape';
 import React, { useEffect } from 'react';
 //@ts-ignore
 import { v4 as uuidv4 } from 'uuid';
-import { bringConnectedEdge, createCyEdgeData, cyAddEdge } from '../controller/general';
+import { bringConnectedEdge } from '../controller/general';
 import { hierarchicalStructuralEdges, MMEdge } from '../model/edge-model';
-import { MMNode } from '../model/master-model';
+import { MMNode } from '../model/node-model';
 import { cyStylesheet } from '../options/cytoscape-stylesheet';
 import { ACTIONS } from './App';
 import { cy } from './DiagramCanvas';
@@ -34,6 +36,8 @@ const EdgeSelectionCard: React.FC<ModalProps> = ({ dispatch, edge, targetNode })
     const tgtParent = target.parent as MMNode
     const isSourceState = source.type === 'state'
     const isTargetState = target.type === 'state'
+    
+    //determine ideal positions based on context
     let positions = [];
     if (hierarchicalStructuralEdges.includes(edge.type))
       positions = [{ x: 150, y: 30 }, { x: 210, y: 130 }];
@@ -43,8 +47,9 @@ const EdgeSelectionCard: React.FC<ModalProps> = ({ dispatch, edge, targetNode })
       positions = [{ x: 90, y: 40 }, { x: 270, y: 100 }];
     else
       positions = [{ x: 90, y: 40 }, { x: 270, y: 110 }];
+
     const cyCard = cytoscape({
-      container: document.getElementById(ID), // container to render in
+      container: document.getElementById(ID),
       //@ts-ignore
       style: cyStylesheet,
       autolock: true,

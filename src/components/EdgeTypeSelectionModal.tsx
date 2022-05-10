@@ -1,14 +1,15 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Modal that appears when new edges are created. It displays options of edge types that a user can select. 
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { Card, Image, List, Modal } from "antd";
 import 'antd/dist/antd.css';
 import React from 'react';
-import { edgeCancel, edgeCreate } from '../controller/edge';
+import { edgeCreate, edgeCreateCancel } from '../controller/edge';
 import { EdgeType } from '../model/edge-model';
 import agentImg from './../data/edge-type-images/agent.svg';
 import aggregationImg from './../data/edge-type-images/aggregation.svg';
@@ -54,7 +55,7 @@ const EdgeTypeSelectionModal: React.FC<ModalProps> = ({ state, dispatch }) => {
   });
 
   const cancelModal = () => {
-    edgeCancel();
+    edgeCreateCancel();
     dispatch({ type: ACTIONS.EDGE_TYPE_SELECTION, payload: false });
   };
   return (

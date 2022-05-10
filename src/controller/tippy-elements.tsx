@@ -1,27 +1,30 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Definitions of name editing popups. The popups are html elements that get invoked
+ *    on double click. They are implemented with the cytoscape-popper extension.
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { Core } from "cytoscape";
 import tippy from "tippy.js";
 
-
+/**
+ * Definition of node name editing popup
+ * @param cy Cytoscape instance
+ */
 const nodeLabelEditingPopup = (cy: Core) => {
   cy.on('dbltap', 'node', (evt: any) => {
     const targetNode = evt.target;
     let ref = targetNode.popperRef();
     let dummyDomEle = document.createElement('div');
     document.body.appendChild(dummyDomEle);
-    let tip = tippy(dummyDomEle, { // tippy props:
-      getReferenceClientRect: ref.getBoundingClientRect, // https://atomiks.github.io/tippyjs/v6/all-props/#getreferenceclientrect
-      trigger: 'manual', // mandatory, we cause the tippy to show programmatically.
+    let tip = tippy(dummyDomEle, {
+      getReferenceClientRect: ref.getBoundingClientRect,
+      trigger: 'manual',
       placement: 'bottom',
       interactive: true,
-      // your own custom props
-      // content prop can be used when the target is a single element https://atomiks.github.io/tippyjs/v6/constructor/#prop
       content: () => {
         let content = document.createElement('div');
         content.classList.add('renameDialog')
@@ -41,7 +44,6 @@ const nodeLabelEditingPopup = (cy: Core) => {
 
         const buttonConfirm = document.createElement('button');
         buttonConfirm.type = 'button';
-        // buttonConfirm.classList.add('btn', 'btn-default');
         buttonConfirm.innerHTML = "Ok";
         buttonConfirm.addEventListener("click", function (event) {
           event.preventDefault();
@@ -70,19 +72,22 @@ const nodeLabelEditingPopup = (cy: Core) => {
   });
 };
 
+/**
+ * Definition of edge name editing popup
+ * @param cy Cytoscape instance
+ */
 const edgeLabelEditingPopup = (cy: Core) => {
   cy.on('dbltap', 'edge', (evt: any) => {
     const targetEdge = evt.target;
     let ref = targetEdge.popperRef();
     let dummyDomEle = document.createElement('div');
     document.body.appendChild(dummyDomEle);
-    let tip = tippy(dummyDomEle, { // tippy props:
-      getReferenceClientRect: ref.getBoundingClientRect, // https://atomiks.github.io/tippyjs/v6/all-props/#getreferenceclientrect
-      trigger: 'manual', // mandatory, we cause the tippy to show programmatically.
+    let tip = tippy(dummyDomEle, {
+      getReferenceClientRect: ref.getBoundingClientRect,
+      trigger: 'manual',
       placement: 'bottom',
       interactive: true,
-      // your own custom props
-      // content prop can be used when the target is a single element https://atomiks.github.io/tippyjs/v6/constructor/#prop
+
       content: () => {
         let content = document.createElement('div');
         content.classList.add('renameDialog')
@@ -101,7 +106,6 @@ const edgeLabelEditingPopup = (cy: Core) => {
 
         const buttonConfirm = document.createElement('button');
         buttonConfirm.type = 'button';
-        // buttonConfirm.classList.add('btn', 'btn-default');
         buttonConfirm.innerHTML = "Ok";
         buttonConfirm.addEventListener("click", function (event) {
           event.preventDefault();

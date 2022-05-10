@@ -1,12 +1,13 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Cytoscape.js stylesheet defining visuals of diagram elements and edges.
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 export const cyStylesheet = [
-  // cytoscape elements
+  // node styling
   {
     selector: 'node',
     style: {
@@ -73,6 +74,7 @@ export const cyStylesheet = [
       'width': 'data(labelWidth)',
     }
   },
+  //compound nodes styling (objects with states and in-zoomed processes)
   {
     selector: '$node > node[type = "state"]',
     style: {
@@ -82,7 +84,6 @@ export const cyStylesheet = [
       'min-height': 60
     }
   },
-
   {
     selector: '$node > node[type = "object"], $node > node[type = "process"]',
     style: {
@@ -92,7 +93,6 @@ export const cyStylesheet = [
       'min-height': 300
     }
   },
-
   {
     selector: 'node:parent[type = "process"]',
     style: {
@@ -102,6 +102,7 @@ export const cyStylesheet = [
       'min-height': 0
     }
   },
+  //edge styling
   {
     selector: 'edge',
     style: {
@@ -193,14 +194,13 @@ export const cyStylesheet = [
       'target-arrow-shape': 'triangle'
     }
   },
-
   {
     selector: 'node[display], edge[display]',
     style: {
       'display': 'data(display)'
     }
   },
-
+  //derived edges
   {
     selector: 'edge[MMRef.originalEdges.length > 0]',
     style: {
@@ -208,16 +208,13 @@ export const cyStylesheet = [
       'target-arrow-color': '#ccc',
     }
   },
-
-  // cytoscape-edge-handles extention
-
+  // cytoscape-edge-handles extention styling, changes in styles while creating an edge and hovering over elements
   {
     selector: '.eh-source',
     style: {
       'border-width': 2,
     }
   },
-
   {
     selector: '.eh-hover',
     style: {
@@ -225,7 +222,6 @@ export const cyStylesheet = [
       'background-color': 'lightgrey'
     }
   },
-
   {
     selector: '.eh-preview, .eh-ghost-edge',
     style: {

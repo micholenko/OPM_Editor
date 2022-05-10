@@ -1,18 +1,19 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Functions used when importing from JSON and exporting to JSON
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { Core, EdgeSingular, NodeSingular } from "cytoscape";
 import { ACTIONS } from "../components/App";
 import { DiagramTreeNode } from "../model/diagram-tree-model";
-import { derivedEdgeArray, edgeArray, EdgeArray, EdgeType, hierarchicalStructuralEdges, MMEdge } from '../model/edge-model';
-import { masterModelRoot, MMNode, MMRoot, NodeType } from "../model/master-model";
+import { derivedEdgeArray, EdgeArray, EdgeType, hierarchicalStructuralEdges, MMEdge, originalEdgeArray } from '../model/edge-model';
+import { masterModelRoot, MMNode, MMRoot, NodeType } from "../model/node-model";
 import { eleCounter } from './elementCounter';
 
-
+//random layout options
 let options = {
   name: 'random',
   fit: false,
@@ -48,6 +49,11 @@ interface CyViewport {
   h: number,
 }
 
+/**
+ * Crop viewport by third of the width and height
+ * @param viewport - Full viewport
+ * @returns - Cropped viewport
+ */
 const cropViewport = (viewport: CyViewport): CyViewport => {
   const widthDiff = viewport.w / 6;
   const heightDiff = viewport.h / 6;
@@ -60,7 +66,14 @@ const cropViewport = (viewport: CyViewport): CyViewport => {
   return viewport;
 };
 
-const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot) => {
+/**
+ * Adding node to master model as well as in the current diagram
+ * @param cy - Cytoscape instance
+ * @param data - Node data 
+ * @param position - Position to put the node at
+ * @param parentMMNode - Master model parent
+ */
+const addNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMMNode: MMNode | MMRoot) => {
   if (cy.getElementById(data.id).length > 0) {
     return;
   }
@@ -84,6 +97,7 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
     position: position
   });
 
+  //if no position was given, position element randomly 
   if (position.x === 0 && position.y === 0) {
     let boundingBox;
     if (data.type === 'state') {
@@ -102,14 +116,20 @@ const cyAddNode = (cy: Core, data: NodeData, position = { x: 0, y: 0 }, parentMM
 };
 
 
-
-const cyAddEdge = (cy: Core, data: EdgeData, shouldPropagate: boolean = false): EdgeSingular | null => {
+/**
+ * Adding edge to master model as well as in the current diagram
+ * @param cy - Cytoscape instance
+ * @param data - Edge data
+ * @param shouldPropagate - Whether the edge should be propagated to other diagrams
+ * @returns 
+ */
+const addEdge = (cy: Core, data: EdgeData, shouldPropagate: boolean = false): EdgeSingular | null => {
   if (cy.getElementById(data.id).length > 0) {
     return null;
   }
   if (data['MMRef'] === null) {
     let modelEdge = new MMEdge(data['id'], data['source'], data['target'], data['type'], shouldPropagate);
-    edgeArray.addEdge(modelEdge);
+    originalEdgeArray.addEdge(modelEdge);
     data['MMRef'] = modelEdge;
   }
 
@@ -124,6 +144,12 @@ const cyAddEdge = (cy: Core, data: EdgeData, shouldPropagate: boolean = false): 
   return addedEdge;
 };
 
+/**
+ * Actions to be done on removal of a node from context menu.
+ * @param node - Cytoscape node
+ * @param dispatch - React reducer function to update UI (when main node of a diagram is deleted, 
+ *    it has to be removed from the diagram tree) 
+ */
 const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
   const MMRef = node.data('MMRef') as MMNode;
 
@@ -142,39 +168,51 @@ const removeNodeContextMenu = (node: NodeSingular, dispatch: Function) => {
     }
   }
 
+  //mark connected edges as removed
   for (const connectedEdge of node.connectedEdges().toArray()) {
     const edgeMMRef = connectedEdge.data('MMRef');
 
     MMRef.deleted = true;
-    edgeArray.removeEdge(edgeMMRef);
+    originalEdgeArray.removeEdge(edgeMMRef);
     if (edgeMMRef.originalEdges.length) {
-      edgeArray.removeOriginalEdges(edgeMMRef.originalEdges);
+      originalEdgeArray.removeOriginalEdges(edgeMMRef.originalEdges);
     }
     else {
-      edgeArray.removeEdge(edgeMMRef);
+      originalEdgeArray.removeEdge(edgeMMRef);
       edgeMMRef.removeAllDerived();
     }
     connectedEdge.data({ 'MMRef': null });
   }
 };
 
+/**
+ * Actions to be done on removal of an edge from context menu.
+ * @param edge - Cytoscape edge
+ */
 const removeEdgeContextMenu = (edge: EdgeSingular) => {
   const MMRef = edge.data('MMRef') as MMEdge;
   if (MMRef.originalEdges.length) {
-    edgeArray.removeOriginalEdges(MMRef.originalEdges);
+    originalEdgeArray.removeOriginalEdges(MMRef.originalEdges);
     for (const edge of MMRef.originalEdges) {
       edge.removeAllDerived();
     }
   }
   else {
-    edgeArray.removeEdge(MMRef);
+    originalEdgeArray.removeEdge(MMRef);
     MMRef.removeAllDerived();
   }
 
   edge.data({ 'MMRef': null });
 };
 
-const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType, currentDiagram: DiagramTreeNode) => {
+/**
+ * Actions to be done on addition of an element from context menu.
+ * @param cy - Cytoscape instance
+ * @param event - Event object
+ * @param type - Type of removed object
+ * @param currentDiagram - Model node of current diagram
+ */
+const addNodeFromContextMenu = (cy: Core, event: any, type: NodeType, currentDiagram: DiagramTreeNode) => {
   currentMMNode = currentDiagram.mainNode;
   const counter = eleCounter.value;
   const defaultLabel = [type + " " + counter];
@@ -193,13 +231,18 @@ const cyAddNodeFromContextMenu = (cy: Core, event: any, type: NodeType, currentD
   };
   if (event.target !== cy) { //on element
     data['parent'] = event.target.id() as string;
-    cyAddNode(cy, data, nodePosition, event.target.data('MMRef'));
+    addNode(cy, data, nodePosition, event.target.data('MMRef'));
   }
   else
-    cyAddNode(cy, data, nodePosition, currentMMNode);
+    addNode(cy, data, nodePosition, currentMMNode);
 };
 
-const cyAddInzoomedNodes = (cy: Core, event: any) => {
+/**
+ * Copying of in-zoomed process and addition of placehoder subprocesses
+ * @param cy - Cytoscape instance
+ * @param event - Event object
+ */
+const addInzoomedNodes = (cy: Core, event: any) => {
   let inzoomedNode = event.target;
   let type = inzoomedNode.data('type') as NodeType;
   let parentId = inzoomedNode.id() as string;
@@ -209,7 +252,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
   const centerY = (viewport.y1 + viewport.y2) / 2;
 
   // add inzoomed node to new diagram
-  cyAddNode(cy, inzoomedNode.data(), { x: centerX, y: centerY }, currentMMNode);
+  addNode(cy, inzoomedNode.data(), { x: centerX, y: centerY }, currentMMNode);
 
   let MMRef = inzoomedNode.data('MMRef') as MMNode;
   // add 2 default subnodes
@@ -221,7 +264,7 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     type: type,
     MMRef: null
   };
-  cyAddNode(cy, data, { x: centerX - 20, y: centerY - 40 }, MMRef);
+  addNode(cy, data, { x: centerX - 20, y: centerY - 40 }, MMRef);
 
   counter = eleCounter.value;
   data = {
@@ -231,23 +274,40 @@ const cyAddInzoomedNodes = (cy: Core, event: any) => {
     type: type,
     MMRef: null
   };
-  cyAddNode(cy, data, { x: centerX + 20, y: centerY + 40 }, MMRef);
+  addNode(cy, data, { x: centerX + 20, y: centerY + 40 }, MMRef);
 
 };
 
+/**
+ * Get connected edges to a given master model node
+ * @param MMNode - Master model node
+ * @param array - Original edge array or derived edge array
+ * @returns - Array of master model edges connected to the given node
+ */
 const getConnectedEdges = (MMNode: MMNode, array: EdgeArray): Array<MMEdge> => {
   let connectedEdges = array.findIngoingEdges(MMNode);
   connectedEdges = connectedEdges.concat(array.findOutgoingEdges(MMNode));
   return connectedEdges;
 };
 
+/**
+ * Determine wheter given element is present and visible in the current diagram.
+ * @param cy - Cytoscape instance
+ * @param id - element id
+ * @returns - True if exists on current diagram and is not hidden, else false
+ */
 const eleAlreadyInAndVisible = (cy: Core, id: string): boolean => {
   const ele = cy.getElementById(id);
   const result = ele.length > 0 && ele.data('display') !== 'none';
   return result;
 };
 
-const createCyNodeData = (node: MMNode): any => {
+/**
+ * Create node data for the cytoscape node
+ * @param node - Master model node
+ * @returns: Data object
+ */
+const createCytoNodeData = (node: MMNode): any => {
   return {
     id: node.id,
     MMRef: node,
@@ -256,7 +316,12 @@ const createCyNodeData = (node: MMNode): any => {
   };
 };
 
-const createCyEdgeData = (edge: MMEdge): any => {
+/**
+ * Create edge data for the cytoscape edge
+ * @param edge - Master model node
+ * @returns: Data object
+ */
+const createCytoEdgeData = (edge: MMEdge): any => {
   let label = edge.label;
   if (edge.originalEdges.length)
     label = edge.originalEdges[0].label;
@@ -271,6 +336,12 @@ const createCyEdgeData = (edge: MMEdge): any => {
   };
 };
 
+/**
+ * Determine if the given derived edge should be skipped (because a more specific one could be added instead)
+ * @param cy - Cytoscape instance
+ * @param edge - Master model edge
+ * @returns - True if should be skipped, false if not
+ */
 const skipDerivedEdge = (cy: Core, edge: MMEdge): boolean => {
   if (edge.preferedEdge !== null) {
     const sourceId = edge.preferedEdge.source.id;
@@ -305,7 +376,13 @@ const derivedAlreadyIn = (cy: Core, edge: MMEdge): boolean => {
   return false;
 };
 
-const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
+/**
+ * Add an array of edges to given node
+ * @param cy - Cytoscape instance
+ * @param MMNode - Given master model node
+ * @param edges - Array of master model edges
+ */
+const addEdgeArray = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
   for (const edge of edges) {
     if (eleAlreadyInAndVisible(cy, edge.id) ||
       edge.source.deleted || edge.target.deleted ||
@@ -327,23 +404,29 @@ const cyAddEdges = (cy: Core, MMNode: MMNode, edges: Array<MMEdge>) => {
 
     if (!eleAlreadyInAndVisible(cy, connectedNode.id)) {
       let parent = connectedNode.parent as MMNode;
-      const nodeData = createCyNodeData(connectedNode);
+      const nodeData = createCytoNodeData(connectedNode);
 
       if (connectedNode.type === 'state') {
         nodeData['parent'] = parent ? parent.id : null;
         if (!eleAlreadyInAndVisible(cy, parent.id)) {
-          const nodeParentData = createCyNodeData(parent);
-          cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
+          const nodeParentData = createCytoNodeData(parent);
+          addNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
         }
       }
-      cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent);
+      addNode(cy, nodeData, { x: 0, y: 0 }, parent);
     }
 
-    const edgeData = createCyEdgeData(edge);
-    cyAddEdge(cy, edgeData);
+    const edgeData = createCytoEdgeData(edge);
+    addEdge(cy, edgeData);
   }
 };
 
+/**
+ * Add connected edge after selecting it from the Bring Connected selection
+ * @param cy - Cytoscape instance
+ * @param edge - Selected edge
+ * @param targetNode - Node that the Bring Connected was invoked on
+ */
 const bringConnectedEdge = (cy: Core, edge: MMEdge, targetNode: MMNode) => {
   let connectedNode;
   if (targetNode === edge.source)
@@ -367,54 +450,52 @@ const bringConnectedEdge = (cy: Core, edge: MMEdge, targetNode: MMNode) => {
 
   cy.getElementById(edge.id).data({ display: 'element' });
 
-  /* if (eleAlreadyInAndVisible(cy, edge.id) ||
-    edge.source.deleted || edge.target.deleted) {
-    return;
-  } */
-
   if (!eleAlreadyInAndVisible(cy, connectedNode.id)) {
     let parent = connectedNode.parent as MMNode;
-    const nodeData = createCyNodeData(connectedNode);
+    const nodeData = createCytoNodeData(connectedNode);
 
     if (connectedNode.type === 'state') {
       nodeData['parent'] = parent ? parent.id : null;
       if (!eleAlreadyInAndVisible(cy, parent.id)) {
-        const nodeParentData = createCyNodeData(parent);
-        cyAddNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
+        const nodeParentData = createCytoNodeData(parent);
+        addNode(cy, nodeParentData, { x: 0, y: 0 }, currentMMNode);
       }
     }
-    cyAddNode(cy, nodeData, { x: 0, y: 0 }, parent);
+    addNode(cy, nodeData, { x: 0, y: 0 }, parent);
   }
 
-  const edgeData = createCyEdgeData(edge);
-  cyAddEdge(cy, edgeData);
+  const edgeData = createCytoEdgeData(edge);
+  addEdge(cy, edgeData);
 };
 
-const cyAddConnectedNodes = (cy: Core, MMNode: MMNode) => {
-  let connectedOriginalEdges = getConnectedEdges(MMNode, edgeArray);
+/**
+ * Find connected edges from the master model and connect them.
+ * @param cy - Cytoscape instance
+ * @param MMNode - Master model node to which elements are connected to
+ */
+const addConnectedNodes = (cy: Core, MMNode: MMNode) => {
+  let connectedOriginalEdges = getConnectedEdges(MMNode, originalEdgeArray);
   let connectedStructuralEdges = connectedOriginalEdges.filter((edge) => hierarchicalStructuralEdges.includes(edge.type));
   let connectedDerivedEdges = getConnectedEdges(MMNode, derivedEdgeArray);
-  // let connectedPreferedEdges = connectedDerivedEdges.map((edge) => edge.preferOriginal ? edge.originalEdge : null) as Array<MMEdge>;
-  // connectedPreferedEdges = connectedDerivedEdges.filter((edge) => edge !== null);
-  console.log("-----");
-  console.log(connectedStructuralEdges);
-  console.log(connectedDerivedEdges);
-  console.log(connectedOriginalEdges);
-  cyAddEdges(cy, MMNode, connectedStructuralEdges);
-  // cyAddEdges(cy, MMNode, connectedPreferedEdges);
-  cyAddEdges(cy, MMNode, connectedDerivedEdges);
-  cyAddEdges(cy, MMNode, connectedOriginalEdges);
+  addEdgeArray(cy, MMNode, connectedStructuralEdges);
+  addEdgeArray(cy, MMNode, connectedDerivedEdges);
+  addEdgeArray(cy, MMNode, connectedOriginalEdges);
 };
 
-const cyAddConnectedNodesInzoom = (cy: Core, MMNode: MMNode) => {
-  let connectedOriginalEdges = getConnectedEdges(MMNode, edgeArray);
-  cyAddEdges(cy, MMNode, connectedOriginalEdges);
+/**
+ * Adding connected nodes to just inzoomed node, original edges are prefered.
+ * @param cy - Cytoscape instance
+ * @param MMNode - In-zoomed master model node
+ */
+const addConnectedNodesInzoom = (cy: Core, MMNode: MMNode) => {
+  let connectedOriginalEdges = getConnectedEdges(MMNode, originalEdgeArray);
   let connectedDerivedEdges = getConnectedEdges(MMNode, derivedEdgeArray);
-  cyAddEdges(cy, MMNode, connectedDerivedEdges);
+  addEdgeArray(cy, MMNode, connectedOriginalEdges);
+  addEdgeArray(cy, MMNode, connectedDerivedEdges);
 };
 
 const getAllConnectedEdges = (cy: Core, node: MMNode): Array<MMEdge> => {
-  const connectedOriginalEdges = getConnectedEdges(node, edgeArray);
+  const connectedOriginalEdges = getConnectedEdges(node, originalEdgeArray);
   const connectedDerivedEdges = getConnectedEdges(node, derivedEdgeArray);
   const allConnected = connectedOriginalEdges.concat(connectedDerivedEdges);
   const filteredConnected = allConnected.filter((edge) => {
@@ -435,8 +516,12 @@ const getAllConnectedEdges = (cy: Core, node: MMNode): Array<MMEdge> => {
 
   return filteredConnected;
 };
-
-const cyBringAllStates = (cy: Core, node: NodeSingular) => {
+/**
+ * Find all states of the given node and add them into the current diagram
+ * @param cy - Cytoscape instance
+ * @param node - Cytoscape node
+ */
+const bringAllStates = (cy: Core, node: NodeSingular) => {
   const MMRef = node.data('MMRef');
   for (const child of MMRef.children) {
     if (child.type === 'state') {
@@ -449,27 +534,28 @@ const cyBringAllStates = (cy: Core, node: NodeSingular) => {
       };
       let cyNode = cy.getElementById(child.id);
       if (cyNode.length > 0) {
-        cyNode.move({ parent: MMRef.id });
+        cyNode.move({ parent: MMRef.id }); //move out of the compound node so when no children are displayed, the parent node is no longer compound 
         cyNode.data({ display: 'element' });
       }
       else {
-        cyAddNode(cy, data, { x: 0, y: 0 }, MMRef);
+        addNode(cy, data, { x: 0, y: 0 }, MMRef);
       }
     }
   }
 };
 
 export {
-  cyAddNodeFromContextMenu,
-  cyAddInzoomedNodes,
-  cyAddConnectedNodesInzoom,
-  cyAddConnectedNodes,
-  cyAddEdge,
+  addNodeFromContextMenu,
+  addInzoomedNodes,
+  addConnectedNodesInzoom,
+  addConnectedNodes,
+  addEdge,
   removeNodeContextMenu,
   removeEdgeContextMenu,
-  eleAlreadyInAndVisible as eleAlreadyIn,
+  eleAlreadyInAndVisible,
   getAllConnectedEdges,
-  cyBringAllStates,
-  createCyEdgeData,
+  bringAllStates,
+  createCytoEdgeData,
   bringConnectedEdge
 };
+

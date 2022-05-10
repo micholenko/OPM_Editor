@@ -1,15 +1,16 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Modal that appears on the Bring Connected option and displays all connections that could be added. 
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { List, Modal } from "antd";
 import 'antd/dist/antd.css';
 import React from 'react';
 import { getAllConnectedEdges } from '../controller/general';
-import { MMNode } from "../model/master-model";
+import { MMNode } from "../model/node-model";
 import { ACTIONS, StateInterface } from './App';
 import { cy } from './DiagramCanvas';
 import EdgeSelectionCard from './EdgeSelectionCard';

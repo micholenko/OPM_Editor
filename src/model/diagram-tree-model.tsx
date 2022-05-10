@@ -1,12 +1,13 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Class of the diagram tree model nodes.
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 
-import { MMNode, masterModelRoot, MMRoot } from "./master-model";
+import { MMNode, masterModelRoot, MMRoot } from "./node-model";
 
 class DiagramTreeNode {
   label: React.Key;
@@ -25,6 +26,11 @@ class DiagramTreeNode {
     this.mainNode = mainNode;
   }
 
+  /**
+   * Goes through all nodes and finds the lowest not used ID.
+   * Necessary when new diagrams are created after some were deleted.
+   * @returns - Lowest available diagram id
+   */
   _findLowestAvailableId(): number {
     const sortedChildren = this.children.sort((a, b) => {
       return a.labelId - b.labelId;
@@ -38,6 +44,11 @@ class DiagramTreeNode {
     return index;
   }
 
+  /**
+   * Adds given diagram as a child element of this and sets this as a parent of the given diagram.
+   * Label of the newly added diagram is determined.
+   * @param child - Diagram node to be added
+   */
   addChild(child: DiagramTreeNode) {
     child.parent = this;
 
@@ -51,28 +62,23 @@ class DiagramTreeNode {
     child.label += index.toString();
 
     this.children.push(child);
-
   }
+
+  /**
+   * Remove the given child
+   * @param child Diagram model node to be removed
+   */
   removeChild(child: DiagramTreeNode) {
     let index = this.children.indexOf(child);
     if (index !== -1) {
       this.children.splice(index, 1);
-      return 0;
     }
-  }
-
-
-  get isLeaf() {
-    return this.children.length === 0;
-  }
-
-  get hasChildren() {
-    return !this.isLeaf;
   }
 }
 
 let diagramTreeRoot = new DiagramTreeNode('SD', masterModelRoot);
 
+//used when importing from JSON
 const importDiagramTreeRoot = (newDiagramTreeRoot: DiagramTreeNode) => {
   diagramTreeRoot = newDiagramTreeRoot;
 };

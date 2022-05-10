@@ -1,8 +1,9 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Demo selection component located in the top toolbar. Implemented with the use of Ant Design Selection component. 
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { Select } from 'antd';
@@ -12,9 +13,8 @@ import breadBakingDemo from '../demos/bread-baking.json';
 import edgeTypesDemo from '../demos/edge-types.json';
 import thingsDemo from '../demos/things.json';
 import { useReducerProps } from './App';
-
-
 const { Option } = Select;
+
 
 const demoMapping = {
   'breadBaking': breadBakingDemo,
@@ -30,7 +30,6 @@ const DemoSelect: React.FC<useReducerProps> = ({ state, dispatch }) => {
     jsonString = JSON.stringify(jsonString)
     importJson(jsonString, dispatch);
   };
-
   return (
     <Select className='demo-selection' placeholder="Select demo"  onChange={onChange}>
       <Option value="breadBaking">Bread Baking</Option>

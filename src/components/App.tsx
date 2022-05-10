@@ -1,10 +1,10 @@
 // @ts-nocheck
-
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Root component of the application. Includes the diagram canvas, toolbars as well as pop-up modals.
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { EdgeSingular, NodeSingular } from 'cytoscape';
@@ -12,8 +12,8 @@ import { useReducer } from 'react';
 import { DiagramTreeNode, diagramTreeRoot } from '../model/diagram-tree-model';
 import './../css/general.css';
 import DiagramCanvas from './DiagramCanvas';
-import EdgeTypeSelectionModal from './EdgeTypeSelectionModal';
 import EdgeSelectionModal from './EdgeSelectionModal';
+import EdgeTypeSelectionModal from './EdgeTypeSelectionModal';
 import LeftSidebar from './LeftSidebar';
 import TopToolbar from './TopToolbar';
 
@@ -32,7 +32,7 @@ export interface StateInterface {
   currentEdge: EdgeSingular | null,
   propagation: Propagation,
   targetNode: null,
-  timestamp: Date
+  timestamp: Date;
 }
 
 export enum PropagationEnum {
@@ -41,8 +41,8 @@ export enum PropagationEnum {
   Complete
 }
 
-export let propagation: PropagationEnum = PropagationEnum.OneLevel
-export let currentDiagram: DiagramTreeNode = diagramTreeRoot
+export let propagation: PropagationEnum = PropagationEnum.OneLevel;
+export let currentDiagram: DiagramTreeNode = diagramTreeRoot;
 
 export const ACTIONS = {
   CHANGE_DIAGRAM: 'change-diagram',
@@ -55,6 +55,8 @@ export const ACTIONS = {
   UPDATE_TREE: 'update-tree',
 };
 
+
+// Global state handling
 function reducer(state, action) {
   switch (action.type) {
     case ACTIONS.CHANGE_DIAGRAM:
@@ -66,14 +68,14 @@ function reducer(state, action) {
     case ACTIONS.EDGE_TYPE_SELECTION:
       return { ...state, showEdgeTypeSelectonModal: action.payload };
     case ACTIONS.EDGE_SELECTION:
-      return { ...state, showEdgeSelectionModal: action.payload.show, targetNode:action.payload.node  };
+      return { ...state, showEdgeSelectionModal: action.payload.show, targetNode: action.payload.node };
     case ACTIONS.CHANGE_PROPAGATION:
-      propagation = action.payload
-      return {...state, propagation: action.payload}
+      propagation = action.payload;
+      return { ...state, propagation: action.payload };
     case ACTIONS.UPDATE_TREE:
-      return {...state, timestamp: new Date()}
+      return { ...state, timestamp: new Date() };
     default:
-      console.log('invalid dispatch type')
+      console.log('invalid dispatch type');
   }
 }
 
@@ -92,7 +94,7 @@ function App() {
     <div className="app">
       <div className='flex-vertical-wrapper'>
         <div className='top-toolbar-wrapper'>
-          <TopToolbar state={state} dispatch={dispatch}/>
+          <TopToolbar state={state} dispatch={dispatch} />
         </div>
         <div className='flex-horizontal-wrapper'>
           <div className='left-sidebar-wrapper'>

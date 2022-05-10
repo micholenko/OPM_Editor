@@ -28,6 +28,7 @@
     "cytoscape-popper": "^2.0.0",
     "file-saver": "^2.0.5",
     "jquery": "^3.6.0",
+    "jsdoc": "^3.6.10",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-cytoscapejs": "^1.2.1",

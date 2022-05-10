@@ -1,8 +1,9 @@
-/* 
- * Author: Michal Zavadil, Brno University of Technology - Faculty of Information Technology
- * Copyright: Copyright 2022, OPM Editor
+/**  
+ * @file Classes of the nodes in the node model and the root.
+ * @author Michal Zavadil, Brno University of Technology - Faculty of Information Technology
+ * @copyright Copyright 2022, OPM Editor
+ * @license MIT
  * Made for Bachelor's Thesis - Agile Model Editor
- * License: MIT
 */
 
 import { DiagramTreeNode } from "./diagram-tree-model";
@@ -51,25 +52,24 @@ class MMNode {
     this.isSubelementOfMain = false;
   }
 
+  /**
+   * Add a given node to the .children array. Set this as the child's parent,
+   * @param child - Model node to be added
+   */
   addChild(child: MMNode) {
     this.children.push(child);
     child.parent = this;
   }
-  removeChild(child: MMNode): number {
+
+  /**
+   * Remove a child from the .children array.
+   * @param child Model node to be removed
+   */
+  removeChild(child: MMNode) {
     let index = this.children.indexOf(child);
     if (index !== -1) {
       this.children.splice(index, 1);
-      return 0;
     }
-    return 1;
-  }
-
-  get isLeaf() {
-    return this.children.length === 0;
-  }
-
-  get hasChildren() {
-    return !this.isLeaf;
   }
 }
 
@@ -80,21 +80,29 @@ class MMRoot {
     this.children = [];
   }
 
+  /**
+   * Add a given node to the .children array. Set this as the child's parent
+   * @param child - Model node to be added
+   */
   addChild = (child: MMNode) => {
     this.children.push(child);
     child.parent = this;
   };
-  removeChild(child: MMNode): number {
+
+  /**
+   * Remove a child from the .children array.
+   * @param child Model node to be removed
+   */
+  removeChild(child: MMNode) {
     let index = this.children.indexOf(child);
     if (index !== -1) {
       this.children.splice(index, 1);
-      return 0;
     }
-    return 1;
   }
 }
 let masterModelRoot = new MMRoot();
 
+//used when importing from JSON
 const importMMRoot = (newRoot: MMRoot) => {
   masterModelRoot = newRoot;
 };
