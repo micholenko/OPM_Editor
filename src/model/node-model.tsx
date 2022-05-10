@@ -84,7 +84,7 @@ class MMRoot {
    * Add a given node to the .children array. Set this as the child's parent
    * @param child - Model node to be added
    */
-  addChild = (child: MMNode) => {
+  addChild(child: MMNode) {
     this.children.push(child);
     child.parent = this;
   };
